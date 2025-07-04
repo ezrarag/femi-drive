@@ -55,7 +55,7 @@ export default function HomePage() {
           className="absolute inset-0 h-full w-full object-cover"
         >
           <source
-            src="https://ubkqrmhtikdanospeomg.supabase.co/storage/v1/object/public/avatars/coverr-electric-car-driving-in-the-dark-woods-668-1080p.mp4"
+            src="https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/project-media/temporary/coverr-electric-car-driving-in-the-dark-woods-668-1080p.mp4"
             type="video/mp4"
           />
           Your browser does not support the video tag.
