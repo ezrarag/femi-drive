@@ -1,125 +1,137 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { MapPin, Filter, Grid, Map, ArrowLeft } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
+import Image from "next/image"
+import { Search, X, Menu } from "lucide-react"
 
 export default function InventoryPage() {
-  const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
-  const [priceRange, setPriceRange] = useState([30, 100])
   const [searchTerm, setSearchTerm] = useState("")
+  const [priceRange, setPriceRange] = useState([0, 200])
+  const [selectedType, setSelectedType] = useState("all")
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [selectedVehicle, setSelectedVehicle] = useState(null)
 
   const vehicles = [
     {
       id: 1,
-      make: "VOLKSWAGEN",
-      model: "PASSAT",
+      make: "Volkswagen",
+      model: "Passat",
       year: 2015,
-      rate: 55,
-      mileage: "85K",
-      transmission: "AUTO",
+      price: 45,
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0698.jpeg",
-      gigReady: true,
-      location: "NEWARK AIRPORT",
+      mileage: "85K",
+      transmission: "Automatic",
+      location: "Newark, NJ",
       available: true,
+      gigReady: true,
+      type: "sedan",
+      category: "SEDAN",
+      size: "large",
+      description: "Perfect for rideshare with excellent fuel economy and comfortable interior.",
+      features: ["Bluetooth", "Backup Camera", "Cruise Control", "Power Windows"],
+      insurance: "Full coverage included",
+      maintenance: "Regular maintenance included",
     },
     {
       id: 2,
-      make: "FORD",
-      model: "EDGE",
+      make: "Ford",
+      model: "Edge",
       year: 2014,
-      rate: 55,
-      mileage: "72K",
-      transmission: "AUTO",
+      price: 55,
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0699.jpeg",
-      gigReady: true,
-      location: "DOWNTOWN NEWARK",
+      mileage: "92K",
+      transmission: "Automatic",
+      location: "Jersey City, NJ",
       available: true,
+      gigReady: true,
+      type: "suv",
+      category: "SUV",
+      size: "medium",
+      description: "Spacious SUV ideal for delivery services and passenger transport.",
+      features: ["AWD", "Navigation", "Heated Seats", "Panoramic Roof"],
+      insurance: "Full coverage included",
+      maintenance: "Regular maintenance included",
     },
     {
       id: 3,
       make: "BMW",
-      model: "328i xdrive",
+      model: "328i xDrive",
       year: 2011,
-      rate: 47,
-      mileage: "68K",
-      transmission: "AUTO",
+      price: 50,
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0701.jpeg",
-      gigReady: true,
-      location: "JERSEY CITY",
+      mileage: "78K",
+      transmission: "Automatic",
+      location: "Newark, NJ",
       available: false,
+      gigReady: true,
+      type: "sedan",
+      category: "LUXURY",
+      size: "medium",
+      description: "Premium luxury sedan for high-end rideshare services.",
+      features: ["Leather Seats", "Premium Sound", "Sport Mode", "All-Wheel Drive"],
+      insurance: "Full coverage included",
+      maintenance: "Regular maintenance included",
     },
     {
       id: 4,
-      make: "CHEVY",
-      model: "EQUINOX",
+      make: "Chevy",
+      model: "Equinox",
       year: 2013,
-      rate: 49,
-      mileage: "55K",
-      transmission: "AUTO",
+      price: 48,
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0702.jpeg",
-      gigReady: true,
-      location: "NEWARK AIRPORT",
+      mileage: "65K",
+      transmission: "Automatic",
+      location: "Elizabeth, NJ",
       available: true,
+      gigReady: true,
+      type: "suv",
+      category: "SUV",
+      size: "small",
+      description: "Reliable compact SUV perfect for city driving and deliveries.",
+      features: ["Fuel Efficient", "Cargo Space", "Easy Parking", "Reliable"],
+      insurance: "Full coverage included",
+      maintenance: "Regular maintenance included",
     },
     {
       id: 5,
-      make: "NISSAN",
-      model: "SENTRA",
+      make: "Nissan",
+      model: "Sentra",
       year: 2011,
-      rate: 42,
-      mileage: "55K",
-      transmission: "AUTO",
+      price: 42,
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0703.jpeg",
-      gigReady: true,
-      location: "NEWARK AIRPORT",
+      mileage: "89K",
+      transmission: "CVT",
+      location: "Paterson, NJ",
       available: true,
+      gigReady: false,
+      type: "sedan",
+      category: "ECONOMY",
+      size: "small",
+      description: "Budget-friendly option for new drivers entering the gig economy.",
+      features: ["Great MPG", "Compact Size", "Easy to Drive", "Low Maintenance"],
+      insurance: "Full coverage included",
+      maintenance: "Regular maintenance included",
     },
     {
       id: 6,
-      make: "DODGE",
-      model: "CHARGER",
+      make: "Dodge",
+      model: "Charger",
       year: 2016,
-      rate: 65,
-      mileage: "55K",
-      transmission: "AUTO",
+      price: 52,
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0704.jpeg",
-      gigReady: true,
-      location: "NEWARK AIRPORT",
+      mileage: "71K",
+      transmission: "Automatic",
+      location: "Newark, NJ",
       available: true,
-    },
-    {
-      id: 7,
-      make: "FORD",
-      model: "ECOSPORT",
-      year: 2018,
-      rate: 49,
-      mileage: "55K",
-      transmission: "AUTO",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0700.jpeg",
       gigReady: true,
-      location: "NEWARK AIRPORT",
-      available: true,
-    },
-    {
-      id: 8,
-      make: "TOYOTA",
-      model: "PRIUS V",
-      year: 2016,
-      rate: 49,
-      mileage: "55K",
-      transmission: "AUTO",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0705.jpeg",
-      gigReady: true,
-      location: "NEWARK AIRPORT",
-      available: true,
+      type: "sedan",
+      category: "PERFORMANCE",
+      size: "small",
+      description: "Powerful sedan with impressive performance and style.",
+      features: ["V6 Engine", "Sport Suspension", "Premium Interior", "Fast Acceleration"],
+      insurance: "Full coverage included",
+      maintenance: "Regular maintenance included",
     },
   ]
 
@@ -127,207 +139,362 @@ export default function InventoryPage() {
     const matchesSearch =
       vehicle.make.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesPrice = vehicle.rate >= priceRange[0] && vehicle.rate <= priceRange[1]
-    return matchesSearch && matchesPrice
+    const matchesPrice = vehicle.price >= priceRange[0] && vehicle.price <= priceRange[1]
+    const matchesType = selectedType === "all" || vehicle.type === selectedType
+
+    return matchesSearch && matchesPrice && matchesType
   })
 
+  const openModal = (vehicle) => {
+    setSelectedVehicle(vehicle)
+  }
+
+  const closeModal = () => {
+    setSelectedVehicle(null)
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gray-100 text-neutral-900">
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-8 py-6 border-b border-white/10">
-        <div className="flex items-center space-x-6">
-          <Link href="/" className="flex items-center space-x-2 text-white/60 hover:text-white">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm tracking-wider">BACK</span>
+      <nav className="flex items-center justify-between p-6">
+        <div className="flex gap-4">
+          <Link
+            href="/"
+            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all"
+          >
+            Home
+          </Link>
+          <Link
+            href="/inventory"
+            className="nav-text px-4 py-2 bg-neutral-900 text-white rounded-full border border-neutral-900 transition-all"
+          >
+            Works
+          </Link>
+          <Link
+            href="/services"
+            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all"
+          >
+            Archive
           </Link>
         </div>
 
-        <div className="text-center">
-          <div className="text-2xl font-bold tracking-wider">
-            FE
-            <br />
-            MI
+        {/* Center Logo */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="text-center">
+            <div className="text-sm font-bold tracking-widest">MI</div>
+            <div className="text-sm font-bold tracking-widest -mt-1">KK</div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
+        <div className="flex gap-4">
+          <Link
+            href="/about"
+            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all"
           >
-            FLEET
-          </Button>
+            About
+          </Link>
+          <Link
+            href="/contact"
+            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all"
+          >
+            Contact
+          </Link>
         </div>
       </nav>
 
-      <div className="px-8 py-12">
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-6xl font-black tracking-tighter mb-4">VEHICLE FLEET</h1>
-          <p className="text-white/60 tracking-wider text-sm">PREMIUM VEHICLES FOR GIG ECONOMY SUCCESS</p>
+      {/* Header Section */}
+      <div className="px-6 py-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <h1 className="display-heading text-6xl md:text-8xl">FLEET</h1>
+          <h2 className="display-heading text-6xl md:text-8xl">OVERVIEW</h2>
         </div>
+      </div>
 
-        {/* Filters */}
-        <div className="mb-12 p-6 border border-white/10 rounded-lg bg-white/5 backdrop-blur-sm">
-          <div className="grid md:grid-cols-4 gap-6 mb-6">
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-2 tracking-widest uppercase">Search</label>
-              <Input
-                placeholder="MAKE OR MODEL..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-2 tracking-widest uppercase">Type</label>
-              <Select>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue placeholder="ALL TYPES" />
-                </SelectTrigger>
-                <SelectContent className="bg-black border-white/20">
-                  <SelectItem value="all">ALL TYPES</SelectItem>
-                  <SelectItem value="sedan">SEDAN</SelectItem>
-                  <SelectItem value="suv">SUV</SelectItem>
-                  <SelectItem value="compact">COMPACT</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-2 tracking-widest uppercase">Location</label>
-              <Select>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue placeholder="ALL LOCATIONS" />
-                </SelectTrigger>
-                <SelectContent className="bg-black border-white/20">
-                  <SelectItem value="all">ALL LOCATIONS</SelectItem>
-                  <SelectItem value="newark-airport">NEWARK AIRPORT</SelectItem>
-                  <SelectItem value="downtown-newark">DOWNTOWN NEWARK</SelectItem>
-                  <SelectItem value="jersey-city">JERSEY CITY</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-2 tracking-widest uppercase">Sort</label>
-              <Select>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue placeholder="PRICE: LOW TO HIGH" />
-                </SelectTrigger>
-                <SelectContent className="bg-black border-white/20">
-                  <SelectItem value="price-low">PRICE: LOW TO HIGH</SelectItem>
-                  <SelectItem value="price-high">PRICE: HIGH TO LOW</SelectItem>
-                  <SelectItem value="newest">NEWEST ADDED</SelectItem>
-                  <SelectItem value="year">YEAR</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+      {/* Vehicle Grid */}
+      <div className="px-6 pb-32">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {filteredVehicles.map((vehicle, index) => {
+            const cardNumber = String(index + 1).padStart(2, "0")
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-2 tracking-widest uppercase">
-                PRICE RANGE: ${priceRange[0]} - ${priceRange[1]} PER DAY
-              </label>
-              <Slider value={priceRange} onValueChange={setPriceRange} max={100} min={30} step={5} className="w-full" />
-            </div>
-            <div className="flex items-end space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                GIG-READY ONLY
-              </Button>
-              <div className="flex border border-white/20 rounded-full overflow-hidden">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                  className="rounded-none bg-white/10 hover:bg-white/20"
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "map" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("map")}
-                  className="rounded-none bg-white/10 hover:bg-white/20"
-                >
-                  <Map className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Results Count */}
-        <div className="mb-8">
-          <p className="text-white/60 tracking-wider text-sm">{filteredVehicles.length} VEHICLES AVAILABLE</p>
-        </div>
-
-        {/* Vehicle Grid */}
-        {viewMode === "grid" ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredVehicles.map((vehicle) => (
-              <Card
-                key={vehicle.id}
-                className="bg-white/5 border-white/10 overflow-hidden hover:bg-white/10 transition-all"
-              >
-                <div className="relative">
-                  <Image
-                    src={vehicle.image || "/placeholder.svg"}
-                    alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-                    width={400}
-                    height={300}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute top-4 left-4 flex flex-col gap-2">
+            if (vehicle.size === "large") {
+              return (
+                <div key={vehicle.id} className="group cursor-pointer">
+                  <div className="label-text text-neutral-600 mb-4">
+                    {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}{" "}
+                    {vehicle.category}
+                  </div>
+                  <div className="relative w-full h-96 overflow-hidden rounded-lg">
+                    <Image
+                      src={vehicle.image || "/placeholder.svg"}
+                      alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
                     {vehicle.gigReady && (
-                      <Badge className="bg-green-500/80 text-white text-xs tracking-wider">GIG READY</Badge>
+                      <div className="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white label-text rounded-full">
+                        GIG READY
+                      </div>
                     )}
-                    {!vehicle.available && (
-                      <Badge variant="destructive" className="text-xs tracking-wider">
-                        UNAVAILABLE
-                      </Badge>
-                    )}
+                    <div
+                      className={`absolute top-4 right-4 px-3 py-1 label-text rounded-full ${
+                        vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                      }`}
+                    >
+                      {vehicle.available ? "AVAILABLE" : "RENTED"}
+                    </div>
+                    <div className="absolute bottom-4 right-4">
+                      <button
+                        onClick={() => openModal(vehicle)}
+                        className="px-4 py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all"
+                      >
+                        DRIVE
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-lg mb-2 tracking-wider">
-                    {vehicle.year} {vehicle.make} {vehicle.model}
-                  </h3>
-                  <div className="flex justify-between text-sm text-white/60 mb-2 tracking-wider">
-                    <span>{vehicle.mileage} MILES</span>
-                    <span>{vehicle.transmission}</span>
+              )
+            }
+
+            return null
+          })}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {filteredVehicles
+              .filter((v) => v.size === "medium" || v.size === "small")
+              .map((vehicle, index) => {
+                const cardNumber = String(filteredVehicles.findIndex((v) => v.id === vehicle.id) + 1).padStart(2, "0")
+
+                return (
+                  <div key={vehicle.id} className="group cursor-pointer">
+                    <div className="label-text text-neutral-600 mb-4">
+                      {cardNumber} {vehicle.make.toUpperCase()} - {vehicle.model.toUpperCase()} {vehicle.category}
+                    </div>
+                    <div className="relative w-full h-64 overflow-hidden rounded-lg">
+                      <Image
+                        src={vehicle.image || "/placeholder.svg"}
+                        alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      {vehicle.gigReady && (
+                        <div className="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white label-text rounded-full">
+                          GIG READY
+                        </div>
+                      )}
+                      <div
+                        className={`absolute top-4 right-4 px-3 py-1 label-text rounded-full ${
+                          vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                        }`}
+                      >
+                        {vehicle.available ? "AVAILABLE" : "RENTED"}
+                      </div>
+                      <div className="absolute bottom-4 right-4">
+                        <button
+                          onClick={() => openModal(vehicle)}
+                          className="px-4 py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all"
+                        >
+                          DRIVE
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm text-white/60 mb-4 tracking-wider">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span>{vehicle.location}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold tracking-wider">${vehicle.rate}/DAY</span>
-                    <Button
-                      size="sm"
-                      disabled={!vehicle.available}
-                      className="rounded-full bg-white text-black hover:bg-white/90 tracking-wider"
-                    >
-                      {vehicle.available ? "BOOK NOW" : "UNAVAILABLE"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                )
+              })}
           </div>
-        ) : (
-          <div className="bg-white/5 border border-white/10 rounded-lg p-12 text-center">
-            <Map className="h-16 w-16 mx-auto text-white/40 mb-4" />
-            <h3 className="text-lg font-semibold mb-2 tracking-wider">MAP VIEW</h3>
-            <p className="text-white/60 tracking-wider">INTERACTIVE MAP SHOWING VEHICLE LOCATIONS</p>
-          </div>
-        )}
+
+          {filteredVehicles.length === 0 && (
+            <div className="text-center py-16">
+              <p className="body-text text-neutral-600">No vehicles match your search criteria</p>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Vehicle Details Modal */}
+      {selectedVehicle && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={closeModal}>
+          <div
+            className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative h-64">
+              <Image
+                src={selectedVehicle.image || "/placeholder.svg"}
+                alt={`${selectedVehicle.year} ${selectedVehicle.make} ${selectedVehicle.model}`}
+                fill
+                className="object-cover rounded-t-2xl"
+              />
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 p-2 bg-white/90 rounded-full hover:bg-white transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h2 className="display-heading text-2xl mb-2">
+                    {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
+                  </h2>
+                  <p className="body-text text-neutral-600">{selectedVehicle.description}</p>
+                </div>
+                <div className="text-right">
+                  <div className="display-heading text-3xl">${selectedVehicle.price}</div>
+                  <div className="label-text text-neutral-600">per day</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <div className="label-text text-neutral-600 mb-1">Mileage</div>
+                  <div className="body-text">{selectedVehicle.mileage} miles</div>
+                </div>
+                <div>
+                  <div className="label-text text-neutral-600 mb-1">Transmission</div>
+                  <div className="body-text">{selectedVehicle.transmission}</div>
+                </div>
+                <div>
+                  <div className="label-text text-neutral-600 mb-1">Location</div>
+                  <div className="body-text">{selectedVehicle.location}</div>
+                </div>
+                <div>
+                  <div className="label-text text-neutral-600 mb-1">Status</div>
+                  <div className={`body-text ${selectedVehicle.available ? "text-green-600" : "text-red-600"}`}>
+                    {selectedVehicle.available ? "Available" : "Rented"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <div className="label-text text-neutral-600 mb-2">Features</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {selectedVehicle.features.map((feature, index) => (
+                    <div key={index} className="body-text">
+                      • {feature}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div>
+                  <span className="label-text text-neutral-600">Insurance: </span>
+                  <span className="body-text">{selectedVehicle.insurance}</span>
+                </div>
+                <div>
+                  <span className="label-text text-neutral-600">Maintenance: </span>
+                  <span className="body-text">{selectedVehicle.maintenance}</span>
+                </div>
+              </div>
+
+              <button
+                disabled={!selectedVehicle.available}
+                className={`w-full py-3 rounded-lg nav-text transition-all ${
+                  selectedVehicle.available
+                    ? "bg-neutral-900 text-white hover:bg-neutral-800"
+                    : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
+                }`}
+              >
+                {selectedVehicle.available ? "Book This Vehicle" : "Currently Unavailable"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Menu Overlay */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="flex items-center gap-3 px-6 py-3 bg-orange-600 text-white rounded-full shadow-lg hover:bg-orange-700 transition-all"
+        >
+          <span className="nav-text font-medium">ALL VEHICLES</span>
+          {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+        </button>
+      </div>
+
+      {/* Filter Menu Overlay */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 bg-black/50 z-30" onClick={() => setIsMenuOpen(false)}>
+          <div
+            className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="display-heading text-2xl">Filter Vehicles</h2>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Search */}
+              <div>
+                <label className="label-text block mb-2">Search</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by make or model..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="body-text w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500"
+                  />
+                </div>
+              </div>
+
+              {/* Vehicle Type */}
+              <div>
+                <label className="label-text block mb-2">Vehicle Type</label>
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="body-text w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500"
+                >
+                  <option value="all">All Types</option>
+                  <option value="sedan">Sedan</option>
+                  <option value="suv">SUV</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <label className="label-text block mb-2">
+                  Daily Rate: ${priceRange[0]} - ${priceRange[1]}
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-sm text-neutral-500">
+                    <span>$0</span>
+                    <span>$200</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Apply Button */}
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full py-3 bg-neutral-900 text-white rounded-lg nav-text hover:bg-neutral-800 transition-all"
+              >
+                Apply Filters ({filteredVehicles.length} vehicles)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

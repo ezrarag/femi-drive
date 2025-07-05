@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Play, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -12,26 +11,29 @@ export default function HomePage() {
     {
       title: "DRIVE",
       subtitle: "TO EARN",
+      label: "Gig Economy",
       description:
-        "ROOTED IN THE GIG ECONOMY, WE'VE DEVELOPED A COMPREHENSIVE APPROACH TO VEHICLE ACCESS. FLEXIBLE TERMS MEET INNOVATIVE FINANCING TO CREATE THE PERFECT PLATFORM FOR SUCCESS.",
-      cta: "GET STARTED",
-      info: "01 - 03 NEWARK - JERSEY CITY FLEET",
+        "Rooted in the gig economy world, we've developed a comprehensive vehicle access platform. Moving beyond traditional leasing to embrace its power as a financial tool.",
+      cta: "Start Earning",
+      info: "01 - 03 Uber - Lyft Ready",
     },
     {
       title: "FLEXIBLE",
       subtitle: "FINANCING",
+      label: "No Credit",
       description:
-        "NO CREDIT? NO PROBLEM. OUR INNOVATIVE FINANCING SOLUTIONS BREAK DOWN BARRIERS TO VEHICLE OWNERSHIP. WEEKLY PAYMENTS, LEASE-TO-OWN, AND CUSTOM TERMS DESIGNED FOR YOUR SUCCESS.",
-      cta: "APPLY NOW",
-      info: "02 - 05 FINANCING - LEASE TO OWN",
+        "No credit? No problem. We've created innovative financing solutions that work with your situation. From rent-to-own to traditional leasing options.",
+      cta: "Apply Now",
+      info: "02 - 03 Financing Options",
     },
     {
       title: "PREMIUM",
       subtitle: "FLEET",
+      label: "Quality Vehicles",
       description:
-        "EVERY VEHICLE IN OUR FLEET IS CAREFULLY SELECTED AND MAINTAINED TO RIDESHARE STANDARDS. GIG-READY VEHICLES THAT HELP YOU MAXIMIZE YOUR EARNING POTENTIAL ON THE ROAD.",
-      cta: "VIEW FLEET",
-      info: "03 - 08 INVENTORY - GIG READY VEHICLES",
+        "Every vehicle in our fleet is carefully selected and maintained. From fuel-efficient sedans to spacious SUVs, we provide the tools for your success.",
+      cta: "View Fleet",
+      info: "03 - 03 Newark - NYC Area",
     },
   ]
 
@@ -44,16 +46,10 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-black">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
       {/* Background Video */}
       <div className="absolute inset-0 overflow-hidden">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-        >
+        <video autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover">
           <source
             src="https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/project-media/temporary/coverr-electric-car-driving-in-the-dark-woods-668-1080p.mp4"
             type="video/mp4"
@@ -64,148 +60,124 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black/40" />
       </div>
       {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between px-8 py-6">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+      <nav className="relative z-50 flex items-center justify-between p-6">
+        <div className="flex gap-4">
+          <Link
+            href="/"
+            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
           >
             Home
-          </Button>
-          <Button variant="ghost" size="sm" className="rounded-full text-white/70 hover:bg-white/10 hover:text-white">
-            <Link href="/inventory">Fleet</Link>
-          </Button>
-          <Button variant="ghost" size="sm" className="rounded-full text-white/70 hover:bg-white/10 hover:text-white">
-            <Link href="/services">Services</Link>
-          </Button>
+          </Link>
+          <Link
+            href="/inventory"
+            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+          >
+            Fleet
+          </Link>
+          <Link
+            href="/services"
+            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+          >
+            Services
+          </Link>
         </div>
 
         {/* Center Logo */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="text-center">
-            <div className="text-2xl font-bold tracking-wider text-white">
-              FE
-              <br />
-              MI
-            </div>
+            <div className="text-sm font-bold tracking-widest">FE</div>
+            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" className="rounded-full text-white/70 hover:bg-white/10 hover:text-white">
-            <Link href="/about">About</Link>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+        <div className="flex gap-4">
+          <Link
+            href="/about"
+            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
           >
-            <Link href="/contact">Contact</Link>
-          </Button>
+            About
+          </Link>
+          <Link
+            href="/contact"
+            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+          >
+            Contact
+          </Link>
         </div>
       </nav>
 
       {/* Main Content */}
-      <div className="relative z-40 flex h-full items-center justify-between px-8 pb-20">
-        {/* Left Content */}
-        <div className="flex-1 max-w-md">
-          <div className="mb-8">
-            <h1 className="text-8xl font-black tracking-tighter text-white leading-none">
+      <main className="relative z-40 flex items-center justify-center min-h-[calc(100vh-120px)]">
+        <div className="w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+          {/* Left Content */}
+          <div className="text-left">
+            <div className="label-text mb-4 opacity-80">{slides[currentSlide].label}</div>
+            <h1 className="display-heading text-6xl md:text-8xl lg:text-9xl leading-none mb-8">
               {slides[currentSlide].title}
             </h1>
+            <div className="body-text leading-relaxed max-w-md mb-8">{slides[currentSlide].description}</div>
+            <Link href="/contact" className="label-text underline hover:no-underline transition-all">
+              Read More
+            </Link>
           </div>
 
-          <div className="mb-6">
-            <p className="text-xs font-medium tracking-widest text-white/60 uppercase mb-4">LEASING COMPANY</p>
-            <p className="text-sm leading-relaxed text-white/80 font-light tracking-wide max-w-xs">
-              {slides[currentSlide].description}
-            </p>
+          {/* Center CTA */}
+          <div className="flex justify-center">
+            <button className="nav-text px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all">
+              {slides[currentSlide].cta}
+            </button>
           </div>
 
-          <Button
-            variant="link"
-            className="text-white/80 hover:text-white p-0 h-auto font-normal tracking-widest text-xs"
-          >
-            READ MORE
-          </Button>
-        </div>
-
-        {/* Center CTA */}
-        <div className="flex-1 flex justify-center">
-          <Button
-            size="lg"
-            className="rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 backdrop-blur-sm px-12 py-6 text-lg font-medium tracking-wider"
-          >
-            <Play className="mr-3 h-5 w-5" />
-            {slides[currentSlide].cta}
-          </Button>
-        </div>
-
-        {/* Right Content */}
-        <div className="flex-1 flex flex-col items-end">
-          <div className="text-right mb-8">
-            <h2 className="text-8xl font-black tracking-tighter text-white leading-none">
+          {/* Right Content */}
+          <div className="text-right">
+            <h2 className="display-heading text-6xl md:text-8xl lg:text-9xl leading-none mb-8">
               {slides[currentSlide].subtitle}
             </h2>
-          </div>
+            <div className="label-text mb-4 opacity-80">{slides[currentSlide].info}</div>
 
-          <div className="text-right mb-8">
-            <p className="text-xs font-medium tracking-widest text-white/60 uppercase">{slides[currentSlide].info}</p>
-          </div>
-
-          {/* Navigation Arrows */}
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={prevSlide}
-              className="rounded-full w-10 h-10 p-0 text-white/60 hover:text-white hover:bg-white/10"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={nextSlide}
-              className="rounded-full w-10 h-10 p-0 text-white/60 hover:text-white hover:bg-white/10"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Elements */}
-      <div className="absolute bottom-0 left-0 right-0 z-50">
-        {/* Copyright */}
-        <div className="absolute bottom-6 left-8">
-          <div className="flex items-center space-x-2">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 rounded-full bg-white/60" />
-              <div className="w-2 h-2 rounded-full bg-white/60" />
+            {/* Navigation Arrows */}
+            <div className="flex justify-end gap-4 mt-8">
+              <button
+                onClick={prevSlide}
+                className="p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
-            <p className="text-xs text-white/60 tracking-wider">
-              ©2025 FEMI LEASING - <span className="underline cursor-pointer">TERMS</span>
-            </p>
           </div>
         </div>
+      </main>
 
-        {/* Progress Bar */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64">
-          <div className="h-0.5 bg-white/20 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-white transition-all duration-500 ease-out"
-              style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
-            />
+      {/* Footer */}
+      <footer className="relative z-40 px-6 pb-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4 label-text">
+            <span>©2025 Femi Leasing</span>
+            <span>·</span>
+            <Link href="/privacy" className="hover:underline">
+              Privacy
+            </Link>
           </div>
-        </div>
 
-        {/* Slide Indicator */}
-        <div className="absolute bottom-6 right-8">
-          <div className="w-3 h-3 rounded-full bg-white/40" />
+          {/* Progress Bar */}
+          <div className="hidden md:block flex-1 max-w-md mx-8">
+            <div className="h-px bg-white/20 relative">
+              <div
+                className="h-px bg-white transition-all duration-500"
+                style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="w-3 h-3 bg-white/40 rounded-full"></div>
         </div>
-      </div>
+      </footer>
     </div>
   )
 }

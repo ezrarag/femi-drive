@@ -1,203 +1,311 @@
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { MapPin, Phone, Mail, Clock, ArrowLeft } from "lucide-react"
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
 import Link from "next/link"
+import { Phone, Mail, MapPin, Clock } from "lucide-react"
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("Form submitted:", formData)
+    // Handle form submission here
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    })
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-8 py-6 border-b border-white/10">
-        <div className="flex items-center space-x-6">
-          <Link href="/" className="flex items-center space-x-2 text-white/60 hover:text-white">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm tracking-wider">BACK</span>
+      <nav className="flex items-center justify-between p-6 border-b border-white/10">
+        <div className="flex gap-4">
+          <Link
+            href="/"
+            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+          >
+            Home
+          </Link>
+          <Link
+            href="/inventory"
+            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+          >
+            Fleet
+          </Link>
+          <Link
+            href="/services"
+            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+          >
+            Services
           </Link>
         </div>
 
-        <div className="text-center">
-          <div className="text-2xl font-bold tracking-wider">
-            FE
-            <br />
-            MI
+        {/* Center Logo */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="text-center">
+            <div className="text-sm font-bold tracking-widest">FE</div>
+            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full border-white/30 bg-white/10 text-white hover:bg-white/20"
+        <div className="flex gap-4">
+          <Link
+            href="/about"
+            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
           >
-            CONTACT
-          </Button>
+            About
+          </Link>
+          <Link
+            href="/contact"
+            className="nav-text px-4 py-2 bg-white text-black rounded-full border border-white transition-all"
+          >
+            Contact
+          </Link>
         </div>
       </nav>
 
-      <div className="px-8 py-12">
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-6xl font-black tracking-tighter mb-4">GET IN TOUCH</h1>
-          <p className="text-white/60 tracking-wider text-sm">WE'RE HERE TO HELP YOU GET ON THE ROAD</p>
+      {/* Header */}
+      <div className="px-6 py-12">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="display-heading text-6xl md:text-8xl mb-8">GET IN TOUCH</h1>
+          <p className="body-text max-w-2xl opacity-80">
+            Ready to start earning? Have questions about our fleet? We're here to help you succeed.
+          </p>
         </div>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-16">
-          {/* Contact Form */}
+      {/* Contact Content */}
+      <div className="px-6 pb-16">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
+          {/* Contact Information */}
           <div>
-            <h2 className="text-2xl font-bold tracking-wider mb-8">SEND MESSAGE</h2>
-            <Card className="bg-white/5 border-white/10 p-8">
-              <form className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="firstName" className="text-xs font-medium text-white/60 tracking-widest uppercase">
-                      First Name
-                    </Label>
-                    <Input
-                      id="firstName"
-                      placeholder="ENTER FIRST NAME"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 mt-2"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="lastName" className="text-xs font-medium text-white/60 tracking-widest uppercase">
-                      Last Name
-                    </Label>
-                    <Input
-                      id="lastName"
-                      placeholder="ENTER LAST NAME"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/40 mt-2"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="email" className="text-xs font-medium text-white/60 tracking-widest uppercase">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="ENTER EMAIL ADDRESS"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone" className="text-xs font-medium text-white/60 tracking-widest uppercase">
-                    Phone
-                  </Label>
-                  <Input
-                    id="phone"
-                    placeholder="ENTER PHONE NUMBER"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="subject" className="text-xs font-medium text-white/60 tracking-widest uppercase">
-                    Subject
-                  </Label>
-                  <Input
-                    id="subject"
-                    placeholder="WHAT CAN WE HELP WITH?"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="message" className="text-xs font-medium text-white/60 tracking-widest uppercase">
-                    Message
-                  </Label>
-                  <Textarea
-                    id="message"
-                    placeholder="TELL US MORE ABOUT YOUR NEEDS..."
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 min-h-[120px] mt-2"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-white text-black hover:bg-white/90 tracking-wider font-medium"
-                >
-                  SEND MESSAGE
-                </Button>
-              </form>
-            </Card>
-          </div>
+            <h2 className="display-heading text-3xl mb-8">CONTACT INFO</h2>
 
-          {/* Contact Details */}
-          <div>
-            <h2 className="text-2xl font-bold tracking-wider mb-8">CONTACT INFO</h2>
             <div className="space-y-8">
-              <div className="flex items-start space-x-4">
-                <div className="bg-white/10 p-3 rounded-full">
-                  <Phone className="h-6 w-6" />
-                </div>
+              <div className="flex items-start gap-4">
+                <Phone className="w-5 h-5 mt-1 opacity-60" />
                 <div>
-                  <h3 className="font-semibold tracking-wider mb-1">PHONE</h3>
-                  <p className="text-white/60 tracking-wider">(973) 555-0123</p>
-                  <p className="text-xs text-white/40 tracking-wider uppercase">24/7 EMERGENCY SUPPORT</p>
+                  <div className="label-text mb-2">Phone</div>
+                  <div className="body-text">+1 (973) 555-0123</div>
+                  <div className="body-text opacity-60">Mon-Fri 8am-8pm EST</div>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="bg-white/10 p-3 rounded-full">
-                  <Mail className="h-6 w-6" />
-                </div>
+              <div className="flex items-start gap-4">
+                <Mail className="w-5 h-5 mt-1 opacity-60" />
                 <div>
-                  <h3 className="font-semibold tracking-wider mb-1">EMAIL</h3>
-                  <p className="text-white/60 tracking-wider">INFO@FEMILEASING.COM</p>
-                  <p className="text-xs text-white/40 tracking-wider uppercase">RESPONSE WITHIN 2 HOURS</p>
+                  <div className="label-text mb-2">Email</div>
+                  <div className="body-text">info@femileasing.com</div>
+                  <div className="body-text opacity-60">24/7 response</div>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="bg-white/10 p-3 rounded-full">
-                  <Clock className="h-6 w-6" />
-                </div>
+              <div className="flex items-start gap-4">
+                <MapPin className="w-5 h-5 mt-1 opacity-60" />
                 <div>
-                  <h3 className="font-semibold tracking-wider mb-1">HOURS</h3>
-                  <p className="text-white/60 tracking-wider">MON - FRI: 8AM - 8PM</p>
-                  <p className="text-white/60 tracking-wider">SAT - SUN: 9AM - 6PM</p>
+                  <div className="label-text mb-2">Locations</div>
+                  <div className="body-text mb-2">Newark, NJ</div>
+                  <div className="body-text opacity-60">123 Main Street</div>
+                  <div className="body-text opacity-60">Newark, NJ 07102</div>
+
+                  <div className="body-text mb-2 mt-4">Jersey City, NJ</div>
+                  <div className="body-text opacity-60">456 Grove Street</div>
+                  <div className="body-text opacity-60">Jersey City, NJ 07302</div>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="bg-white/10 p-3 rounded-full">
-                  <MapPin className="h-6 w-6" />
-                </div>
+              <div className="flex items-start gap-4">
+                <Clock className="w-5 h-5 mt-1 opacity-60" />
                 <div>
-                  <h3 className="font-semibold tracking-wider mb-1">LOCATIONS</h3>
-                  <p className="text-white/60 tracking-wider">NEWARK AIRPORT</p>
-                  <p className="text-white/60 tracking-wider">DOWNTOWN NEWARK</p>
-                  <p className="text-white/60 tracking-wider">JERSEY CITY</p>
+                  <div className="label-text mb-2">Hours</div>
+                  <div className="body-text">Mon-Fri: 8:00 AM - 8:00 PM</div>
+                  <div className="body-text">Sat: 9:00 AM - 6:00 PM</div>
+                  <div className="body-text">Sun: 10:00 AM - 4:00 PM</div>
                 </div>
               </div>
             </div>
 
             {/* Quick Actions */}
             <div className="mt-12">
-              <h3 className="font-semibold tracking-wider mb-6">QUICK ACTIONS</h3>
+              <h3 className="display-heading text-xl mb-6">QUICK ACTIONS</h3>
               <div className="space-y-4">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-white/5 border-white/20 text-white hover:bg-white/10"
+                <Link
+                  href="/inventory"
+                  className="block w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all"
                 >
-                  <Phone className="h-4 w-4 mr-3" />
-                  CALL NOW: (973) 555-0123
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-white/5 border-white/20 text-white hover:bg-white/10"
+                  <div className="label-text mb-1">View Fleet</div>
+                  <div className="body-text opacity-60">Browse available vehicles</div>
+                </Link>
+
+                <Link
+                  href="/financing"
+                  className="block w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all"
                 >
-                  <Mail className="h-4 w-4 mr-3" />
-                  EMAIL US
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-white/5 border-white/20 text-white hover:bg-white/10"
+                  <div className="label-text mb-1">Apply for Financing</div>
+                  <div className="body-text opacity-60">Get pre-approved today</div>
+                </Link>
+
+                <Link
+                  href="/drive-to-earn"
+                  className="block w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all"
                 >
-                  <MapPin className="h-4 w-4 mr-3" />
-                  GET DIRECTIONS
-                </Button>
+                  <div className="label-text mb-1">Drive to Earn</div>
+                  <div className="body-text opacity-60">Start earning with Uber/Lyft</div>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Form */}
+          <div>
+            <h2 className="display-heading text-3xl mb-8">SEND MESSAGE</h2>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="label-text block mb-2">Name *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="body-text w-full p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:border-white/40 placeholder:opacity-50"
+                    placeholder="Your full name"
+                  />
+                </div>
+
+                <div>
+                  <label className="label-text block mb-2">Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="body-text w-full p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:border-white/40 placeholder:opacity-50"
+                    placeholder="your@email.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="label-text block mb-2">Phone</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="body-text w-full p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:border-white/40 placeholder:opacity-50"
+                  placeholder="(xxx) xxx-xxxx"
+                />
+              </div>
+
+              <div>
+                <label className="label-text block mb-2">Subject *</label>
+                <select
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  className="body-text w-full p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:border-white/40"
+                >
+                  <option value="">Select a subject</option>
+                  <option value="vehicle-inquiry">Vehicle inquiry</option>
+                  <option value="financing">Financing questions</option>
+                  <option value="drive-to-earn">Drive to earn program</option>
+                  <option value="fleet-partner">Fleet partner program</option>
+                  <option value="support">Customer support</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="label-text block mb-2">Message *</label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  rows={6}
+                  className="body-text w-full p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:border-white/40 placeholder:opacity-50 resize-none"
+                  placeholder="Tell us how we can help you..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-white text-black rounded-lg nav-text hover:bg-gray-200 transition-all"
+              >
+                Send Message
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="px-6 pb-16 border-t border-white/10">
+        <div className="max-w-7xl mx-auto pt-16">
+          <h2 className="display-heading text-4xl mb-12">FREQUENTLY ASKED</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div>
+                <h3 className="label-text mb-3">How quickly can I get a vehicle?</h3>
+                <p className="body-text opacity-80">
+                  Most approved applicants can pick up a vehicle within 24-48 hours of approval.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="label-text mb-3">What if I have no credit?</h3>
+                <p className="body-text opacity-80">
+                  No problem! We have specialized programs for drivers with no credit or poor credit history.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="label-text mb-3">Are all vehicles gig-ready?</h3>
+                <p className="body-text opacity-80">
+                  Most of our fleet is pre-approved for Uber, Lyft, and major delivery platforms.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="label-text mb-3">What's included in the rental?</h3>
+                <p className="body-text opacity-80">
+                  Insurance, maintenance, and 24/7 roadside assistance are included in all rentals.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="label-text mb-3">Can I rent for just a few days?</h3>
+                <p className="body-text opacity-80">
+                  Yes! We offer flexible terms from daily rentals to long-term leases.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="label-text mb-3">How do I become a fleet partner?</h3>
+                <p className="body-text opacity-80">
+                  Contact us to learn about listing your vehicle and earning passive income.
+                </p>
               </div>
             </div>
           </div>
