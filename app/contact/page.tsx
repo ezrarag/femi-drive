@@ -99,7 +99,7 @@ export default function ContactPage() {
                 <Phone className="w-5 h-5 mt-1 opacity-60" />
                 <div>
                   <div className="label-text mb-2">Phone</div>
-                  <div className="body-text">+1 (973) 555-0123</div>
+                  <div className="body-text">+1 (201) 898 7182</div>
                   <div className="body-text opacity-60">Mon-Fri 8am-8pm EST</div>
                 </div>
               </div>
@@ -108,7 +108,7 @@ export default function ContactPage() {
                 <Mail className="w-5 h-5 mt-1 opacity-60" />
                 <div>
                   <div className="label-text mb-2">Email</div>
-                  <div className="body-text">info@femileasing.com</div>
+                  <div className="body-text">ayoola@femileasing.com</div>
                   <div className="body-text opacity-60">24/7 response</div>
                 </div>
               </div>
@@ -117,13 +117,13 @@ export default function ContactPage() {
                 <MapPin className="w-5 h-5 mt-1 opacity-60" />
                 <div>
                   <div className="label-text mb-2">Locations</div>
-                  <div className="body-text mb-2">Newark, NJ</div>
-                  <div className="body-text opacity-60">123 Main Street</div>
-                  <div className="body-text opacity-60">Newark, NJ 07102</div>
+                  <div className="body-text mb-2">Newark International Airport</div>
+                  <div className="body-text opacity-60">10 Toler Pl</div>
+                  <div className="body-text opacity-60">Newark, NJ 07114</div>
 
-                  <div className="body-text mb-2 mt-4">Jersey City, NJ</div>
-                  <div className="body-text opacity-60">456 Grove Street</div>
-                  <div className="body-text opacity-60">Jersey City, NJ 07302</div>
+                  <div className="body-text mb-2 mt-4">Weequahic Park</div>
+                  <div className="body-text opacity-60">Elizabeth Ave &, Meeker Ave</div>
+                  <div className="body-text opacity-60">Newark, NJ 07112</div>
                 </div>
               </div>
 

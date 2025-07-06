@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, X, Menu } from "lucide-react"
+import { Search, X, Menu, ExternalLink, Calendar } from "lucide-react"
 
 export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -11,6 +11,10 @@ export default function InventoryPage() {
   const [selectedType, setSelectedType] = useState("all")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedVehicle, setSelectedVehicle] = useState(null)
+  const [showBookingWidget, setShowBookingWidget] = useState(false)
+  const [bookingVehicle, setBookingVehicle] = useState(null)
+  const [showInlineBooking, setShowInlineBooking] = useState({})
+  const [wheelbaseScriptLoaded, setWheelbaseScriptLoaded] = useState(false)
 
   const vehicles = [
     {
@@ -19,6 +23,7 @@ export default function InventoryPage() {
       model: "Passat",
       year: 2015,
       price: 45,
+      wheelbaseId: "VW_PASSAT_2015_001", // Added wheelbaseId for each vehicle
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0698.jpeg",
       mileage: "85K",
       transmission: "Automatic",
@@ -39,6 +44,7 @@ export default function InventoryPage() {
       model: "Edge",
       year: 2014,
       price: 55,
+      wheelbaseId: "FORD_EDGE_2014_002",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0699.jpeg",
       mileage: "92K",
       transmission: "Automatic",
@@ -59,6 +65,7 @@ export default function InventoryPage() {
       model: "328i xDrive",
       year: 2011,
       price: 50,
+      wheelbaseId: "BMW_328I_2011_003",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0701.jpeg",
       mileage: "78K",
       transmission: "Automatic",
@@ -79,6 +86,7 @@ export default function InventoryPage() {
       model: "Equinox",
       year: 2013,
       price: 48,
+      wheelbaseId: "CHEVY_EQUINOX_2013_004",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0702.jpeg",
       mileage: "65K",
       transmission: "Automatic",
@@ -99,6 +107,7 @@ export default function InventoryPage() {
       model: "Sentra",
       year: 2011,
       price: 42,
+      wheelbaseId: "NISSAN_SENTRA_2011_005",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0703.jpeg",
       mileage: "89K",
       transmission: "CVT",
@@ -119,6 +128,7 @@ export default function InventoryPage() {
       model: "Charger",
       year: 2016,
       price: 52,
+      wheelbaseId: "DODGE_CHARGER_2016_006",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0704.jpeg",
       mileage: "71K",
       transmission: "Automatic",
@@ -145,6 +155,19 @@ export default function InventoryPage() {
     return matchesSearch && matchesPrice && matchesType
   })
 
+  // Load Wheelbase script once
+  useEffect(() => {
+    if (!wheelbaseScriptLoaded && !document.querySelector('script[src*="wheelbase.min.js"]')) {
+      const script = document.createElement("script")
+      script.src = "https://d3cuf6g1arkgx6.cloudfront.net/sdk/wheelbase.min.js"
+      script.async = true
+      script.onload = () => {
+        setWheelbaseScriptLoaded(true)
+      }
+      document.head.appendChild(script)
+    }
+  }, [wheelbaseScriptLoaded])
+
   const openModal = (vehicle) => {
     setSelectedVehicle(vehicle)
   }
@@ -152,6 +175,38 @@ export default function InventoryPage() {
   const closeModal = () => {
     setSelectedVehicle(null)
   }
+
+  const toggleInlineBooking = (vehicleId) => {
+    setShowInlineBooking((prev) => ({
+      ...prev,
+      [vehicleId]: !prev[vehicleId],
+    }))
+  }
+
+  const openBookingWidget = (vehicle) => {
+    setBookingVehicle(vehicle)
+    setShowBookingWidget(true)
+  }
+
+  const closeBookingWidget = () => {
+    setShowBookingWidget(false)
+    setBookingVehicle(null)
+  }
+
+  const openWheelbaseReservation = (vehicle) => {
+    const reservationUrl = `https://checkout.wheelbasepro.com/reserve?owner_id=4321962`
+    window.open(reservationUrl, "_blank", "noopener,noreferrer")
+  }
+
+  // Clean up script when component unmounts
+  useEffect(() => {
+    return () => {
+      const script = document.querySelector('script[src*="wheelbase.min.js"]')
+      if (script) {
+        script.remove()
+      }
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-100 text-neutral-900">
@@ -215,19 +270,22 @@ export default function InventoryPage() {
         <div className="max-w-7xl mx-auto space-y-8">
           {filteredVehicles.map((vehicle, index) => {
             const cardNumber = String(index + 1).padStart(2, "0")
+            const isBookingOpen = showInlineBooking[vehicle.id]
 
             if (vehicle.size === "large") {
               return (
-                <div key={vehicle.id} className="group cursor-pointer">
+                <div key={vehicle.id} className="group">
                   <div className="label-text text-neutral-600 mb-4">
                     {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}{" "}
                     {vehicle.category}
                   </div>
-                  <div className="relative w-full h-96 overflow-hidden rounded-lg">
+                  <div className="relative w-full h-96 overflow-hidden rounded-lg cursor-pointer">
                     <Image
                       src={vehicle.image || "/placeholder.svg"}
                       alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-                      fill
+                      width={1920}
+                      height={1080}
+                      unoptimized
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     {vehicle.gigReady && (
@@ -242,15 +300,73 @@ export default function InventoryPage() {
                     >
                       {vehicle.available ? "AVAILABLE" : "RENTED"}
                     </div>
-                    <div className="absolute bottom-4 right-4">
+                    <div className="absolute bottom-4 right-4 flex gap-2">
                       <button
                         onClick={() => openModal(vehicle)}
                         className="px-4 py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all"
                       >
-                        DRIVE
+                        DETAILS
                       </button>
+                      {vehicle.available && (
+                        <button
+                          onClick={() => toggleInlineBooking(vehicle.id)}
+                          className={`px-4 py-2 rounded-full nav-text transition-all flex items-center gap-2 ${
+                            isBookingOpen
+                              ? "bg-red-600 text-white hover:bg-red-700"
+                              : "bg-blue-600 text-white hover:bg-blue-700"
+                          }`}
+                        >
+                          {isBookingOpen ? (
+                            <>
+                              CLOSE BOOKING
+                              <X className="w-3 h-3" />
+                            </>
+                          ) : (
+                            <>
+                              BOOK NOW
+                              <Calendar className="w-3 h-3" />
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
+
+                  {/* Inline Booking Widget for Large Cards */}
+                  {isBookingOpen && vehicle.available && (
+                    <div className="mt-6 bg-white rounded-lg border border-neutral-200 p-6 shadow-lg">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="display-heading text-xl">
+                          Book {vehicle.year} {vehicle.make} {vehicle.model}
+                        </h3>
+                        <button
+                          onClick={() => toggleInlineBooking(vehicle.id)}
+                          className="p-2 hover:bg-gray-100 rounded-full transition-all"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="min-h-[400px]">
+                        {wheelbaseScriptLoaded ? (
+                          <div
+                            className="wheelbase-vehicle-embed"
+                            data-owner="4321962"
+                            data-vehicle={vehicle.wheelbaseId}
+                            data-color="1b4a8f"
+                            data-calendar="true"
+                          ></div>
+                        ) : (
+                          <div className="flex items-center justify-center h-64 text-neutral-500">
+                            <div className="text-center">
+                              <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                              <p className="body-text">Loading booking system...</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             }
@@ -263,17 +379,20 @@ export default function InventoryPage() {
               .filter((v) => v.size === "medium" || v.size === "small")
               .map((vehicle, index) => {
                 const cardNumber = String(filteredVehicles.findIndex((v) => v.id === vehicle.id) + 1).padStart(2, "0")
+                const isBookingOpen = showInlineBooking[vehicle.id]
 
                 return (
-                  <div key={vehicle.id} className="group cursor-pointer">
+                  <div key={vehicle.id} className="group">
                     <div className="label-text text-neutral-600 mb-4">
                       {cardNumber} {vehicle.make.toUpperCase()} - {vehicle.model.toUpperCase()} {vehicle.category}
                     </div>
-                    <div className="relative w-full h-64 overflow-hidden rounded-lg">
+                    <div className="relative w-full h-64 overflow-hidden rounded-lg cursor-pointer">
                       <Image
                         src={vehicle.image || "/placeholder.svg"}
                         alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-                        fill
+                        width={800}
+                        height={600}
+                        unoptimized
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       {vehicle.gigReady && (
@@ -288,15 +407,73 @@ export default function InventoryPage() {
                       >
                         {vehicle.available ? "AVAILABLE" : "RENTED"}
                       </div>
-                      <div className="absolute bottom-4 right-4">
+                      <div className="absolute bottom-4 right-4 flex gap-2">
                         <button
                           onClick={() => openModal(vehicle)}
-                          className="px-4 py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all"
+                          className="px-3 py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs"
                         >
-                          DRIVE
+                          DETAILS
                         </button>
+                        {vehicle.available && (
+                          <button
+                            onClick={() => toggleInlineBooking(vehicle.id)}
+                            className={`px-3 py-2 rounded-full nav-text transition-all flex items-center gap-1 text-xs ${
+                              isBookingOpen
+                                ? "bg-red-600 text-white hover:bg-red-700"
+                                : "bg-blue-600 text-white hover:bg-blue-700"
+                            }`}
+                          >
+                            {isBookingOpen ? (
+                              <>
+                                CLOSE
+                                <X className="w-3 h-3" />
+                              </>
+                            ) : (
+                              <>
+                                BOOK
+                                <Calendar className="w-3 h-3" />
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
+
+                    {/* Inline Booking Widget for Medium/Small Cards */}
+                    {isBookingOpen && vehicle.available && (
+                      <div className="mt-4 bg-white rounded-lg border border-neutral-200 p-4 shadow-lg">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="display-heading text-lg">
+                            Book {vehicle.year} {vehicle.make} {vehicle.model}
+                          </h3>
+                          <button
+                            onClick={() => toggleInlineBooking(vehicle.id)}
+                            className="p-1 hover:bg-gray-100 rounded-full transition-all"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <div className="min-h-[350px]">
+                          {wheelbaseScriptLoaded ? (
+                            <div
+                              className="wheelbase-vehicle-embed"
+                              data-owner="4321962"
+                              data-vehicle={vehicle.wheelbaseId}
+                              data-color="1b4a8f"
+                              data-calendar="true"
+                            ></div>
+                          ) : (
+                            <div className="flex items-center justify-center h-48 text-neutral-500">
+                              <div className="text-center">
+                                <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3"></div>
+                                <p className="body-text text-sm">Loading booking system...</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )
               })}
@@ -389,16 +566,47 @@ export default function InventoryPage() {
                 </div>
               </div>
 
-              <button
-                disabled={!selectedVehicle.available}
-                className={`w-full py-3 rounded-lg nav-text transition-all ${
-                  selectedVehicle.available
-                    ? "bg-neutral-900 text-white hover:bg-neutral-800"
-                    : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
-                }`}
-              >
-                {selectedVehicle.available ? "Book This Vehicle" : "Currently Unavailable"}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    closeModal()
+                    toggleInlineBooking(selectedVehicle.id)
+                  }}
+                  disabled={!selectedVehicle.available}
+                  className={`flex-1 py-3 rounded-lg nav-text transition-all flex items-center justify-center gap-2 ${
+                    selectedVehicle.available
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
+                  }`}
+                >
+                  {selectedVehicle.available ? (
+                    <>
+                      Book Inline
+                      <Calendar className="w-4 h-4" />
+                    </>
+                  ) : (
+                    "Currently Unavailable"
+                  )}
+                </button>
+                <button
+                  onClick={() => openWheelbaseReservation(selectedVehicle)}
+                  disabled={!selectedVehicle.available}
+                  className={`flex-1 py-3 rounded-lg nav-text transition-all flex items-center justify-center gap-2 ${
+                    selectedVehicle.available
+                      ? "bg-green-600 text-white hover:bg-green-700"
+                      : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
+                  }`}
+                >
+                  {selectedVehicle.available ? (
+                    <>
+                      Book on Wheelbase
+                      <ExternalLink className="w-4 h-4" />
+                    </>
+                  ) : (
+                    "Currently Unavailable"
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

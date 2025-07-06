@@ -56,7 +56,9 @@ export default function AboutPage() {
 
         {/* Body paragraph */}
         <p className="body-text whitespace-pre-line leading-relaxed max-w-prose">
-          {`"Body language translates directly into emotion and is often a powerful way to convey a story or a brand's message."\n\nAs a film director with a dance background, Mikki explores the deeper potential of movement: not just as abstraction or form, but as a way to create dramatic narrative. From precise choreography to the subtlest gesture: even a twitch of the eye can drive a story forward. She is currently working on her debut short film, The Gift, set to premiere in 2025.`}
+          {`"At Femi Leasing, our vision is to transform the car rental experience by continually evolving with the shifting landscape of modern mobility. We are committed to becoming the premier rental solution in the NJ/NY area, offering exceptional convenience, competitive pricing, and an unwavering focus on customer satisfaction.
+​
+Through innovation, strategic partnerships, and a deep understanding of our clients' needs, we aim to set a new industry benchmark delivering flexibility, reliability, and excellence at every turn."\n\nAt Femi Leasing, our mission is to provide accessible, flexible, and dependable car rental solutions that fit seamlessly into the lives of our clients. We’re committed to serving a diverse community of drivers whether you're working in the gig economy, traveling for business, or simply need a reliable ride for personal use.​ By combining quality vehicles with exceptional customer service and user friendly policies, we aim to remove the stress from car rentals and empower our clients with the freedom to move on their own terms.`}
         </p>
 
         {/* Polaroid-style portrait */}
@@ -73,23 +75,25 @@ export default function AboutPage() {
 
         {/* Bottom paragraph */}
         <p className="body-text leading-relaxed max-w-prose">
-          Throughout her commercial career, she has collaborated with clients such as IKEA, ECCO, Zalando, Klabu, Nike,
-          Heineken, Vodafone, Ronald McDonald House, Libresse, Top Notch and Sony Music. In addition to directing, Mikki
-          draws on experience in both the art department and production, bringing a distinctive visual style and a sharp
-          eye for detail.
+          At Femi Leasing, our journey began with a simple mission: to redefine car rentals by making the process more convenient, flexible, and accessible especially for the hardworking individuals powering today’s gig economy.
+​
+With over 20 years of industry experience, we saw a growing need in the NJ/NY area for reliable, short term rental options tailored to modern drivers. Whether you're behind the wheel for Uber, running errands, or taking a well deserved weekend getaway, we wanted to make sure you had the right vehicle without the stress.
+What started as a small venture has grown into a trusted name, proudly serving drivers between the ages of 25 and 55 with high quality vehicles, transparent pricing, and unmatched customer service. Our close collaboration with Uber and other ride sharing platforms allows us to offer tailored solutions that help drivers hit the road faster and earn more, with less hassle.
+​
+Femi Leasing isn’t just a rental service it’s a community built on trust, convenience, and the freedom to move.
         </p>
       </section>
 
       {/* Footer */}
       <footer className="w-full px-6 py-4 label-text flex items-center justify-between text-neutral-700">
-        <div>© 2025 Mikki Sindhunata · Cookies</div>
+        <div>© 2025 Femi Leasing · Cookies</div>
         <div className="text-center flex-1">All Rights Reserved</div>
         <div className="flex items-center gap-1">
           <span>Website by</span>
-          {/* tiny bird icon with emoji fallback */}
-          <span role="img" aria-label="bird">
-            🐦
-          </span>
+{/* bow and arrow icon with emoji fallback */}
+<span role="img" aria-label="bow and arrow">
+  🏹
+</span>
         </div>
       </footer>
     </main>
