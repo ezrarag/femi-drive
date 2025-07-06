@@ -23,7 +23,7 @@ export default function InventoryPage() {
       model: "Passat",
       year: 2015,
       price: 45,
-      wheelbaseId: "VW_PASSAT_2015_001", // Added wheelbaseId for each vehicle
+      wheelbaseId: "457237", // Using actual numeric Wheelbase ID
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0698.jpeg",
       mileage: "85K",
       transmission: "Automatic",
@@ -44,7 +44,7 @@ export default function InventoryPage() {
       model: "Edge",
       year: 2014,
       price: 55,
-      wheelbaseId: "FORD_EDGE_2014_002",
+      wheelbaseId: "457238", // Using actual numeric Wheelbase ID
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0699.jpeg",
       mileage: "92K",
       transmission: "Automatic",
@@ -65,7 +65,7 @@ export default function InventoryPage() {
       model: "328i xDrive",
       year: 2011,
       price: 50,
-      wheelbaseId: "BMW_328I_2011_003",
+      wheelbaseId: "457239", // Using actual numeric Wheelbase ID
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0701.jpeg",
       mileage: "78K",
       transmission: "Automatic",
@@ -86,7 +86,7 @@ export default function InventoryPage() {
       model: "Equinox",
       year: 2013,
       price: 48,
-      wheelbaseId: "CHEVY_EQUINOX_2013_004",
+      wheelbaseId: "457240", // Using actual numeric Wheelbase ID
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0702.jpeg",
       mileage: "65K",
       transmission: "Automatic",
@@ -107,7 +107,7 @@ export default function InventoryPage() {
       model: "Sentra",
       year: 2011,
       price: 42,
-      wheelbaseId: "NISSAN_SENTRA_2011_005",
+      wheelbaseId: "457241", // Using actual numeric Wheelbase ID
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0703.jpeg",
       mileage: "89K",
       transmission: "CVT",
@@ -128,7 +128,7 @@ export default function InventoryPage() {
       model: "Charger",
       year: 2016,
       price: 52,
-      wheelbaseId: "DODGE_CHARGER_2016_006",
+      wheelbaseId: "457242", // Using actual numeric Wheelbase ID
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0704.jpeg",
       mileage: "71K",
       transmission: "Automatic",
@@ -163,6 +163,10 @@ export default function InventoryPage() {
       script.async = true
       script.onload = () => {
         setWheelbaseScriptLoaded(true)
+        // Initialize Wheelbase
+        if (window.Outdoorsy) {
+          window.Outdoorsy.color = "1b4a8f"
+        }
       }
       document.head.appendChild(script)
     }
@@ -177,10 +181,23 @@ export default function InventoryPage() {
   }
 
   const toggleInlineBooking = (vehicleId) => {
-    setShowInlineBooking((prev) => ({
-      ...prev,
-      [vehicleId]: !prev[vehicleId],
-    }))
+    setShowInlineBooking((prev) => {
+      const newState = {
+        ...prev,
+        [vehicleId]: !prev[vehicleId],
+      }
+
+      // If opening booking widget, ensure Wheelbase script is loaded and trigger widget load
+      if (newState[vehicleId] && wheelbaseScriptLoaded) {
+        setTimeout(() => {
+          if (window.Outdoorsy && window.Outdoorsy.Booking) {
+            window.Outdoorsy.Booking.load()
+          }
+        }, 100)
+      }
+
+      return newState
+    })
   }
 
   const openBookingWidget = (vehicle) => {
@@ -223,13 +240,13 @@ export default function InventoryPage() {
             href="/inventory"
             className="nav-text px-4 py-2 bg-neutral-900 text-white rounded-full border border-neutral-900 transition-all"
           >
-            Works
+            Fleet
           </Link>
           <Link
             href="/services"
             className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all"
           >
-            Archive
+            Services
           </Link>
         </div>
 
@@ -347,14 +364,15 @@ export default function InventoryPage() {
                         </button>
                       </div>
 
-                      <div className="min-h-[400px]">
+                      <div className="min-h-[400px] w-full">
                         {wheelbaseScriptLoaded ? (
                           <div
-                            className="wheelbase-vehicle-embed"
+                            className="wheelbase-vehicle-embed w-full h-full"
                             data-owner="4321962"
                             data-vehicle={vehicle.wheelbaseId}
                             data-color="1b4a8f"
                             data-calendar="true"
+                            style={{ minHeight: "400px", width: "100%", display: "block" }}
                           ></div>
                         ) : (
                           <div className="flex items-center justify-center h-64 text-neutral-500">
