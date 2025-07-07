@@ -214,8 +214,7 @@ export default function ServicesPage() {
         {/* Center Logo */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="text-center">
-            <div className="text-sm font-bold tracking-widest">FE</div>
-            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
+            <div className="text-sm font-bold tracking-widest">FEMI</div>
           </div>
         </div>
 
@@ -264,37 +263,49 @@ export default function ServicesPage() {
               >
                 {/* ID */}
                 <div className="col-span-1">
-                  <span className="label-text opacity-60">{service.id}</span>
+                  <span className="label-text opacity-40 group-hover:opacity-80 font-light group-hover:font-medium transition-all">
+                    {service.id}
+                  </span>
                 </div>
 
                 {/* Service Name */}
                 <div className="col-span-2">
-                  <span className="body-text font-medium">{service.service}</span>
+                  <span className="body-text font-light group-hover:font-medium transition-all">{service.service}</span>
                 </div>
 
                 {/* Description */}
                 <div className="col-span-3">
-                  <span className="body-text opacity-80">{service.description}</span>
+                  <span className="body-text opacity-60 group-hover:opacity-90 font-light group-hover:font-normal transition-all">
+                    {service.description}
+                  </span>
                 </div>
 
                 {/* Category */}
                 <div className="col-span-2">
-                  <span className="label-text opacity-60">{service.category}</span>
+                  <span className="label-text opacity-40 group-hover:opacity-70 font-light group-hover:font-normal transition-all">
+                    {service.category}
+                  </span>
                 </div>
 
                 {/* Location */}
                 <div className="col-span-1">
-                  <span className="label-text opacity-60">{service.location}</span>
+                  <span className="label-text opacity-40 group-hover:opacity-70 font-light group-hover:font-normal transition-all">
+                    {service.location}
+                  </span>
                 </div>
 
                 {/* Details */}
                 <div className="col-span-2">
-                  <span className="label-text opacity-60">{service.details}</span>
+                  <span className="label-text opacity-40 group-hover:opacity-70 font-light group-hover:font-normal transition-all">
+                    {service.details}
+                  </span>
                 </div>
 
                 {/* Year */}
                 <div className="col-span-1 text-right">
-                  <span className="label-text opacity-60">{service.year}</span>
+                  <span className="label-text opacity-40 group-hover:opacity-70 font-light group-hover:font-normal transition-all">
+                    {service.year}
+                  </span>
                 </div>
               </div>
             ))}

@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
+import { PhoneDisplay } from "@/components/phone-display"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -98,9 +99,15 @@ export default function ContactPage() {
               <div className="flex items-start gap-4">
                 <Phone className="w-5 h-5 mt-1 opacity-60" />
                 <div>
-                  <div className="label-text mb-2">Phone</div>
-                  <div className="body-text">+1 (201) 898 7182</div>
-                  <div className="body-text opacity-60">Mon-Fri 8am-8pm EST</div>
+                  <div className="label-text mb-2">Phone (AI Assistant Available 24/7)</div>
+                  <PhoneDisplay phoneNumber="+12018987182" variant="cta" className="mb-2" />
+                  <div className="body-text opacity-60">Our AI assistant Femi can help with:</div>
+                  <ul className="body-text opacity-60 text-sm mt-1 space-y-1">
+                    <li>• Vehicle availability and pricing</li>
+                    <li>• Booking assistance and secure payment links</li>
+                    <li>• General rental questions</li>
+                    <li>• Transfer to human agent when needed</li>
+                  </ul>
                 </div>
               </div>
 

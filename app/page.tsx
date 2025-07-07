@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { PhoneDisplay } from "@/components/phone-display"
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -91,6 +92,13 @@ export default function HomePage() {
         </div>
 
         <div className="flex gap-4">
+          {process.env.NEXT_PUBLIC_BUSINESS_PHONE && (
+            <PhoneDisplay
+              phoneNumber={process.env.NEXT_PUBLIC_BUSINESS_PHONE}
+              variant="header"
+              className="text-white"
+            />
+          )}
           <Link
             href="/about"
             className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "Femi Leasing - Premium Vehicle Access",
   description:
     "Flexible car rentals and leasing for gig economy success in NJ/NY. Premium fleet, innovative financing.",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
