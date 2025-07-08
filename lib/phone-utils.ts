@@ -1,6 +1,6 @@
 /**
- * Pure client-side phone number formatting utilities
- * No server dependencies - safe for client components
+ * Client-safe phone number formatting utilities
+ * No server-side dependencies - safe for client components
  */
 
 export function formatPhoneNumber(phoneNumber: string): string {
@@ -9,12 +9,13 @@ export function formatPhoneNumber(phoneNumber: string): string {
   // Remove all non-digit characters
   const digits = phoneNumber.replace(/\D/g, "")
 
-  // Handle different phone number lengths
+  // Format as (XXX) XXX-XXXX for US numbers
   if (digits.length === 10) {
-    // US phone number: (XXX) XXX-XXXX
     return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
-  } else if (digits.length === 11 && digits.startsWith("1")) {
-    // US phone number with country code: +1 (XXX) XXX-XXXX
+  }
+
+  // Format as +X (XXX) XXX-XXXX for international numbers starting with 1
+  if (digits.length === 11 && digits.startsWith("1")) {
     return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`
   }
 

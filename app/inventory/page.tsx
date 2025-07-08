@@ -23,7 +23,7 @@ export default function InventoryPage() {
       model: "Passat",
       year: 2015,
       price: 45,
-      wheelbaseId: "457237", // Using actual numeric Wheelbase ID
+      wheelbaseId: "457237",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0698.jpeg",
       mileage: "85K",
       transmission: "Automatic",
@@ -44,7 +44,7 @@ export default function InventoryPage() {
       model: "Edge",
       year: 2014,
       price: 55,
-      wheelbaseId: "457238", // Using actual numeric Wheelbase ID
+      wheelbaseId: "457238",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0699.jpeg",
       mileage: "92K",
       transmission: "Automatic",
@@ -65,7 +65,7 @@ export default function InventoryPage() {
       model: "328i xDrive",
       year: 2011,
       price: 50,
-      wheelbaseId: "457239", // Using actual numeric Wheelbase ID
+      wheelbaseId: "457239",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0701.jpeg",
       mileage: "78K",
       transmission: "Automatic",
@@ -86,7 +86,7 @@ export default function InventoryPage() {
       model: "Equinox",
       year: 2013,
       price: 48,
-      wheelbaseId: "457240", // Using actual numeric Wheelbase ID
+      wheelbaseId: "457240",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0702.jpeg",
       mileage: "65K",
       transmission: "Automatic",
@@ -107,7 +107,7 @@ export default function InventoryPage() {
       model: "Sentra",
       year: 2011,
       price: 42,
-      wheelbaseId: "457241", // Using actual numeric Wheelbase ID
+      wheelbaseId: "457241",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0703.jpeg",
       mileage: "89K",
       transmission: "CVT",
@@ -128,7 +128,7 @@ export default function InventoryPage() {
       model: "Charger",
       year: 2016,
       price: 52,
-      wheelbaseId: "457242", // Using actual numeric Wheelbase ID
+      wheelbaseId: "457242",
       image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0704.jpeg",
       mileage: "71K",
       transmission: "Automatic",
@@ -164,7 +164,6 @@ export default function InventoryPage() {
       script.onload = () => {
         setWheelbaseScriptLoaded(true)
         console.log("Wheelbase script loaded successfully")
-        // Initialize Wheelbase
         if (window.Outdoorsy) {
           window.Outdoorsy.color = "1b4a8f"
           console.log("Wheelbase initialized")
@@ -192,7 +191,6 @@ export default function InventoryPage() {
         [vehicleId]: !prev[vehicleId],
       }
 
-      // If opening booking widget, ensure Wheelbase script is loaded and trigger widget load
       if (newState[vehicleId] && wheelbaseScriptLoaded) {
         setTimeout(() => {
           console.log("Attempting to load Wheelbase booking widget")
@@ -202,21 +200,11 @@ export default function InventoryPage() {
           } else {
             console.warn("Wheelbase Booking not available")
           }
-        }, 500) // Increased timeout to ensure DOM is ready
+        }, 500)
       }
 
       return newState
     })
-  }
-
-  const openBookingWidget = (vehicle) => {
-    setBookingVehicle(vehicle)
-    setShowBookingWidget(true)
-  }
-
-  const closeBookingWidget = () => {
-    setShowBookingWidget(false)
-    setBookingVehicle(null)
   }
 
   const openWheelbaseReservation = (vehicle) => {
@@ -226,7 +214,6 @@ export default function InventoryPage() {
 
   // Handle card click - open booking unless clicking on details button
   const handleCardClick = (e, vehicle) => {
-    // Check if the clicked element or its parent is the details button
     const isDetailsButton = e.target.closest('[data-action="details"]')
 
     if (!isDetailsButton && vehicle.available) {
@@ -314,8 +301,7 @@ export default function InventoryPage() {
               return (
                 <div key={vehicle.id} className="group">
                   <div className="label-text text-neutral-600 mb-4">
-                    {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}{" "}
-                    {vehicle.category}
+                    {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}
                   </div>
                   <div
                     className={`relative w-full h-96 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
@@ -396,7 +382,6 @@ export default function InventoryPage() {
                               data-calendar="true"
                               style={{ minHeight: "400px", width: "100%" }}
                             ></div>
-                            {/* Fallback booking form if Wheelbase doesn't load */}
                             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                               <h4 className="font-semibold mb-3">Alternative Booking</h4>
                               <p className="text-sm text-gray-600 mb-4">
@@ -520,7 +505,6 @@ export default function InventoryPage() {
                                 data-calendar="true"
                                 style={{ minHeight: "350px", width: "100%" }}
                               ></div>
-                              {/* Fallback booking form if Wheelbase doesn't load */}
                               <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                                 <h4 className="font-semibold mb-2 text-sm">Alternative Booking</h4>
                                 <p className="text-xs text-gray-600 mb-3">

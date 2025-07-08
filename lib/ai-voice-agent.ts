@@ -1,8 +1,16 @@
-import OpenAI from "openai"
+// Guard against missing OpenAI API key
+let openai: any = null
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+if (process.env.OPENAI_API_KEY) {
+  try {
+    const OpenAI = require("openai")
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  } catch (error) {
+    console.warn("OpenAI not available:", error.message)
+  }
+}
 
 export interface CallContext {
   callSid: string
@@ -90,6 +98,15 @@ Remember: You cannot process payments directly. Always send customers to our sec
     action: "continue" | "escalate" | "send_booking_link" | "end_call"
     bookingData?: any
   }> {
+    // Guard against missing OpenAI configuration
+    if (!openai) {
+      console.warn("AI processing not available - missing OpenAI API key")
+      return {
+        response: "I'm experiencing technical difficulties. Let me transfer you to our team for immediate assistance.",
+        action: "escalate",
+      }
+    }
+
     let context = this.conversationContexts.get(callSid)
 
     if (!context) {
@@ -207,4 +224,5 @@ Remember: You cannot process payments directly. Always send customers to our sec
   }
 }
 
-export const aiAgent = new AIVoiceAgent()
+// Only export if OpenAI is available
+export const aiAgent = openai ? new AIVoiceAgent() : null

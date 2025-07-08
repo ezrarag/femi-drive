@@ -1,21 +1,33 @@
 import { type NextRequest, NextResponse } from "next/server"
-import twilio from "twilio"
-import { aiAgent } from "@/lib/ai-voice-agent"
-import { sendSMS } from "@/lib/twilio"
 
-const VoiceResponse = twilio.twiml.VoiceResponse
+// Guard against missing environment variables
+if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+  console.warn("Voice API disabled - missing Twilio credentials")
+}
 
 export async function POST(request: NextRequest) {
-  const formData = await request.formData()
-  const callSid = formData.get("CallSid") as string
-  const from = formData.get("From") as string
-  const to = formData.get("To") as string
-  const speechResult = formData.get("SpeechResult") as string
-  const callStatus = formData.get("CallStatus") as string
-
-  const twiml = new VoiceResponse()
+  // Return early if Twilio is not configured
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+    return new NextResponse("Voice service not configured", { status: 503 })
+  }
 
   try {
+    // Dynamic import to avoid build-time errors
+    const twilio = await import("twilio")
+    const { aiAgent } = await import("@/lib/ai-voice-agent")
+    const { sendSMS } = await import("@/lib/twilio")
+
+    const VoiceResponse = twilio.default.twiml.VoiceResponse
+
+    const formData = await request.formData()
+    const callSid = formData.get("CallSid") as string
+    const from = formData.get("From") as string
+    const to = formData.get("To") as string
+    const speechResult = formData.get("SpeechResult") as string
+    const callStatus = formData.get("CallStatus") as string
+
+    const twiml = new VoiceResponse()
+
     // Handle initial call
     if (callStatus === "ringing" || !speechResult) {
       twiml.say(
@@ -42,7 +54,21 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Process speech with AI
+    // Process speech with AI (only if available)
+    if (!aiAgent) {
+      twiml.say("I apologize, but our AI assistant is currently unavailable. Let me transfer you to our team.")
+      twiml.dial(
+        {
+          timeout: 30,
+          callerId: from,
+        },
+        process.env.BUSINESS_OWNER_PHONE || "+1234567890",
+      )
+      return new NextResponse(twiml.toString(), {
+        headers: { "Content-Type": "text/xml" },
+      })
+    }
+
     const aiResult = await aiAgent.processCall(callSid, speechResult, { from, to })
 
     switch (aiResult.action) {
@@ -55,7 +81,6 @@ export async function POST(request: NextRequest) {
           aiResult.response,
         )
 
-        // Transfer to business owner (you'll need to set this number)
         twiml.dial(
           {
             timeout: 30,
@@ -83,7 +108,6 @@ export async function POST(request: NextRequest) {
           aiResult.response,
         )
 
-        // Send booking link via SMS
         const bookingLink = `https://checkout.wheelbasepro.com/reserve?owner_id=4321962`
         const smsMessage = `Hi! Here's your secure booking link for Femi Leasing: ${bookingLink}\n\nComplete your reservation and we'll have your vehicle ready! Questions? Call us back anytime.`
 
@@ -134,15 +158,25 @@ export async function POST(request: NextRequest) {
         twiml.say("I didn't hear a response. How else can I help you today?")
         twiml.redirect("/api/voice")
     }
+
+    return new NextResponse(twiml.toString(), {
+      headers: { "Content-Type": "text/xml" },
+    })
   } catch (error) {
     console.error("Voice processing error:", error)
+
+    // Fallback response
+    const twilio = require("twilio")
+    const VoiceResponse = twilio.twiml.VoiceResponse
+    const twiml = new VoiceResponse()
+
     twiml.say(
       "I apologize, but I'm experiencing technical difficulties. Please call back in a few minutes or visit our website at femi leasing dot com.",
     )
     twiml.hangup()
-  }
 
-  return new NextResponse(twiml.toString(), {
-    headers: { "Content-Type": "text/xml" },
-  })
+    return new NextResponse(twiml.toString(), {
+      headers: { "Content-Type": "text/xml" },
+    })
+  }
 }

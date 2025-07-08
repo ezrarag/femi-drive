@@ -1,40 +1,70 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { aiAgent } from "@/lib/ai-voice-agent"
 
-// Admin endpoint to update AI prompts
-export async function POST(request: NextRequest) {
+export async function GET() {
+  // Hard gate: if no Twilio credentials, return service unavailable
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+    return NextResponse.json(
+      { error: "Voice configuration service is not available. Missing Twilio credentials." },
+      { status: 503 },
+    )
+  }
+
+  // Hard gate: if no OpenAI key, return service unavailable
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: "Voice configuration service is not available. Missing OpenAI credentials." },
+      { status: 503 },
+    )
+  }
+
   try {
-    const { systemPrompt, adminKey } = await request.json()
+    // Only import and use these modules if we have the required credentials
+    const { getTwilioClient } = await import("@/lib/twilio")
+    const { getVoiceConfig } = await import("@/lib/ai-voice-agent")
 
-    // Simple admin authentication (replace with proper auth)
-    if (adminKey !== process.env.ADMIN_API_KEY) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const twilioClient = getTwilioClient()
+    const voiceConfig = getVoiceConfig()
 
-    if (systemPrompt) {
-      aiAgent.updateSystemPrompt(systemPrompt)
-      return NextResponse.json({ success: true, message: "System prompt updated" })
-    }
+    // Get phone numbers
+    const phoneNumbers = await twilioClient.incomingPhoneNumbers.list()
 
-    return NextResponse.json({ error: "No system prompt provided" }, { status: 400 })
+    return NextResponse.json({
+      phoneNumbers: phoneNumbers.map((num) => ({
+        sid: num.sid,
+        phoneNumber: num.phoneNumber,
+        friendlyName: num.friendlyName,
+        voiceUrl: num.voiceUrl,
+      })),
+      voiceConfig,
+      status: "active",
+    })
   } catch (error) {
-    console.error("Voice config update error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Voice config error:", error)
+    return NextResponse.json({ error: "Failed to retrieve voice configuration" }, { status: 500 })
   }
 }
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const adminKey = searchParams.get("adminKey")
-
-  if (adminKey !== process.env.ADMIN_API_KEY) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+export async function POST(request: NextRequest) {
+  // Hard gate: if no credentials, return service unavailable
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: "Voice configuration service is not available. Missing required credentials." },
+      { status: 503 },
+    )
   }
 
-  // Return current configuration
-  return NextResponse.json({
-    twilioNumber: process.env.TWILIO_PHONE_NUMBER,
-    webhookUrl: process.env.TWILIO_WEBHOOK_URL,
-    businessOwnerPhone: process.env.BUSINESS_OWNER_PHONE,
-  })
+  try {
+    const { updateVoiceConfig } = await import("@/lib/ai-voice-agent")
+    const body = await request.json()
+
+    const updatedConfig = updateVoiceConfig(body)
+
+    return NextResponse.json({
+      success: true,
+      config: updatedConfig,
+    })
+  } catch (error) {
+    console.error("Voice config update error:", error)
+    return NextResponse.json({ error: "Failed to update voice configuration" }, { status: 500 })
+  }
 }

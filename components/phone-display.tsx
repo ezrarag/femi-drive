@@ -1,28 +1,31 @@
 "use client"
 
-import { Phone } from "lucide-react"
 import { formatPhoneNumber } from "@/lib/phone-utils"
 
-export function PhoneDisplay() {
-  const businessPhone = process.env.NEXT_PUBLIC_BUSINESS_PHONE
+interface PhoneDisplayProps {
+  className?: string
+}
 
-  if (!businessPhone) {
-    return null // Don't render anything if no phone number is configured
+export function PhoneDisplay({ className = "" }: PhoneDisplayProps) {
+  // Get phone number from environment variable (client-side)
+  const phoneNumber = process.env.NEXT_PUBLIC_BUSINESS_PHONE
+
+  // Don't render if no phone number is configured
+  if (!phoneNumber) {
+    return null
   }
 
-  const formattedPhone = formatPhoneNumber(businessPhone)
-
-  const handlePhoneClick = () => {
-    window.open(`tel:${businessPhone}`, "_self")
-  }
+  const formattedPhone = formatPhoneNumber(phoneNumber)
 
   return (
-    <button
-      onClick={handlePhoneClick}
-      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full nav-text hover:bg-green-700 transition-all"
-    >
-      <Phone className="w-4 h-4" />
-      <span>{formattedPhone}</span>
-    </button>
+    <div className={`flex items-center gap-2 ${className}`}>
+      <span className="text-sm font-medium">📞</span>
+      <a href={`tel:${phoneNumber}`} className="text-sm font-medium hover:underline transition-colors">
+        {formattedPhone}
+      </a>
+    </div>
   )
 }
+
+// Also export as default for compatibility
+export default PhoneDisplay

@@ -1,12 +1,22 @@
-import twilio from "twilio"
+// Only import and use Twilio if environment variables are available
+let twilioClient: any = null
 
-// Twilio configuration
-export const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+// Guard against missing environment variables
+if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+  try {
+    const twilio = require("twilio")
+    twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+  } catch (error) {
+    console.warn("Twilio not available:", error.message)
+  }
+}
+
+export { twilioClient }
 
 export const TWILIO_CONFIG = {
   accountSid: process.env.TWILIO_ACCOUNT_SID,
   authToken: process.env.TWILIO_AUTH_TOKEN,
-  phoneNumber: process.env.TWILIO_PHONE_NUMBER, // Your business number
+  phoneNumber: process.env.TWILIO_PHONE_NUMBER,
   webhookUrl: process.env.TWILIO_WEBHOOK_URL || "https://your-domain.com/api/voice",
 }
 
@@ -19,8 +29,14 @@ export function formatPhoneNumber(phoneNumber: string): string {
   return phoneNumber
 }
 
-// SMS sending utility
+// SMS sending utility with environment guards
 export async function sendSMS(to: string, message: string) {
+  // Guard against missing configuration
+  if (!twilioClient || !TWILIO_CONFIG.phoneNumber) {
+    console.warn("SMS not configured - missing Twilio credentials")
+    return { success: false, error: "SMS service not configured" }
+  }
+
   try {
     const result = await twilioClient.messages.create({
       body: message,
