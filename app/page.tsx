@@ -10,13 +10,13 @@ export default function HomePage() {
 
   const slides = [
     {
-      title: "DRIVE",
-      subtitle: "TO EARN",
-      label: "Gig Economy",
-      description:
-        "Rooted in the gig economy world, we've developed a comprehensive vehicle access platform. Moving beyond traditional leasing to embrace its power as a financial tool.",
-      cta: "Start Earning",
-      info: "01 - 03 Uber - Lyft Ready",
+    title: "PREMIUM",
+    subtitle: "FLEET",
+    label: "Quality Vehicles",
+    description:
+      "Every vehicle in our fleet is carefully selected and maintained. From fuel-efficient sedans to spacious SUVs, we provide the tools for your success.",
+    cta: "View Fleet",
+    info: "03 - 03 Newark - NYC Area",
     },
     {
       title: "FLEXIBLE",
@@ -28,13 +28,13 @@ export default function HomePage() {
       info: "02 - 03 Financing Options",
     },
     {
-      title: "PREMIUM",
-      subtitle: "FLEET",
-      label: "Quality Vehicles",
+      title: "DRIVE",
+      subtitle: "TO EARN",
+      label: "Gig Economy",
       description:
-        "Every vehicle in our fleet is carefully selected and maintained. From fuel-efficient sedans to spacious SUVs, we provide the tools for your success.",
-      cta: "View Fleet",
-      info: "03 - 03 Newark - NYC Area",
+        "Rooted in the gig economy world, we've developed a comprehensive vehicle access platform. Moving beyond traditional leasing to embrace its power as a financial tool.",
+      cta: "Start Earning",
+      info: "01 - 03 Uber - Lyft Ready",
     },
   ]
 

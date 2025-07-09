@@ -189,7 +189,7 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
-      <nav className="flex items-center justify-between p-6">
+      <nav className="relative z-50 flex items-center justify-between p-6">
         <div className="flex gap-4">
           <Link
             href="/"
@@ -214,7 +214,8 @@ export default function ServicesPage() {
         {/* Center Logo */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="text-center">
-            <div className="text-sm font-bold tracking-widest">FEMI</div>
+            <div className="text-sm font-bold tracking-widest">FE</div>
+            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
           </div>
         </div>
 

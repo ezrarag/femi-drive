@@ -5,16 +5,30 @@ import Link from "next/link"
 import Image from "next/image"
 import { Search, X, Menu, ExternalLink, Calendar } from "lucide-react"
 
+// Add type declaration for window.Outdoorsy
+declare global {
+  interface Window {
+    Outdoorsy?: {
+      color?: string
+      Booking?: {
+        load: () => void
+      }
+    }
+  }
+}
+
 export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [priceRange, setPriceRange] = useState([0, 200])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
   const [selectedType, setSelectedType] = useState("all")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [selectedVehicle, setSelectedVehicle] = useState(null)
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null)
   const [showBookingWidget, setShowBookingWidget] = useState(false)
-  const [bookingVehicle, setBookingVehicle] = useState(null)
-  const [showInlineBooking, setShowInlineBooking] = useState({})
-  const [wheelbaseScriptLoaded, setWheelbaseScriptLoaded] = useState(false)
+  const [bookingVehicle, setBookingVehicle] = useState<any>(null)
+  const [showInlineBooking, setShowInlineBooking] = useState<Record<string, boolean>>({})
+  // Remove wheelbaseScriptLoaded state
+  // Remove useEffect for script loading and cleanup
+  // Remove useEffect for widget loading
 
   const vehicles = [
     {
@@ -24,7 +38,7 @@ export default function InventoryPage() {
       year: 2015,
       price: 45,
       wheelbaseId: "457237",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0698.jpeg",
+      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0698.jpeg",
       mileage: "85K",
       transmission: "Automatic",
       location: "Newark, NJ",
@@ -37,6 +51,7 @@ export default function InventoryPage() {
       features: ["Bluetooth", "Backup Camera", "Cruise Control", "Power Windows"],
       insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
+      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
     {
       id: 2,
@@ -45,11 +60,11 @@ export default function InventoryPage() {
       year: 2014,
       price: 55,
       wheelbaseId: "457238",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0699.jpeg",
+      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0699.jpeg",
       mileage: "92K",
       transmission: "Automatic",
       location: "Jersey City, NJ",
-      available: true,
+      available: false,
       gigReady: true,
       type: "suv",
       category: "SUV",
@@ -58,6 +73,7 @@ export default function InventoryPage() {
       features: ["AWD", "Navigation", "Heated Seats", "Panoramic Roof"],
       insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
+      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
     {
       id: 3,
@@ -66,7 +82,7 @@ export default function InventoryPage() {
       year: 2011,
       price: 50,
       wheelbaseId: "457239",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0701.jpeg",
+      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0701.jpeg",
       mileage: "78K",
       transmission: "Automatic",
       location: "Newark, NJ",
@@ -79,6 +95,7 @@ export default function InventoryPage() {
       features: ["Leather Seats", "Premium Sound", "Sport Mode", "All-Wheel Drive"],
       insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
+      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
     {
       id: 4,
@@ -87,11 +104,11 @@ export default function InventoryPage() {
       year: 2013,
       price: 48,
       wheelbaseId: "457240",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0702.jpeg",
+      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0702.jpeg",
       mileage: "65K",
       transmission: "Automatic",
       location: "Elizabeth, NJ",
-      available: true,
+      available: false,
       gigReady: true,
       type: "suv",
       category: "SUV",
@@ -100,6 +117,7 @@ export default function InventoryPage() {
       features: ["Fuel Efficient", "Cargo Space", "Easy Parking", "Reliable"],
       insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
+      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
     {
       id: 5,
@@ -108,11 +126,11 @@ export default function InventoryPage() {
       year: 2011,
       price: 42,
       wheelbaseId: "457241",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0703.jpeg",
+      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0703.jpeg",
       mileage: "89K",
       transmission: "CVT",
       location: "Paterson, NJ",
-      available: true,
+      available: false,
       gigReady: false,
       type: "sedan",
       category: "ECONOMY",
@@ -121,15 +139,16 @@ export default function InventoryPage() {
       features: ["Great MPG", "Compact Size", "Easy to Drive", "Low Maintenance"],
       insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
+      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
     {
       id: 6,
       make: "Dodge",
       model: "Charger",
       year: 2016,
-      price: 52,
+      price: 65,
       wheelbaseId: "457242",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//IMG_0704.jpeg",
+      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0704.jpeg",
       mileage: "71K",
       transmission: "Automatic",
       location: "Newark, NJ",
@@ -138,10 +157,33 @@ export default function InventoryPage() {
       type: "sedan",
       category: "PERFORMANCE",
       size: "small",
-      description: "Powerful sedan with impressive performance and style.",
+      description: "Former Miami police cruiser, we converted it for civilian use. We have done upgrades that includes a fresh paint job and 19 inch rims You will enjoy the power and speed this",
       features: ["V6 Engine", "Sport Suspension", "Premium Interior", "Fast Acceleration"],
       insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
+      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/457237?locale=en-us", 
+    },
+    {
+      id: 7,
+      make: "Nissan",
+      model: "Altima",
+      year: 2035,
+      price: 42,
+      wheelbaseId: "457241",
+      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_3529-removebg-preview.png",
+      mileage: "89K",
+      transmission: "CVT",
+      location: "Paterson, NJ",
+      available: false,
+      gigReady: false,
+      type: "sedan",
+      category: "ECONOMY",
+      size: "small",
+      description: "Budget-friendly option for new drivers entering the gig economy.",
+      features: ["Great MPG", "Compact Size", "Easy to Drive", "Low Maintenance"],
+      insurance: "Full coverage included",
+      maintenance: "Regular maintenance included",
+      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
   ]
 
@@ -155,66 +197,56 @@ export default function InventoryPage() {
     return matchesSearch && matchesPrice && matchesType
   })
 
-  // Load Wheelbase script once
-  useEffect(() => {
-    if (!wheelbaseScriptLoaded && !document.querySelector('script[src*="wheelbase.min.js"]')) {
-      const script = document.createElement("script")
-      script.src = "https://d3cuf6g1arkgx6.cloudfront.net/sdk/wheelbase.min.js"
-      script.async = true
-      script.onload = () => {
-        setWheelbaseScriptLoaded(true)
-        console.log("Wheelbase script loaded successfully")
-        if (window.Outdoorsy) {
-          window.Outdoorsy.color = "1b4a8f"
-          console.log("Wheelbase initialized")
-        }
-      }
-      script.onerror = () => {
-        console.error("Failed to load Wheelbase script")
-      }
-      document.head.appendChild(script)
-    }
-  }, [wheelbaseScriptLoaded])
-
-  const openModal = (vehicle) => {
-    setSelectedVehicle(vehicle)
-  }
-
-  const closeModal = () => {
-    setSelectedVehicle(null)
-  }
-
+  // 2. For each vehicle, when the user clicks the "Click to Book" button, toggle a showInlineBooking[vehicle.id] state (already implemented)
   const toggleInlineBooking = (vehicleId) => {
-    setShowInlineBooking((prev) => {
-      const newState = {
-        ...prev,
-        [vehicleId]: !prev[vehicleId],
-      }
-
-      if (newState[vehicleId] && wheelbaseScriptLoaded) {
-        setTimeout(() => {
-          console.log("Attempting to load Wheelbase booking widget")
-          if (window.Outdoorsy && window.Outdoorsy.Booking) {
-            window.Outdoorsy.Booking.load()
-            console.log("Wheelbase booking widget loaded")
-          } else {
-            console.warn("Wheelbase Booking not available")
-          }
-        }, 500)
-      }
-
-      return newState
-    })
+    setShowInlineBooking((prev) => ({
+      ...prev,
+      [vehicleId]: !prev[vehicleId],
+    }))
   }
 
-  const openWheelbaseReservation = (vehicle) => {
-    const reservationUrl = `https://checkout.wheelbasepro.com/reserve?owner_id=4321962`
-    window.open(reservationUrl, "_blank", "noopener,noreferrer")
-  }
+  // 3. When showInlineBooking[vehicle.id] is true and vehicle.wheelbaseCheckoutUrl exists, render an inline <iframe> inside a container
+  // Replace the old Wheelbase widget div with:
+  // <div className="booking-iframe-container">
+  //   <iframe
+  //     src={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+  //     width="100%"
+  //     height="600"
+  //     frameBorder="0"
+  //     allowFullScreen
+  //     loading="lazy"
+  //     title={`Book ${vehicle.make} ${vehicle.model}`}
+  //   ></iframe>
+  // </div>
+  // ...
+  // 4. Always render a visible fallback "Book on Wheelbase" button that opens vehicle.wheelbaseCheckoutUrl in a new tab
+  // ...
+  // <a
+  //   href={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+  //   target="_blank"
+  //   rel="noopener noreferrer"
+  //   className="inline-block mt-2 text-blue-600 underline"
+  // >
+  //   Book on Wheelbase
+  // </a>
+  // ...
+  // 5. Add a booking-iframe-container CSS class with a light shadow and rounded corners
+  // ...
+  // 6. Ensure the code is clean and commented clearly so it's easy to maintain
+  // ...
+
+  // Add the CSS class for iframe container (in a <style jsx> block or in your global CSS)
+  // .booking-iframe-container {
+  //   border-radius: 0.75rem;
+  //   box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  //   overflow: hidden;
+  //   background: #fff;
+  //   margin-bottom: 1rem;
+  // }
 
   // Handle card click - open booking unless clicking on details button
-  const handleCardClick = (e, vehicle) => {
-    const isDetailsButton = e.target.closest('[data-action="details"]')
+  const handleCardClick = (e: React.MouseEvent, vehicle: any) => {
+    const isDetailsButton = (e.target as HTMLElement).closest('[data-action="details"]')
 
     if (!isDetailsButton && vehicle.available) {
       e.preventDefault()
@@ -223,20 +255,23 @@ export default function InventoryPage() {
     }
   }
 
+  // Re-add openModal and closeModal for modal functionality
+  const openModal = (vehicle: any) => {
+    setSelectedVehicle(vehicle)
+  }
+  const closeModal = () => {
+    setSelectedVehicle(null)
+  }
+
   // Clean up script when component unmounts
-  useEffect(() => {
-    return () => {
-      const script = document.querySelector('script[src*="wheelbase.min.js"]')
-      if (script) {
-        script.remove()
-      }
-    }
-  }, [])
+  // Remove wheelbaseScriptLoaded state
+  // Remove useEffect for script loading and cleanup
+  // Remove useEffect for widget loading
 
   return (
     <div className="min-h-screen bg-gray-100 text-neutral-900">
       {/* Navigation */}
-      <nav className="flex items-center justify-between p-6">
+      <nav className="relative z-50 flex items-center justify-between p-6">
         <div className="flex gap-4">
           <Link
             href="/"
@@ -261,8 +296,8 @@ export default function InventoryPage() {
         {/* Center Logo */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="text-center">
-            <div className="text-sm font-bold tracking-widest">MI</div>
-            <div className="text-sm font-bold tracking-widest -mt-1">KK</div>
+            <div className="text-sm font-bold tracking-widest">FE</div>
+            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
           </div>
         </div>
 
@@ -310,9 +345,7 @@ export default function InventoryPage() {
                     <Image
                       src={vehicle.image || "/placeholder.svg"}
                       alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-                      width={1920}
-                      height={1080}
-                      unoptimized
+                      fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     {vehicle.gigReady && (
@@ -371,40 +404,41 @@ export default function InventoryPage() {
                         </button>
                       </div>
 
-                      <div className="min-h-[400px] w-full">
-                        {wheelbaseScriptLoaded ? (
-                          <div>
-                            <div
-                              className="wheelbase-vehicle-embed"
-                              data-owner="4321962"
-                              data-vehicle={vehicle.wheelbaseId}
-                              data-color="1b4a8f"
-                              data-calendar="true"
-                              style={{ minHeight: "400px", width: "100%" }}
-                            ></div>
-                            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                              <h4 className="font-semibold mb-3">Alternative Booking</h4>
-                              <p className="text-sm text-gray-600 mb-4">
-                                If the booking widget above doesn't load, you can book directly through Wheelbase:
-                              </p>
-                              <button
-                                onClick={() => openWheelbaseReservation(vehicle)}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2"
-                              >
-                                Book on Wheelbase
-                                <ExternalLink className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center h-64 text-neutral-500">
-                            <div className="text-center">
-                              <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-                              <p className="body-text">Loading booking system...</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      {/* Inline booking iframe if available */}
+                      {vehicle.wheelbaseCheckoutUrl ? (
+                        <div className="booking-iframe-container">
+                          <iframe
+                            src={vehicle.wheelbaseCheckoutUrl}
+                            width="100%"
+                            height="600"
+                            frameBorder="0"
+                            allowFullScreen
+                            loading="lazy"
+                            title={`Book ${vehicle.make} ${vehicle.model}`}
+                          ></iframe>
+                        </div>
+                      ) : (
+                        <div className="booking-iframe-container">
+                          <iframe
+                            src="https://checkout.wheelbasepro.com/reserve/454552?locale=en-us"
+                            width="100%"
+                            height="600"
+                            frameBorder="0"
+                            allowFullScreen
+                            loading="lazy"
+                            title={`Book ${vehicle.make} ${vehicle.model}`}
+                          ></iframe>
+                        </div>
+                      )}
+                      {/* Always show fallback button */}
+                      <a
+                        href={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block mt-2 text-blue-600 underline"
+                      >
+                        Book on Wheelbase
+                      </a>
                     </div>
                   )}
                 </div>
@@ -427,16 +461,14 @@ export default function InventoryPage() {
                       {cardNumber} {vehicle.make.toUpperCase()} - {vehicle.model.toUpperCase()} {vehicle.category}
                     </div>
                     <div
-                      className={`relative w-full h-64 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
+                      className={`relative w-full h-64 aspect-video overflow-hidden rounded-lg bg-gray-100 ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
                       onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
                         src={vehicle.image || "/placeholder.svg"}
                         alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-                        width={800}
-                        height={600}
-                        unoptimized
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        fill
+                        className="object-cover object-center w-full h-full aspect-video"
                       />
                       {vehicle.gigReady && (
                         <div className="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white label-text rounded-full">
@@ -495,38 +527,41 @@ export default function InventoryPage() {
                         </div>
 
                         <div className="min-h-[350px]">
-                          {wheelbaseScriptLoaded ? (
-                            <div>
-                              <div
-                                className="wheelbase-vehicle-embed"
-                                data-owner="4321962"
-                                data-vehicle={vehicle.wheelbaseId}
-                                data-color="1b4a8f"
-                                data-calendar="true"
-                                style={{ minHeight: "350px", width: "100%" }}
-                              ></div>
-                              <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                                <h4 className="font-semibold mb-2 text-sm">Alternative Booking</h4>
-                                <p className="text-xs text-gray-600 mb-3">
-                                  If the booking widget above doesn't load, you can book directly:
-                                </p>
-                                <button
-                                  onClick={() => openWheelbaseReservation(vehicle)}
-                                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 text-sm"
-                                >
-                                  Book on Wheelbase
-                                  <ExternalLink className="w-3 h-3" />
-                                </button>
-                              </div>
+                          {/* Inline booking iframe if available */}
+                          {vehicle.wheelbaseCheckoutUrl ? (
+                            <div className="booking-iframe-container">
+                              <iframe
+                                src={vehicle.wheelbaseCheckoutUrl}
+                                width="100%"
+                                height="600"
+                                frameBorder="0"
+                                allowFullScreen
+                                loading="lazy"
+                                title={`Book ${vehicle.make} ${vehicle.model}`}
+                              ></iframe>
                             </div>
                           ) : (
-                            <div className="flex items-center justify-center h-48 text-neutral-500">
-                              <div className="text-center">
-                                <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3"></div>
-                                <p className="body-text text-sm">Loading booking system...</p>
-                              </div>
+                            <div className="booking-iframe-container">
+                              <iframe
+                                src="https://checkout.wheelbasepro.com/reserve/454552?locale=en-us"
+                                width="100%"
+                                height="600"
+                                frameBorder="0"
+                                allowFullScreen
+                                loading="lazy"
+                                title={`Book ${vehicle.make} ${vehicle.model}`}
+                              ></iframe>
                             </div>
                           )}
+                          {/* Always show fallback button */}
+                          <a
+                            href={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block mt-2 text-blue-600 underline"
+                          >
+                            Book on Wheelbase
+                          </a>
                         </div>
                       </div>
                     )}
@@ -547,24 +582,26 @@ export default function InventoryPage() {
       {selectedVehicle && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={closeModal}>
           <div
-            className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative animate-fadein"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative h-64">
+            {/* Sticky close button for mobile/desktop */}
+            <button
+              onClick={closeModal}
+              className="sticky top-4 right-4 z-10 float-right p-2 bg-white/90 rounded-full hover:bg-white transition-all shadow-md"
+              style={{ position: 'absolute', top: 16, right: 16 }}
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="relative w-full aspect-video bg-gray-100 rounded-t-2xl overflow-hidden">
               <Image
                 src={selectedVehicle.image || "/placeholder.svg"}
                 alt={`${selectedVehicle.year} ${selectedVehicle.make} ${selectedVehicle.model}`}
                 fill
-                className="object-cover rounded-t-2xl"
+                className="object-cover object-center w-full h-full aspect-video"
               />
-              <button
-                onClick={closeModal}
-                className="absolute top-4 right-4 p-2 bg-white/90 rounded-full hover:bg-white transition-all"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
-
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -603,7 +640,7 @@ export default function InventoryPage() {
               <div className="mb-6">
                 <div className="label-text text-neutral-600 mb-2">Features</div>
                 <div className="grid grid-cols-2 gap-2">
-                  {selectedVehicle.features.map((feature, index) => (
+                  {selectedVehicle.features.map((feature: string, index: number) => (
                     <div key={index} className="body-text">
                       • {feature}
                     </div>
@@ -645,7 +682,10 @@ export default function InventoryPage() {
                   )}
                 </button>
                 <button
-                  onClick={() => openWheelbaseReservation(selectedVehicle)}
+                  onClick={() => {
+                    closeModal()
+                    // No longer needed as wheelbaseCheckoutUrl is handled by iframe or fallback
+                  }}
                   disabled={!selectedVehicle.available}
                   className={`flex-1 py-3 rounded-lg nav-text transition-all flex items-center justify-center gap-2 ${
                     selectedVehicle.available
@@ -664,6 +704,31 @@ export default function InventoryPage() {
                 </button>
               </div>
             </div>
+            {/* Inline booking iframe if toggled open */}
+            {showInlineBooking[selectedVehicle.id] && (
+              <div className="flex flex-col items-center justify-center w-full my-6">
+                <div className="w-full max-w-3xl h-[600px] rounded-xl shadow-lg transition-opacity duration-300 bg-white overflow-hidden animate-fadein">
+                  <iframe
+                    src={selectedVehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+                    width="100%"
+                    height="600"
+                    frameBorder="0"
+                    allowFullScreen
+                    loading="lazy"
+                    title={`Book ${selectedVehicle.make} ${selectedVehicle.model}`}
+                    className="w-full h-full rounded-xl"
+                  ></iframe>
+                </div>
+                <a
+                  href={selectedVehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-2 text-blue-600 underline"
+                >
+                  Book on Wheelbase
+                </a>
+              </div>
+            )}
           </div>
         </div>
       )}
