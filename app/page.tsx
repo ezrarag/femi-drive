@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Menu, X } from "lucide-react"
 import { PhoneDisplay } from "@/components/phone-display"
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const slides = [
     {
@@ -62,7 +63,8 @@ export default function HomePage() {
       </div>
       {/* Navigation */}
       <nav className="relative z-50 flex items-center justify-between p-6">
-        <div className="flex gap-4">
+        {/* Desktop Nav */}
+        <div className="hidden sm:flex gap-4">
           <Link
             href="/"
             className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
@@ -82,7 +84,16 @@ export default function HomePage() {
             Services
           </Link>
         </div>
-
+        {/* Hamburger for Mobile */}
+        <div className="sm:hidden flex items-center">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
         {/* Center Logo */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="text-center">
@@ -90,12 +101,10 @@ export default function HomePage() {
             <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
           </div>
         </div>
-
-        <div className="flex gap-4">
+        {/* Desktop Right Nav */}
+        <div className="hidden sm:flex gap-4">
           {process.env.NEXT_PUBLIC_BUSINESS_PHONE && (
             <PhoneDisplay
-              phoneNumber={process.env.NEXT_PUBLIC_BUSINESS_PHONE}
-              variant="header"
               className="text-white"
             />
           )}
@@ -112,6 +121,49 @@ export default function HomePage() {
             Contact
           </Link>
         </div>
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden absolute top-full left-0 w-full bg-black/95 border-t border-white/10 shadow-lg flex flex-col items-center py-6 gap-4 animate-fadein z-50">
+            <Link
+              href="/"
+              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              href="/inventory"
+              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Fleet
+            </Link>
+            <Link
+              href="/services"
+              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Services
+            </Link>
+            <Link
+              href="/about"
+              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              About
+            </Link>
+            <Link
+              href="/contact"
+              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact
+            </Link>
+            {process.env.NEXT_PUBLIC_BUSINESS_PHONE && (
+              <PhoneDisplay className="text-white mt-2" />
+            )}
+          </div>
+        )}
       </nav>
 
       {/* Main Content */}
@@ -131,9 +183,12 @@ export default function HomePage() {
 
           {/* Center CTA */}
           <div className="flex justify-center">
-            <button className="nav-text px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all">
+            <Link
+              href="/inventory"
+              className="nav-text px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all text-center"
+            >
               {slides[currentSlide].cta}
-            </button>
+            </Link>
           </div>
 
           {/* Right Content */}
