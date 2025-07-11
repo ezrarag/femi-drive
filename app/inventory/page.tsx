@@ -183,7 +183,7 @@ export default function InventoryPage() {
       features: ["Great MPG", "Compact Size", "Easy to Drive", "Low Maintenance"],
       insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
-      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
+      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/463737?locale=en-us", // Added for testing
     },
   ]
 
