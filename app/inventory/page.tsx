@@ -42,7 +42,7 @@ export default function InventoryPage() {
       mileage: "85K",
       transmission: "Automatic",
       location: "Newark, NJ",
-      available: false,
+      available: true,
       gigReady: true,
       type: "sedan",
       category: "SEDAN",
