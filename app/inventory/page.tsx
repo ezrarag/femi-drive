@@ -49,7 +49,7 @@ export default function InventoryPage() {
       size: "large",
       description: "Perfect for rideshare with excellent fuel economy and comfortable interior.",
       features: ["Bluetooth", "Backup Camera", "Cruise Control", "Power Windows"],
-      insurance: "Full coverage included",
+      // insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
       wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
@@ -71,7 +71,7 @@ export default function InventoryPage() {
       size: "medium",
       description: "Spacious SUV ideal for delivery services and passenger transport.",
       features: ["AWD", "Navigation", "Heated Seats", "Panoramic Roof"],
-      insurance: "Full coverage included",
+      // insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
       wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
@@ -93,7 +93,7 @@ export default function InventoryPage() {
       size: "medium",
       description: "Premium luxury sedan for high-end rideshare services.",
       features: ["Leather Seats", "Premium Sound", "Sport Mode", "All-Wheel Drive"],
-      insurance: "Full coverage included",
+      // insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
       wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
@@ -115,7 +115,7 @@ export default function InventoryPage() {
       size: "small",
       description: "Reliable compact SUV perfect for city driving and deliveries.",
       features: ["Fuel Efficient", "Cargo Space", "Easy Parking", "Reliable"],
-      insurance: "Full coverage included",
+      // insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
       wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
@@ -137,7 +137,7 @@ export default function InventoryPage() {
       size: "small",
       description: "Budget-friendly option for new drivers entering the gig economy.",
       features: ["Great MPG", "Compact Size", "Easy to Drive", "Low Maintenance"],
-      insurance: "Full coverage included",
+      // insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
       wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
     },
@@ -159,7 +159,7 @@ export default function InventoryPage() {
       size: "small",
       description: "Former Miami police cruiser, we converted it for civilian use. We have done upgrades that includes a fresh paint job and 19 inch rims You will enjoy the power and speed this",
       features: ["V6 Engine", "Sport Suspension", "Premium Interior", "Fast Acceleration"],
-      insurance: "Full coverage included",
+      // insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
       wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/457237?locale=en-us", 
     },
@@ -181,7 +181,7 @@ export default function InventoryPage() {
       size: "small",
       description: "Budget-friendly option for new drivers entering the gig economy.",
       features: ["Great MPG", "Compact Size", "Easy to Drive", "Low Maintenance"],
-      insurance: "Full coverage included",
+      // insurance: "Full coverage included",
       maintenance: "Regular maintenance included",
       wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/463737?locale=en-us", // Added for testing
     },
@@ -198,7 +198,7 @@ export default function InventoryPage() {
   })
 
   // 2. For each vehicle, when the user clicks the "Click to Book" button, toggle a showInlineBooking[vehicle.id] state (already implemented)
-  const toggleInlineBooking = (vehicleId) => {
+  const toggleInlineBooking = (vehicleId: number) => {
     setShowInlineBooking((prev) => ({
       ...prev,
       [vehicleId]: !prev[vehicleId],
