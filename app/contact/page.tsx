@@ -172,6 +172,14 @@ export default function ContactPage() {
                   <div className="label-text mb-1">Drive to Earn</div>
                   <div className="body-text opacity-60">Start earning with Uber/Lyft</div>
                 </Link>
+
+                <Link
+                  href="/reviews"
+                  className="block w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all"
+                >
+                  <div className="label-text mb-1">Reviews</div>
+                  <div className="body-text opacity-60">See what customers are saying</div>
+                </Link>
               </div>
             </div>
           </div>
