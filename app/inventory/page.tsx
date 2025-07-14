@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Search, X, Menu, ExternalLink, Calendar } from "lucide-react"
+import { supabase } from "@/lib/supabase"
+import { motion, AnimatePresence } from "framer-motion"
 
 // Add type declaration for window.Outdoorsy
 declare global {
@@ -20,7 +22,7 @@ declare global {
 export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
-  const [selectedType, setSelectedType] = useState("all")
+  const [selectedType, setSelectedType] = useState("available")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null)
   const [showBookingWidget, setShowBookingWidget] = useState(false)
@@ -30,170 +32,41 @@ export default function InventoryPage() {
   // Remove useEffect for script loading and cleanup
   // Remove useEffect for widget loading
 
-  const vehicles = [
-    {
-      id: 1,
-      make: "Volkswagen",
-      model: "Passat",
-      year: 2015,
-      price: 45,
-      wheelbaseId: "457237",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0698.jpeg",
-      mileage: "85K",
-      transmission: "Automatic",
-      location: "Newark, NJ",
-      available: true,
-      gigReady: true,
-      type: "sedan",
-      category: "SEDAN",
-      size: "large",
-      description: "Perfect for rideshare with excellent fuel economy and comfortable interior.",
-      features: ["Bluetooth", "Backup Camera", "Cruise Control", "Power Windows"],
-      // insurance: "Full coverage included",
-      maintenance: "Regular maintenance included",
-      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
-    },
-    {
-      id: 2,
-      make: "Ford",
-      model: "Edge",
-      year: 2014,
-      price: 55,
-      wheelbaseId: "457238",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0699.jpeg",
-      mileage: "92K",
-      transmission: "Automatic",
-      location: "Jersey City, NJ",
-      available: false,
-      gigReady: true,
-      type: "suv",
-      category: "SUV",
-      size: "medium",
-      description: "Spacious SUV ideal for delivery services and passenger transport.",
-      features: ["AWD", "Navigation", "Heated Seats", "Panoramic Roof"],
-      // insurance: "Full coverage included",
-      maintenance: "Regular maintenance included",
-      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
-    },
-    {
-      id: 3,
-      make: "BMW",
-      model: "328i xDrive",
-      year: 2011,
-      price: 50,
-      wheelbaseId: "457239",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0701.jpeg",
-      mileage: "78K",
-      transmission: "Automatic",
-      location: "Newark, NJ",
-      available: false,
-      gigReady: true,
-      type: "sedan",
-      category: "LUXURY",
-      size: "medium",
-      description: "Premium luxury sedan for high-end rideshare services.",
-      features: ["Leather Seats", "Premium Sound", "Sport Mode", "All-Wheel Drive"],
-      // insurance: "Full coverage included",
-      maintenance: "Regular maintenance included",
-      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
-    },
-    {
-      id: 4,
-      make: "Chevy",
-      model: "Equinox",
-      year: 2013,
-      price: 48,
-      wheelbaseId: "457240",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0702.jpeg",
-      mileage: "65K",
-      transmission: "Automatic",
-      location: "Elizabeth, NJ",
-      available: false,
-      gigReady: true,
-      type: "suv",
-      category: "SUV",
-      size: "small",
-      description: "Reliable compact SUV perfect for city driving and deliveries.",
-      features: ["Fuel Efficient", "Cargo Space", "Easy Parking", "Reliable"],
-      // insurance: "Full coverage included",
-      maintenance: "Regular maintenance included",
-      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
-    },
-    {
-      id: 5,
-      make: "Nissan",
-      model: "Sentra",
-      year: 2011,
-      price: 42,
-      wheelbaseId: "457241",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0703.jpeg",
-      mileage: "89K",
-      transmission: "CVT",
-      location: "Paterson, NJ",
-      available: false,
-      gigReady: false,
-      type: "sedan",
-      category: "ECONOMY",
-      size: "small",
-      description: "Budget-friendly option for new drivers entering the gig economy.",
-      features: ["Great MPG", "Compact Size", "Easy to Drive", "Low Maintenance"],
-      // insurance: "Full coverage included",
-      maintenance: "Regular maintenance included",
-      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/454552?locale=en-us", // Added for testing
-    },
-    {
-      id: 6,
-      make: "Dodge",
-      model: "Charger",
-      year: 2016,
-      price: 65,
-      wheelbaseId: "457242",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_0704.jpeg",
-      mileage: "71K",
-      transmission: "Automatic",
-      location: "Newark, NJ",
-      available: true,
-      gigReady: true,
-      type: "sedan",
-      category: "PERFORMANCE",
-      size: "small",
-      description: "Former Miami police cruiser, we converted it for civilian use. We have done upgrades that includes a fresh paint job and 19 inch rims You will enjoy the power and speed this",
-      features: ["V6 Engine", "Sport Suspension", "Premium Interior", "Fast Acceleration"],
-      // insurance: "Full coverage included",
-      maintenance: "Regular maintenance included",
-      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/457237?locale=en-us", 
-    },
-    {
-      id: 7,
-      make: "Nissan",
-      model: "Altima",
-      year: 2023,
-      price: 48,
-      wheelbaseId: "457241",
-      image: "https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow/femileasing/IMG_3529-removebg-preview.png",
-      mileage: "89K",
-      transmission: "CVT",
-      location: "Paterson, NJ",
-      available: true,
-      gigReady: false,
-      type: "sedan",
-      category: "ECONOMY",
-      size: "small",
-      description: "Budget-friendly option for new drivers entering the gig economy.",
-      features: ["Great MPG", "Compact Size", "Easy to Drive", "Low Maintenance"],
-      // insurance: "Full coverage included",
-      maintenance: "Regular maintenance included",
-      wheelbaseCheckoutUrl: "https://checkout.wheelbasepro.com/reserve/463737?locale=en-us", // Added for testing
-    },
-  ]
+  // Remove static vehicles array
+  const [vehicles, setVehicles] = useState<any[]>([])
+  const [loadingVehicles, setLoadingVehicles] = useState(true)
+  const [fetchError, setFetchError] = useState("")
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      setLoadingVehicles(true)
+      setFetchError("")
+      const { data, error } = await supabase
+        .from("vehicles")
+        .select("*")
+        .order("make", { ascending: true })
+      if (error) {
+        setFetchError(error.message)
+        setVehicles([])
+      } else {
+        setVehicles(data || [])
+      }
+      setLoadingVehicles(false)
+    }
+    fetchVehicles()
+  }, [])
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
-      vehicle.make.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicle.model.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesPrice = vehicle.price >= priceRange[0] && vehicle.price <= priceRange[1]
-    const matchesType = selectedType === "all" || vehicle.type === selectedType
-
+      (vehicle.make?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (vehicle.model?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+    const matchesPrice = vehicle.price_per_day >= priceRange[0] && vehicle.price_per_day <= priceRange[1]
+    let matchesType = true
+    if (selectedType === "available") {
+      matchesType = vehicle.available === true
+    } else if (selectedType !== "all") {
+      matchesType = vehicle.type === selectedType
+    }
     return matchesSearch && matchesPrice && matchesType
   })
 
@@ -328,125 +201,135 @@ export default function InventoryPage() {
       {/* Vehicle Grid */}
       <div className="px-6 pb-32">
         <div className="max-w-7xl mx-auto space-y-8">
-          {filteredVehicles.map((vehicle, index) => {
-            const cardNumber = String(index + 1).padStart(2, "0")
-            const isBookingOpen = showInlineBooking[vehicle.id]
+          {loadingVehicles ? (
+            <div className="text-center py-16">
+              <p className="body-text text-neutral-600">Loading vehicles...</p>
+            </div>
+          ) : fetchError ? (
+            <div className="text-center py-16">
+              <p className="body-text text-red-600">{fetchError}</p>
+            </div>
+          ) : (
+            filteredVehicles.map((vehicle, index) => {
+              const cardNumber = String(index + 1).padStart(2, "0")
+              const isBookingOpen = showInlineBooking[vehicle.id]
 
-            if (vehicle.size === "large") {
-              return (
-                <div key={vehicle.id} className="group">
-                  <div className="label-text text-neutral-600 mb-4">
-                    {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}
-                  </div>
-                  <div
-                    className={`relative w-full h-96 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
-                    onClick={(e) => handleCardClick(e, vehicle)}
-                  >
-                    <Image
-                      src={vehicle.image || "/placeholder.svg"}
-                      alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    {vehicle.gigReady && (
-                      <div className="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white label-text rounded-full">
-                        GIG READY
+              if (vehicle.size === "large") {
+                return (
+                  <div key={vehicle.id} className="group">
+                    <div className="label-text text-neutral-600 mb-4">
+                      {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}
+                    </div>
+                    <div
+                      className={`relative w-full h-96 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
+                      onClick={(e) => handleCardClick(e, vehicle)}
+                    >
+                      <Image
+                        src={vehicle.image_url || "/placeholder.svg"}
+                        alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      {vehicle.gigReady && (
+                        <div className="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white label-text rounded-full">
+                          GIG READY
+                        </div>
+                      )}
+                      <div
+                        className={`absolute top-4 right-4 px-3 py-1 label-text rounded-full ${
+                          vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                        }`}
+                      >
+                        {vehicle.available ? "AVAILABLE" : "RENTED"}
+                      </div>
+                      <div className="absolute bottom-4 right-4 flex gap-2">
+                        <button
+                          data-action="details"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openModal(vehicle)
+                          }}
+                          className="px-4 py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all"
+                        >
+                          DETAILS
+                        </button>
+                        {vehicle.available && (
+                          <div className="px-4 py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-2">
+                            {isBookingOpen ? (
+                              <>
+                                CLOSE BOOKING
+                                <X className="w-3 h-3" />
+                              </>
+                            ) : (
+                              <>
+                                CLICK TO BOOK
+                                <Calendar className="w-3 h-3" />
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Inline Booking Widget for Large Cards */}
+                    {isBookingOpen && vehicle.available && (
+                      <div className="mt-6 bg-white rounded-lg border border-neutral-200 p-6 shadow-lg">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="display-heading text-xl">
+                            Book {vehicle.year} {vehicle.make} {vehicle.model}
+                          </h3>
+                          <button
+                            onClick={() => toggleInlineBooking(vehicle.id)}
+                            className="p-2 hover:bg-gray-100 rounded-full transition-all"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        {/* Inline booking iframe if available */}
+                        {vehicle.wheelbaseCheckoutUrl ? (
+                          <div className="booking-iframe-container">
+                            <iframe
+                              src={vehicle.wheelbaseCheckoutUrl}
+                              width="100%"
+                              height="600"
+                              frameBorder="0"
+                              allowFullScreen
+                              loading="lazy"
+                              title={`Book ${vehicle.make} ${vehicle.model}`}
+                            ></iframe>
+                          </div>
+                        ) : (
+                          <div className="booking-iframe-container">
+                            <iframe
+                              src="https://checkout.wheelbasepro.com/reserve/454552?locale=en-us"
+                              width="100%"
+                              height="600"
+                              frameBorder="0"
+                              allowFullScreen
+                              loading="lazy"
+                              title={`Book ${vehicle.make} ${vehicle.model}`}
+                            ></iframe>
+                          </div>
+                        )}
+                        {/* Always show fallback button */}
+                        <a
+                          href={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block mt-2 text-blue-600 underline"
+                        >
+                          Book on Wheelbase
+                        </a>
                       </div>
                     )}
-                    <div
-                      className={`absolute top-4 right-4 px-3 py-1 label-text rounded-full ${
-                        vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
-                      }`}
-                    >
-                      {vehicle.available ? "AVAILABLE" : "RENTED"}
-                    </div>
-                    <div className="absolute bottom-4 right-4 flex gap-2">
-                      <button
-                        data-action="details"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          openModal(vehicle)
-                        }}
-                        className="px-4 py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all"
-                      >
-                        DETAILS
-                      </button>
-                      {vehicle.available && (
-                        <div className="px-4 py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-2">
-                          {isBookingOpen ? (
-                            <>
-                              CLOSE BOOKING
-                              <X className="w-3 h-3" />
-                            </>
-                          ) : (
-                            <>
-                              CLICK TO BOOK
-                              <Calendar className="w-3 h-3" />
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
                   </div>
+                )
+              }
 
-                  {/* Inline Booking Widget for Large Cards */}
-                  {isBookingOpen && vehicle.available && (
-                    <div className="mt-6 bg-white rounded-lg border border-neutral-200 p-6 shadow-lg">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="display-heading text-xl">
-                          Book {vehicle.year} {vehicle.make} {vehicle.model}
-                        </h3>
-                        <button
-                          onClick={() => toggleInlineBooking(vehicle.id)}
-                          className="p-2 hover:bg-gray-100 rounded-full transition-all"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      {/* Inline booking iframe if available */}
-                      {vehicle.wheelbaseCheckoutUrl ? (
-                        <div className="booking-iframe-container">
-                          <iframe
-                            src={vehicle.wheelbaseCheckoutUrl}
-                            width="100%"
-                            height="600"
-                            frameBorder="0"
-                            allowFullScreen
-                            loading="lazy"
-                            title={`Book ${vehicle.make} ${vehicle.model}`}
-                          ></iframe>
-                        </div>
-                      ) : (
-                        <div className="booking-iframe-container">
-                          <iframe
-                            src="https://checkout.wheelbasepro.com/reserve/454552?locale=en-us"
-                            width="100%"
-                            height="600"
-                            frameBorder="0"
-                            allowFullScreen
-                            loading="lazy"
-                            title={`Book ${vehicle.make} ${vehicle.model}`}
-                          ></iframe>
-                        </div>
-                      )}
-                      {/* Always show fallback button */}
-                      <a
-                        href={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block mt-2 text-blue-600 underline"
-                      >
-                        Book on Wheelbase
-                      </a>
-                    </div>
-                  )}
-                </div>
-              )
-            }
-
-            return null
-          })}
+              return null
+            })
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {filteredVehicles
@@ -465,7 +348,7 @@ export default function InventoryPage() {
                       onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
-                        src={vehicle.image || "/placeholder.svg"}
+                        src={vehicle.image_url || "/placeholder.svg"}
                         alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
                         fill
                         className="object-cover object-center w-full h-full aspect-video"
@@ -596,7 +479,7 @@ export default function InventoryPage() {
             </button>
             <div className="relative w-full aspect-video bg-gray-100 rounded-t-2xl overflow-hidden">
               <Image
-                src={selectedVehicle.image || "/placeholder.svg"}
+                src={selectedVehicle.image_url || "/placeholder.svg"}
                 alt={`${selectedVehicle.year} ${selectedVehicle.make} ${selectedVehicle.model}`}
                 fill
                 className="object-cover object-center w-full h-full aspect-video"
@@ -611,7 +494,7 @@ export default function InventoryPage() {
                   <p className="body-text text-neutral-600">{selectedVehicle.description}</p>
                 </div>
                 <div className="text-right">
-                  <div className="display-heading text-3xl">${selectedVehicle.price}</div>
+                  <div className="display-heading text-3xl">${selectedVehicle.price_per_day}</div>
                   <div className="label-text text-neutral-600">per day</div>
                 </div>
               </div>
@@ -734,96 +617,120 @@ export default function InventoryPage() {
       )}
 
       {/* Bottom Menu Overlay */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="flex items-center gap-3 px-6 py-3 bg-orange-600 text-white rounded-full shadow-lg hover:bg-orange-700 transition-all"
-        >
-          <span className="nav-text font-medium">ALL VEHICLES</span>
-          {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-        </button>
-      </div>
+      <AnimatePresence>
+        {!isMenuOpen && (
+          <motion.div
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40"
+            initial={{ y: 0, opacity: 1 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 200, opacity: 0, scale: 0.8, transition: { type: "spring", bounce: 0.5, duration: 0.6 } }}
+          >
+            <motion.button
+              onClick={() => setIsMenuOpen(true)}
+              className="flex items-center gap-3 px-6 py-3 bg-orange-600 text-white rounded-full shadow-lg hover:bg-orange-700 transition-all"
+              whileTap={{ scale: 0.95, y: -10 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <span className="nav-text font-medium">ALL VEHICLES</span>
+              <Menu className="w-4 h-4" />
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Filter Menu Overlay */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30" onClick={() => setIsMenuOpen(false)}>
-          <div
-            className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 z-30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMenuOpen(false)}
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="display-heading text-2xl">Filter Vehicles</h2>
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-all"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Search */}
-              <div>
-                <label className="label-text block mb-2">Search</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input
-                    type="text"
-                    placeholder="Search by make or model..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="body-text w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500"
-                  />
-                </div>
-              </div>
-
-              {/* Vehicle Type */}
-              <div>
-                <label className="label-text block mb-2">Vehicle Type</label>
-                <select
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value)}
-                  className="body-text w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500"
+            <motion.div
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto"
+              initial={{ y: 200 }}
+              animate={{ y: 0 }}
+              exit={{ y: 200 }}
+              transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="display-heading text-2xl">Filter Vehicles</h2>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-all"
                 >
-                  <option value="all">All Types</option>
-                  <option value="sedan">Sedan</option>
-                  <option value="suv">SUV</option>
-                  <option value="hybrid">Hybrid</option>
-                </select>
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              {/* Price Range */}
-              <div>
-                <label className="label-text block mb-2">
-                  Daily Rate: ${priceRange[0]} - ${priceRange[1]}
-                </label>
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="200"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-neutral-500">
-                    <span>$0</span>
-                    <span>$200</span>
+              <div className="space-y-6">
+                {/* Search */}
+                <div>
+                  <label className="label-text block mb-2">Search</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <input
+                      type="text"
+                      placeholder="Search by make or model..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="body-text w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500"
+                    />
                   </div>
                 </div>
-              </div>
 
-              {/* Apply Button */}
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="w-full py-3 bg-neutral-900 text-white rounded-lg nav-text hover:bg-neutral-800 transition-all"
-              >
-                Apply Filters ({filteredVehicles.length} vehicles)
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                {/* Vehicle Type */}
+                <div>
+                  <label className="label-text block mb-2">Vehicle Type</label>
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="body-text w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500"
+                  >
+                    <option value="all">All Types</option>
+                    <option value="available">Available</option>
+                    <option value="sedan">Sedan</option>
+                    <option value="suv">SUV</option>
+                    <option value="hybrid">Hybrid</option>
+                  </select>
+                </div>
+
+                {/* Price Range */}
+                <div>
+                  <label className="label-text block mb-2">
+                    Daily Rate: ${priceRange[0]} - ${priceRange[1]}
+                  </label>
+                  <div className="space-y-2">
+                    <input
+                      type="range"
+                      min="0"
+                      max="200"
+                      value={priceRange[1]}
+                      onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-sm text-neutral-500">
+                      <span>$0</span>
+                      <span>$200</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Apply Button */}
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full py-3 bg-neutral-900 text-white rounded-lg nav-text hover:bg-neutral-800 transition-all"
+                >
+                  Apply Filters ({filteredVehicles.length} vehicles)
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
