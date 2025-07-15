@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 
 export default function AddVehiclePage() {
@@ -17,6 +17,27 @@ export default function AddVehiclePage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || !user.email || !user.email.endsWith("@femileasing.com")) {
+        window.location.href = "/admin/login"
+      } else {
+        setAuthLoading(false)
+      }
+    }
+    checkAdmin()
+  }, [])
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-lg font-semibold text-gray-700">Checking admin access...</div>
+      </div>
+    )
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target

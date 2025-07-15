@@ -20,6 +20,27 @@ export default function AdminVehiclesPage() {
   const [editForm, setEditForm] = useState<any | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState("")
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || !user.email || !user.email.endsWith("@femileasing.com")) {
+        window.location.href = "/admin/login"
+      } else {
+        setAuthLoading(false)
+      }
+    }
+    checkAdmin()
+  }, [])
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-lg font-semibold text-gray-700">Checking admin access...</div>
+      </div>
+    )
+  }
 
   useEffect(() => {
     const fetchVehicles = async () => {

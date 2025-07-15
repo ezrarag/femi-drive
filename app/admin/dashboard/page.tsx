@@ -1,8 +1,32 @@
 "use client"
 
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase"
 
 export default function AdminDashboard() {
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || !user.email || !user.email.endsWith("@femileasing.com")) {
+        window.location.href = "/admin/login"
+      } else {
+        setLoading(false)
+      }
+    }
+    checkAdmin()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-lg font-semibold text-gray-700">Checking admin access...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8">
@@ -18,12 +42,6 @@ export default function AdminDashboard() {
               ➕ Add New Vehicle
             </Link>
           </li>
-          {/* Optional future features */}
-          {/* <li>
-            <Link href="/admin/users" className="block w-full bg-gray-200 text-gray-700 py-3 rounded-lg text-center hover:bg-gray-300 transition">
-              👤 Manage Users
-            </Link>
-          </li> */}
         </ul>
       </div>
     </div>

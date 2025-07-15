@@ -287,10 +287,10 @@ export default function InventoryPage() {
                         </div>
 
                         {/* Inline booking iframe if available */}
-                        {vehicle.wheelbaseCheckoutUrl ? (
+                        {vehicle.wheelbase_checkout_url ? (
                           <div className="booking-iframe-container">
                             <iframe
-                              src={vehicle.wheelbaseCheckoutUrl}
+                              src={vehicle.wheelbase_checkout_url}
                               width="100%"
                               height="600"
                               frameBorder="0"
@@ -314,7 +314,7 @@ export default function InventoryPage() {
                         )}
                         {/* Always show fallback button */}
                         <a
-                          href={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+                          href={vehicle.wheelbase_checkout_url || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-block mt-2 text-blue-600 underline"
@@ -411,10 +411,10 @@ export default function InventoryPage() {
 
                         <div className="min-h-[350px]">
                           {/* Inline booking iframe if available */}
-                          {vehicle.wheelbaseCheckoutUrl ? (
+                          {vehicle.wheelbase_checkout_url ? (
                             <div className="booking-iframe-container">
                               <iframe
-                                src={vehicle.wheelbaseCheckoutUrl}
+                                src={vehicle.wheelbase_checkout_url}
                                 width="100%"
                                 height="600"
                                 frameBorder="0"
@@ -438,7 +438,7 @@ export default function InventoryPage() {
                           )}
                           {/* Always show fallback button */}
                           <a
-                            href={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+                            href={vehicle.wheelbase_checkout_url || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-block mt-2 text-blue-600 underline"
@@ -592,7 +592,7 @@ export default function InventoryPage() {
               <div className="flex flex-col items-center justify-center w-full my-6">
                 <div className="w-full max-w-3xl h-[600px] rounded-xl shadow-lg transition-opacity duration-300 bg-white overflow-hidden animate-fadein">
                   <iframe
-                    src={selectedVehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+                    src={selectedVehicle.wheelbase_checkout_url || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
                     width="100%"
                     height="600"
                     frameBorder="0"
@@ -603,7 +603,7 @@ export default function InventoryPage() {
                   ></iframe>
                 </div>
                 <a
-                  href={selectedVehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
+                  href={selectedVehicle.wheelbase_checkout_url || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block mt-2 text-blue-600 underline"
