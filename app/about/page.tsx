@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useState, useEffect } from "react"
+import NavBar from "@/components/NavBar"
 
 // Placeholder photos for cycling
 const placeholderPhotos = [
@@ -38,54 +39,7 @@ export default function AboutPage() {
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/50" />
       </div>
-
-      {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between p-6 w-full">
-        <div className="flex gap-4">
-          <Link
-            href="/"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Home
-          </Link>
-          <Link
-            href="/inventory"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Fleet
-          </Link>
-          <Link
-            href="/services"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Services
-          </Link>
-        </div>
-
-        {/* Center Logo */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="text-center">
-            <div className="text-sm font-bold tracking-widest">FE</div>
-            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
-          </div>
-        </div>
-
-        <div className="flex gap-4">
-          <Link
-            href="/about"
-            className="nav-text px-4 py-2 bg-white text-black rounded-full border border-white transition-all"
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Contact
-          </Link>
-        </div>
-      </nav>
-
+      <NavBar variant="dark" transparent noBorder />
       {/* Content wrapper */}
       <section className="relative z-10 flex-1 w-full max-w-3xl px-6 flex flex-col items-center justify-center text-center gap-8 py-24">
         {/* Title */}

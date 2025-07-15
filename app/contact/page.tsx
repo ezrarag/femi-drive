@@ -6,6 +6,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Phone, Mail, MapPin, Clock } from "lucide-react"
 import { PhoneDisplay } from "@/components/phone-display"
+import NavBar from "@/components/NavBar"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -31,52 +32,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 border-b border-white/10">
-        <div className="flex gap-4">
-          <Link
-            href="/"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Home
-          </Link>
-          <Link
-            href="/inventory"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Fleet
-          </Link>
-          <Link
-            href="/services"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Services
-          </Link>
-        </div>
-
-        {/* Center Logo */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="text-center">
-            <div className="text-sm font-bold tracking-widest">FE</div>
-            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
-          </div>
-        </div>
-
-        <div className="flex gap-4">
-          <Link
-            href="/about"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className="nav-text px-4 py-2 bg-white text-black rounded-full border border-white transition-all"
-          >
-            Contact
-          </Link>
-        </div>
-      </nav>
+      <NavBar variant="dark" />
 
       {/* Header */}
       <div className="px-6 py-12">

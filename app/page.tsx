@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, Menu, X } from "lucide-react"
 import { PhoneDisplay } from "@/components/phone-display"
+import NavBar from "@/components/NavBar"
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -49,6 +50,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      <NavBar variant="dark" transparent noBorder />
       {/* Background Video */}
       <div className="absolute inset-0 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover">
@@ -61,111 +63,6 @@ export default function HomePage() {
         {/* Dark overlay for contrast */}
         <div className="absolute inset-0 bg-black/40" />
       </div>
-      {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between p-6">
-        {/* Desktop Nav */}
-        <div className="hidden sm:flex gap-4">
-          <Link
-            href="/"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Home
-          </Link>
-          <Link
-            href="/inventory"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Fleet
-          </Link>
-          <Link
-            href="/services"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Services
-          </Link>
-        </div>
-        {/* Hamburger for Mobile */}
-        <div className="sm:hidden flex items-center">
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-        {/* Center Logo */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="text-center">
-            <div className="text-sm font-bold tracking-widest">FE</div>
-            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
-          </div>
-        </div>
-        {/* Desktop Right Nav */}
-        <div className="hidden sm:flex gap-4">
-          {process.env.NEXT_PUBLIC_BUSINESS_PHONE && (
-            <PhoneDisplay
-              className="text-white"
-            />
-          )}
-          <Link
-            href="/about"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Contact
-          </Link>
-        </div>
-        {/* Mobile Dropdown Menu */}
-        {mobileMenuOpen && (
-          <div className="sm:hidden absolute top-full left-0 w-full bg-black/95 border-t border-white/10 shadow-lg flex flex-col items-center py-6 gap-4 animate-fadein z-50">
-            <Link
-              href="/"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              href="/inventory"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Fleet
-            </Link>
-            <Link
-              href="/services"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Services
-            </Link>
-            <Link
-              href="/about"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              href="/contact"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            {process.env.NEXT_PUBLIC_BUSINESS_PHONE && (
-              <PhoneDisplay className="text-white mt-2" />
-            )}
-          </div>
-        )}
-      </nav>
-
       {/* Main Content */}
       <main className="relative z-40 flex items-center justify-center min-h-[calc(100vh-120px)]">
         <div className="w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">

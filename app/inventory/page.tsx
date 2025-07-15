@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, X, Menu, ExternalLink, Calendar } from "lucide-react"
+import { Search, X, Menu, ExternalLink, Calendar, User, Heart } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { motion, AnimatePresence } from "framer-motion"
+import { useRouter } from "next/navigation"
 
 // Add type declaration for window.Outdoorsy
 declare global {
@@ -36,6 +37,10 @@ export default function InventoryPage() {
   const [vehicles, setVehicles] = useState<any[]>([])
   const [loadingVehicles, setLoadingVehicles] = useState(true)
   const [fetchError, setFetchError] = useState("")
+  const [user, setUser] = useState<any>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const router = useRouter()
+  const [savedVehicleIds, setSavedVehicleIds] = useState<number[]>([])
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -54,7 +59,18 @@ export default function InventoryPage() {
       setLoadingVehicles(false)
     }
     fetchVehicles()
-  }, [])
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+    // Fetch saved vehicles for logged-in user
+    if (user) {
+      supabase
+        .from("saved_vehicles")
+        .select("vehicle_id")
+        .eq("user_id", user.id)
+        .then(({ data }) => {
+          setSavedVehicleIds(data?.map((v: any) => v.vehicle_id) || [])
+        })
+    }
+  }, [user])
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
@@ -136,6 +152,22 @@ export default function InventoryPage() {
     setSelectedVehicle(null)
   }
 
+  const toggleFavorite = async (vehicleId: number) => {
+    if (!user) {
+      router.push("/login")
+      return
+    }
+    if (savedVehicleIds.includes(vehicleId)) {
+      // Remove from saved_vehicles
+      await supabase.from("saved_vehicles").delete().eq("user_id", user.id).eq("vehicle_id", vehicleId)
+      setSavedVehicleIds((ids) => ids.filter((id) => id !== vehicleId))
+    } else {
+      // Add to saved_vehicles
+      await supabase.from("saved_vehicles").insert({ user_id: user.id, vehicle_id: vehicleId })
+      setSavedVehicleIds((ids) => [...ids, vehicleId])
+    }
+  }
+
   // Clean up script when component unmounts
   // Remove wheelbaseScriptLoaded state
   // Remove useEffect for script loading and cleanup
@@ -174,19 +206,51 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        <div className="flex gap-4">
-          <Link
-            href="/about"
-            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all"
+        <div className="flex gap-4 items-center relative">
+          {/* Dropdown Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((open) => !open)}
+              className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all font-medium"
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
+              aria-controls="main-menu-dropdown"
+              type="button"
+            >
+              Menu
+            </button>
+            {menuOpen && (
+              <div
+                id="main-menu-dropdown"
+                className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-neutral-200 z-50"
+                onMouseLeave={() => setMenuOpen(false)}
+              >
+                <Link
+                  href="/about"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-t-lg"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  About
+                </Link>
+                <Link
+                  href="/contact"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-b-lg"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+              </div>
+            )}
+          </div>
+          {/* User/Login Button */}
+          <button
+            onClick={() => router.push(user ? "/dashboard" : "/login")}
+            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all flex items-center gap-2"
+            aria-label={user ? "Dashboard" : "Login"}
           >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all"
-          >
-            Contact
-          </Link>
+            <User className="w-5 h-5" />
+            <span className="hidden sm:inline">{user ? "Dashboard" : "Login"}</span>
+          </button>
         </div>
       </nav>
 
@@ -230,11 +294,18 @@ export default function InventoryPage() {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      {vehicle.gigReady && (
-                        <div className="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white label-text rounded-full">
-                          GIG READY
-                        </div>
-                      )}
+                      <div className="absolute top-4 left-4 flex gap-2">
+                        {vehicle.gigReady && (
+                          <div className="px-3 py-1 bg-green-500 text-white label-text rounded-full">GIG READY</div>
+                        )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleFavorite(vehicle.id) }}
+                          className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all"
+                          aria-label={savedVehicleIds.includes(vehicle.id) ? "Unsave vehicle" : "Save vehicle"}
+                        >
+                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-5 h-5 text-red-500 fill-red-500" : "w-5 h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
+                        </button>
+                      </div>
                       <div
                         className={`absolute top-4 right-4 px-3 py-1 label-text rounded-full ${
                           vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
@@ -353,11 +424,18 @@ export default function InventoryPage() {
                         fill
                         className="object-cover object-center w-full h-full aspect-video"
                       />
-                      {vehicle.gigReady && (
-                        <div className="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white label-text rounded-full">
-                          GIG READY
-                        </div>
-                      )}
+                      <div className="absolute top-4 left-4 flex gap-2">
+                        {vehicle.gigReady && (
+                          <div className="px-3 py-1 bg-green-500 text-white label-text rounded-full">GIG READY</div>
+                        )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleFavorite(vehicle.id) }}
+                          className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all"
+                          aria-label={savedVehicleIds.includes(vehicle.id) ? "Unsave vehicle" : "Save vehicle"}
+                        >
+                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-5 h-5 text-red-500 fill-red-500" : "w-5 h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
+                        </button>
+                      </div>
                       <div
                         className={`absolute top-4 right-4 px-3 py-1 label-text rounded-full ${
                           vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
