@@ -3,10 +3,16 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, X, Menu, ExternalLink, Calendar, User, Heart } from "lucide-react"
+import { Search, X, Menu, ExternalLink, User, Heart } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 // Add type declaration for window.Outdoorsy
 declare global {
@@ -41,6 +47,13 @@ export default function InventoryPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
   const [savedVehicleIds, setSavedVehicleIds] = useState<number[]>([])
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingForm, setBookingForm] = useState({ start_date: "", end_date: "" });
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingError, setBookingError] = useState("");
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  // Add state to store unavailable dates for the selected vehicle
+  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -71,6 +84,30 @@ export default function InventoryPage() {
         })
     }
   }, [user])
+
+  // Fetch unavailable dates when selectedVehicle changes
+  useEffect(() => {
+    if (!selectedVehicle) return;
+    // Fetch bookings for this vehicle
+    fetch(`/api/bookings?vehicle_id=${selectedVehicle.id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data.bookings)) {
+          // Collect all booked date ranges
+          const dates: Date[] = [];
+          data.bookings.forEach((b: any) => {
+            if (b.status !== 'cancelled') {
+              const start = new Date(b.start_date);
+              const end = new Date(b.end_date);
+              for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                dates.push(new Date(d));
+              }
+            }
+          });
+          setUnavailableDates(dates);
+        }
+      });
+  }, [selectedVehicle]);
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
@@ -167,6 +204,58 @@ export default function InventoryPage() {
       setSavedVehicleIds((ids) => [...ids, vehicleId])
     }
   }
+
+  const openBookingModal = (vehicle: any) => {
+    setSelectedVehicle(vehicle);
+    setShowBookingModal(true);
+    setBookingForm({ start_date: "", end_date: "" });
+    setBookingError("");
+    setBookingSuccess(false);
+  };
+  const closeBookingModal = () => {
+    setShowBookingModal(false);
+    setBookingForm({ start_date: "", end_date: "" });
+    setBookingError("");
+    setBookingSuccess(false);
+  };
+  const handleBookingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBookingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+  const handleBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      setBookingError("You must be logged in to book a vehicle.");
+      return;
+    }
+    if (!bookingForm.start_date || !bookingForm.end_date) {
+      setBookingError("Please select start and end dates.");
+      return;
+    }
+    setBookingLoading(true);
+    setBookingError("");
+    setBookingSuccess(false);
+    const res = await fetch("/api/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user.id,
+        vehicle_id: selectedVehicle.id,
+        start_date: bookingForm.start_date,
+        end_date: bookingForm.end_date,
+        total_price: selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1),
+      }),
+    });
+    const data = await res.json();
+    setBookingLoading(false);
+    if (!res.ok) {
+      setBookingError(data.error || "Booking failed. Try again.");
+    } else {
+      setBookingSuccess(true);
+      setTimeout(() => {
+        closeBookingModal();
+      }, 2000);
+    }
+  };
 
   // Clean up script when component unmounts
   // Remove wheelbaseScriptLoaded state
@@ -344,54 +433,16 @@ export default function InventoryPage() {
 
                     {/* Inline Booking Widget for Large Cards */}
                     {isBookingOpen && vehicle.available && (
-                      <div className="mt-6 bg-white rounded-lg border border-neutral-200 p-6 shadow-lg">
-                        <div className="flex justify-between items-center mb-4">
-                          <h3 className="display-heading text-xl">
-                            Book {vehicle.year} {vehicle.make} {vehicle.model}
-                          </h3>
-                          <button
-                            onClick={() => toggleInlineBooking(vehicle.id)}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-all"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        {/* Inline booking iframe if available */}
-                        {vehicle.wheelbase_checkout_url ? (
-                          <div className="booking-iframe-container">
-                            <iframe
-                              src={vehicle.wheelbase_checkout_url}
-                              width="100%"
-                              height="600"
-                              frameBorder="0"
-                              allowFullScreen
-                              loading="lazy"
-                              title={`Book ${vehicle.make} ${vehicle.model}`}
-                            ></iframe>
-                          </div>
-                        ) : (
-                          <div className="booking-iframe-container">
-                            <iframe
-                              src="https://checkout.wheelbasepro.com/reserve/454552?locale=en-us"
-                              width="100%"
-                              height="600"
-                              frameBorder="0"
-                              allowFullScreen
-                              loading="lazy"
-                              title={`Book ${vehicle.make} ${vehicle.model}`}
-                            ></iframe>
-                          </div>
-                        )}
-                        {/* Always show fallback button */}
-                        <a
-                          href={vehicle.wheelbase_checkout_url || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block mt-2 text-blue-600 underline"
+                      <div className="mt-6 bg-white rounded-lg border border-neutral-200 p-6 shadow-lg flex flex-col items-center">
+                        <h3 className="display-heading text-xl mb-4">
+                          Book {vehicle.year} {vehicle.make} {vehicle.model}
+                        </h3>
+                        <Button
+                          onClick={() => openModal(vehicle)}
+                          className="w-full max-w-xs py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-lg"
                         >
-                          Book on Wheelbase
-                        </a>
+                          Book This Vehicle
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -474,56 +525,16 @@ export default function InventoryPage() {
 
                     {/* Inline Booking Widget for Medium/Small Cards */}
                     {isBookingOpen && vehicle.available && (
-                      <div className="mt-4 bg-white rounded-lg border border-neutral-200 p-4 shadow-lg">
-                        <div className="flex justify-between items-center mb-3">
-                          <h3 className="display-heading text-lg">
-                            Book {vehicle.year} {vehicle.make} {vehicle.model}
-                          </h3>
-                          <button
-                            onClick={() => toggleInlineBooking(vehicle.id)}
-                            className="p-1 hover:bg-gray-100 rounded-full transition-all"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        <div className="min-h-[350px]">
-                          {/* Inline booking iframe if available */}
-                          {vehicle.wheelbase_checkout_url ? (
-                            <div className="booking-iframe-container">
-                              <iframe
-                                src={vehicle.wheelbase_checkout_url}
-                                width="100%"
-                                height="600"
-                                frameBorder="0"
-                                allowFullScreen
-                                loading="lazy"
-                                title={`Book ${vehicle.make} ${vehicle.model}`}
-                              ></iframe>
-                            </div>
-                          ) : (
-                            <div className="booking-iframe-container">
-                              <iframe
-                                src="https://checkout.wheelbasepro.com/reserve/454552?locale=en-us"
-                                width="100%"
-                                height="600"
-                                frameBorder="0"
-                                allowFullScreen
-                                loading="lazy"
-                                title={`Book ${vehicle.make} ${vehicle.model}`}
-                              ></iframe>
-                            </div>
-                          )}
-                          {/* Always show fallback button */}
-                          <a
-                            href={vehicle.wheelbase_checkout_url || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-block mt-2 text-blue-600 underline"
-                          >
-                            Book on Wheelbase
-                          </a>
-                        </div>
+                      <div className="mt-4 bg-white rounded-lg border border-neutral-200 p-4 shadow-lg flex flex-col items-center">
+                        <h3 className="display-heading text-lg mb-3">
+                          Book {vehicle.year} {vehicle.make} {vehicle.model}
+                        </h3>
+                        <Button
+                          onClick={() => openModal(vehicle)}
+                          className="w-full max-w-xs py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-base"
+                        >
+                          Book This Vehicle
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -620,79 +631,128 @@ export default function InventoryPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    closeModal()
-                    toggleInlineBooking(selectedVehicle.id)
-                  }}
-                  disabled={!selectedVehicle.available}
-                  className={`flex-1 py-3 rounded-lg nav-text transition-all flex items-center justify-center gap-2 ${
-                    selectedVehicle.available
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
-                  }`}
-                >
-                  {selectedVehicle.available ? (
-                    <>
-                      Book Inline
-                      <Calendar className="w-4 h-4" />
-                    </>
-                  ) : (
-                    "Currently Unavailable"
-                  )}
-                </button>
-                <button
-                  onClick={() => {
-                    closeModal()
-                    // No longer needed as wheelbaseCheckoutUrl is handled by iframe or fallback
-                  }}
-                  disabled={!selectedVehicle.available}
-                  className={`flex-1 py-3 rounded-lg nav-text transition-all flex items-center justify-center gap-2 ${
-                    selectedVehicle.available
-                      ? "bg-green-600 text-white hover:bg-green-700"
-                      : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
-                  }`}
-                >
-                  {selectedVehicle.available ? (
-                    <>
-                      Book on Wheelbase
-                      <ExternalLink className="w-4 h-4" />
-                    </>
-                  ) : (
-                    "Currently Unavailable"
-                  )}
-                </button>
-              </div>
-            </div>
-            {/* Inline booking iframe if toggled open */}
-            {showInlineBooking[selectedVehicle.id] && (
-              <div className="flex flex-col items-center justify-center w-full my-6">
-                <div className="w-full max-w-3xl h-[600px] rounded-xl shadow-lg transition-opacity duration-300 bg-white overflow-hidden animate-fadein">
-                  <iframe
-                    src={selectedVehicle.wheelbase_checkout_url || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
-                    width="100%"
-                    height="600"
-                    frameBorder="0"
-                    allowFullScreen
-                    loading="lazy"
-                    title={`Book ${selectedVehicle.make} ${selectedVehicle.model}`}
-                    className="w-full h-full rounded-xl"
-                  ></iframe>
+              {/* Booking Form UI (replaces Wheelbase iframe) */}
+              <form onSubmit={handleBookingSubmit} className="space-y-4" style={{ maxWidth: 400 }}>
+                <div>
+                  <Label htmlFor="start_date">Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Input
+                        type="text"
+                        name="start_date"
+                        value={bookingForm.start_date}
+                        onChange={handleBookingChange}
+                        placeholder="Select start date"
+                        readOnly
+                        className="cursor-pointer bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                        style={{ background: '#fff', color: '#111', fontWeight: 500 }}
+                        required
+                        disabled={!selectedVehicle.available}
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="p-0 w-auto bg-white">
+                      <Calendar
+                        mode="single"
+                        selected={bookingForm.start_date ? new Date(bookingForm.start_date) : undefined}
+                        onSelect={(date: Date | undefined) => {
+                          if (date) {
+                            setBookingForm(prev => ({ ...prev, start_date: date.toISOString().slice(0, 10) }));
+                          }
+                        }}
+                        initialFocus
+                        disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.end_date ? date > new Date(bookingForm.end_date) : false)}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
-                <a
-                  href={selectedVehicle.wheelbase_checkout_url || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mt-2 text-blue-600 underline"
-                >
-                  Book on Wheelbase
-                </a>
-              </div>
-            )}
+                <div>
+                  <Label htmlFor="end_date">End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Input
+                        type="text"
+                        name="end_date"
+                        value={bookingForm.end_date}
+                        onChange={handleBookingChange}
+                        placeholder="Select end date"
+                        readOnly
+                        className="cursor-pointer bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                        style={{ background: '#fff', color: '#111', fontWeight: 500 }}
+                        required
+                        disabled={!selectedVehicle?.available}
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="p-0 w-auto bg-white">
+                      <Calendar
+                        mode="single"
+                        selected={bookingForm.end_date ? new Date(bookingForm.end_date) : undefined}
+                        onSelect={(date: Date | undefined) => {
+                          if (date) {
+                            setBookingForm(prev => ({ ...prev, end_date: date.toISOString().slice(0, 10) }));
+                          }
+                        }}
+                        initialFocus
+                        disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.start_date ? date < new Date(bookingForm.start_date) : false)}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <Label>Total Price</Label>
+                  <div className="font-semibold">
+                    {bookingForm.start_date && bookingForm.end_date && selectedVehicle ?
+                      `$${selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}` :
+                      "$0.00"}
+                  </div>
+                </div>
+                {bookingError && <div className="text-red-600 text-sm">{bookingError}</div>}
+                {bookingSuccess && <div className="text-green-600 text-sm">Booking successful!</div>}
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={bookingLoading || !selectedVehicle?.available} className="border-2 border-blue-600 text-blue-700 bg-white hover:bg-blue-50 font-semibold">
+                    {bookingLoading ? "Booking..." : "Book Now"}
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={closeModal} className="bg-transparent text-neutral-600 hover:bg-neutral-100">
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Booking Modal */}
+      <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Book {selectedVehicle?.year} {selectedVehicle?.make} {selectedVehicle?.model}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleBookingSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="start_date">Start Date</Label>
+              <Input type="date" name="start_date" value={bookingForm.start_date} onChange={handleBookingChange} required />
+            </div>
+            <div>
+              <Label htmlFor="end_date">End Date</Label>
+              <Input type="date" name="end_date" value={bookingForm.end_date} onChange={handleBookingChange} required />
+            </div>
+            <div>
+              <Label>Total Price</Label>
+              <div className="font-semibold">
+                {bookingForm.start_date && bookingForm.end_date && selectedVehicle ?
+                  `$${selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}` :
+                  "$0.00"}
+              </div>
+            </div>
+            {bookingError && <div className="text-red-600 text-sm">{bookingError}</div>}
+            {bookingSuccess && <div className="text-green-600 text-sm">Booking successful!</div>}
+            <DialogFooter>
+              <Button type="submit" disabled={bookingLoading}>{bookingLoading ? "Booking..." : "Book Now"}</Button>
+              <Button type="button" variant="outline" onClick={closeBookingModal}>Cancel</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Bottom Menu Overlay */}
       <AnimatePresence>

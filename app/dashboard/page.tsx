@@ -16,6 +16,7 @@ export default function CustomerDashboard() {
   const [bookings, setBookings] = useState<any[]>([])
   const [reviewText, setReviewText] = useState("")
   const [reviewMsg, setReviewMsg] = useState("")
+  const [bookingActionMsg, setBookingActionMsg] = useState("")
   const router = useRouter()
 
   useEffect(() => {
@@ -52,11 +53,10 @@ export default function CustomerDashboard() {
         .select("vehicle_id, vehicles(*)")
         .eq("user_id", user.id)
       if (isMounted) setSavedVehicles(saved?.map((v: any) => v.vehicles) || [])
-      // Mock bookings
-      if (isMounted) setBookings([
-        { id: 1, vehicle: "Nissan Sentra", date: "2024-06-01", status: "Completed" },
-        { id: 2, vehicle: "VW Passat", date: "2024-05-15", status: "Cancelled" }
-      ])
+      // Fetch bookings from API
+      const res = await fetch(`/api/bookings?user_id=${user.id}`)
+      const bookingsData = await res.json()
+      if (isMounted) setBookings(bookingsData.bookings || [])
       if (isMounted) setLoading(false)
     }
     checkSession()
@@ -110,6 +110,21 @@ export default function CustomerDashboard() {
     } else {
       setReviewMsg("Thank you for your review!")
       setReviewText("")
+    }
+  }
+
+  const handleCancelBooking = async (bookingId: string) => {
+    setBookingActionMsg("")
+    const res = await fetch(`/api/bookings/${bookingId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "cancelled" })
+    })
+    if (res.ok) {
+      setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status: "cancelled" } : b))
+      setBookingActionMsg("Booking cancelled.")
+    } else {
+      setBookingActionMsg("Failed to cancel booking.")
     }
   }
 
@@ -178,15 +193,21 @@ export default function CustomerDashboard() {
           {/* Booking History */}
           <div className="bg-gray-100 rounded-lg p-4">
             <h2 className="text-xl font-semibold mb-2 text-neutral-900">Booking History</h2>
+            {bookingActionMsg && <div className="text-green-700 text-sm mb-2">{bookingActionMsg}</div>}
             {bookings.length === 0 ? (
               <p className="text-neutral-700">No bookings yet.</p>
             ) : (
               <ul className="divide-y">
                 {bookings.map((b) => (
-                  <li key={b.id} className="py-2 flex justify-between text-sm text-neutral-900">
-                    <span>{b.vehicle}</span>
-                    <span>{b.date}</span>
-                    <span className="font-medium">{b.status}</span>
+                  <li key={b.id} className="py-2 flex flex-col md:flex-row md:justify-between md:items-center text-sm text-neutral-900 gap-2 md:gap-0">
+                    <span>
+                      {b.vehicle_id} {/* Optionally, fetch and display vehicle details by ID */}
+                    </span>
+                    <span>{b.start_date} to {b.end_date}</span>
+                    <span className="font-medium capitalize">{b.status}</span>
+                    {b.status === "pending" && (
+                      <button onClick={() => handleCancelBooking(b.id)} className="ml-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs">Cancel</button>
+                    )}
                   </li>
                 ))}
               </ul>

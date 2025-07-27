@@ -17,8 +17,20 @@ export default function LoginPage() {
   }, [])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm flex flex-col items-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 relative overflow-hidden">
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        src="https://wayxucjcejqxydflxwgo.supabase.co/storage/v1/object/public/site-assets/homepage/coverr-electric-car-driving-in-the-dark-woods-668-1080p.mp4"
+      />
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/40 z-10" />
+      {/* Login Card */}
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm flex flex-col items-center relative z-20">
         <div className="mb-6 flex flex-col items-center">
           <Image src="https://wayxucjcejqxydflxwgo.supabase.co/storage/v1/object/public/site-assets/login/f9lugl5xwm8hkwltjdhm-removebg-preview.png" alt="Femi Leasing Logo" width={48} height={48} className="mb-2" />
           <h1 className="text-2xl font-bold text-neutral-900 mb-1">Sign in to Femi Leasing</h1>

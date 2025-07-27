@@ -26,77 +26,77 @@ export default function AboutPage() {
   }, [])
 
   return (
-    <main className="relative min-h-screen w-full flex flex-col items-center text-white">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="https://gfqhzuqckfxtzqawdcso.supabase.co/storage/v1/object/public/usethisfornow//pexels-artempodrez-7232668.jpg"
-          alt="Background"
-          fill
-          className="object-cover"
-          priority
-        />
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-black/50" />
-      </div>
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <NavBar variant="dark" transparent noBorder />
-      {/* Content wrapper */}
-      <section className="relative z-10 flex-1 w-full max-w-3xl px-6 flex flex-col items-center justify-center text-center gap-8 py-24">
-        {/* Title */}
-        <h1 className="display-heading text-4xl md:text-6xl tracking-tighter text-white">FEMI LEASING</h1>
+      {/* Background Video */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        <video autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover">
+          <source
+            src="https://wayxucjcejqxydflxwgo.supabase.co/storage/v1/object/public/site-assets/homepage/coverr-electric-car-driving-in-the-dark-woods-668-1080p.mp4"
+            type="video/mp4"
+          />
+          Your browser does not support the video tag.
+        </video>
+        {/* Dark overlay for contrast */}
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+      {/* Main Content */}
+      <main className="relative z-40 flex items-center justify-center min-h-[calc(100vh-120px)]">
+        <div className="w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+          {/* Left Content */}
+          <div className="text-left">
+            <div className="label-text mb-4 opacity-80">About Us</div>
+            <h1 className="display-heading text-6xl md:text-8xl lg:text-9xl leading-none mb-8">
+              FEMI LEASING
+            </h1>
+            <div className="body-text leading-relaxed max-w-md mb-8 text-white/90">
+              {`Our vision is to transform the car rental experience by continually evolving with the shifting landscape of modern mobility. We are committed to becoming the premier rental solution in the NJ/NY area, offering exceptional convenience, competitive pricing, and an unwavering focus on customer satisfaction.`}
+            </div>
+            <Link href="/contact" className="label-text underline hover:no-underline transition-all">
+              Contact Us
+            </Link>
+          </div>
 
-        {/* Body paragraph */}
-        <p className="body-text whitespace-pre-line leading-relaxed max-w-prose text-white/90">
-          {`"At Femi Leasing, our vision is to transform the car rental experience by continually evolving with the shifting landscape of modern mobility. We are committed to becoming the premier rental solution in the NJ/NY area, offering exceptional convenience, competitive pricing, and an unwavering focus on customer satisfaction.
-​
-Through innovation, strategic partnerships, and a deep understanding of our clients' needs, we aim to set a new industry benchmark delivering flexibility, reliability, and excellence at every turn."\n\nAt Femi Leasing, our mission is to provide accessible, flexible, and dependable car rental solutions that fit seamlessly into the lives of our clients. We're committed to serving a diverse community of drivers whether you're working in the gig economy, traveling for business, or simply need a reliable ride for personal use.​ By combining quality vehicles with exceptional customer service and user friendly policies, we aim to remove the stress from car rentals and empower our clients with the freedom to move on their own terms.`}
-        </p>
+          {/* Center Content (optional: could add a logo or image here) */}
+          <div className="flex justify-center">
+            <div className="rounded-lg shadow-md bg-white/10 backdrop-blur-sm p-2 inline-block">
+              <div className="relative w-[300px] h-[360px] overflow-hidden rounded-md flex items-center justify-center">
+                <Image
+                  src="/placeholder-logo.png"
+                  alt="Femi Leasing Logo"
+                  width={180}
+                  height={180}
+                  className="object-contain"
+                />
+              </div>
+            </div>
+          </div>
 
-        {/* Cycling Photos */}
-        <div className="rounded-lg shadow-md bg-white/10 backdrop-blur-sm p-2 inline-block">
-          <div className="relative w-[300px] h-[360px] overflow-hidden rounded-md">
-            {placeholderPhotos.map((photo, index) => (
-              <Image
-                key={index}
-                src={photo || "/placeholder.svg"}
-                alt={`Portrait ${index + 1}`}
-                width={300}
-                height={360}
-                unoptimized
-                className={`absolute inset-0 object-cover transition-all duration-1000 ${
-                  index === currentPhotoIndex ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-sm"
-                }`}
-              />
-            ))}
+          {/* Right Content */}
+          <div className="text-right">
+            <h2 className="display-heading text-4xl md:text-6xl lg:text-7xl leading-none mb-8">
+              Our Mission
+            </h2>
+            <div className="label-text mb-4 opacity-80">NJ/NY Area</div>
+            <div className="body-text leading-relaxed max-w-md mb-8 text-white/90">
+              {`To provide accessible, flexible, and dependable car rental solutions that fit seamlessly into the lives of our clients. We're committed to serving a diverse community of drivers—whether you're working in the gig economy, traveling for business, or simply need a reliable ride for personal use.`}
+            </div>
           </div>
         </div>
-
-        {/* Bottom paragraph */}
-        <p className="body-text leading-relaxed max-w-prose text-white/90">
-          At Femi Leasing, our journey began with a simple mission: to redefine car rentals by making the process more
-          convenient, flexible, and accessible especially for the hardworking individuals powering today's gig economy. ​
-          With over 20 years of industry experience, we saw a growing need in the NJ/NY area for reliable, short term
-          rental options tailored to modern drivers. Whether you're behind the wheel for Uber, running errands, or
-          taking a well deserved weekend getaway, we wanted to make sure you had the right vehicle without the stress.
-          What started as a small venture has grown into a trusted name, proudly serving drivers between the ages of 25
-          and 55 with high quality vehicles, transparent pricing, and unmatched customer service. Our close
-          collaboration with Uber and other ride sharing platforms allows us to offer tailored solutions that help
-          drivers hit the road faster and earn more, with less hassle. ​ Femi Leasing isn't just a rental service it's a
-          community built on trust, convenience, and the freedom to move.
-        </p>
-      </section>
-
+      </main>
       {/* Footer */}
-      <footer className="relative z-10 w-full px-6 py-4 label-text flex items-center justify-between text-white/70">
-        <div>© 2025 Femi Leasing · Cookies</div>
-        <div className="text-center flex-1">All Rights Reserved</div>
-        <div className="flex items-center gap-1">
-          <span>Website by</span>
-          <span role="img" aria-label="bow and arrow">
-            🏹
-          </span>
+      <footer className="relative z-40 px-6 pb-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4 label-text">
+            <span>© 2025 Femi Leasing</span>
+            <span>·</span>
+            <Link href="/privacy" className="hover:underline">
+              Privacy
+            </Link>
+          </div>
+          <div className="w-3 h-3 bg-white/40 rounded-full"></div>
         </div>
       </footer>
-    </main>
+    </div>
   )
 }
