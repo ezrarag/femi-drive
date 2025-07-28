@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { toast } from "sonner";
 
 // Add type declaration for window.Outdoorsy
 declare global {
@@ -224,7 +225,14 @@ export default function InventoryPage() {
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      setBookingError("You must be logged in to book a vehicle.");
+      toast.error("You must be logged in to book a vehicle.", {
+        description: "Please sign in with Google to continue with your booking.",
+        action: {
+          label: "Sign In",
+          onClick: () => handleGoogleLogin(),
+        },
+        duration: 5000,
+      });
       return;
     }
     if (!bookingForm.start_date || !bookingForm.end_date) {
@@ -251,10 +259,22 @@ export default function InventoryPage() {
       setBookingError(data.error || "Booking failed. Try again.");
     } else {
       setBookingSuccess(true);
+      toast.success("Booking successful!", {
+        description: "Your vehicle has been booked successfully.",
+      });
       setTimeout(() => {
         closeBookingModal();
       }, 2000);
     }
+  };
+
+  const handleGoogleLogin = async () => {
+    await supabase.auth.signInWithOAuth({ 
+      provider: "google", 
+      options: { 
+        redirectTo: window.location.origin + "/inventory" 
+      } 
+    });
   };
 
   // Clean up script when component unmounts
@@ -683,39 +703,39 @@ export default function InventoryPage() {
                       />
                     </PopoverTrigger>
                     <PopoverContent align="start" className="p-0 w-auto bg-white">
-                      <Calendar
-                        mode="single"
-                        selected={bookingForm.end_date ? new Date(bookingForm.end_date) : undefined}
-                        onSelect={(date: Date | undefined) => {
-                          if (date) {
-                            setBookingForm(prev => ({ ...prev, end_date: date.toISOString().slice(0, 10) }));
-                          }
-                        }}
-                        initialFocus
-                        disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.start_date ? date < new Date(bookingForm.start_date) : false)}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div>
-                  <Label>Total Price</Label>
-                  <div className="font-semibold">
-                    {bookingForm.start_date && bookingForm.end_date && selectedVehicle ?
-                      `$${selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}` :
-                      "$0.00"}
+                        <Calendar
+                          mode="single"
+                          selected={bookingForm.end_date ? new Date(bookingForm.end_date) : undefined}
+                          onSelect={(date: Date | undefined) => {
+                            if (date) {
+                              setBookingForm(prev => ({ ...prev, end_date: date.toISOString().slice(0, 10) }));
+                            }
+                          }}
+                          initialFocus
+                          disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.start_date ? date < new Date(bookingForm.start_date) : false)}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
-                </div>
-                {bookingError && <div className="text-red-600 text-sm">{bookingError}</div>}
-                {bookingSuccess && <div className="text-green-600 text-sm">Booking successful!</div>}
-                <div className="flex gap-2">
-                  <Button type="submit" disabled={bookingLoading || !selectedVehicle?.available} className="border-2 border-blue-600 text-blue-700 bg-white hover:bg-blue-50 font-semibold">
-                    {bookingLoading ? "Booking..." : "Book Now"}
-                  </Button>
-                  <Button type="button" variant="ghost" onClick={closeModal} className="bg-transparent text-neutral-600 hover:bg-neutral-100">
-                    Cancel
-                  </Button>
-                </div>
-              </form>
+                  <div>
+                    <Label>Total Price</Label>
+                    <div className="font-semibold">
+                      {bookingForm.start_date && bookingForm.end_date && selectedVehicle ?
+                        `$${selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}` :
+                        "$0.00"}
+                    </div>
+                  </div>
+                  {bookingError && <div className="text-red-600 text-sm">{bookingError}</div>}
+                  {bookingSuccess && <div className="text-green-600 text-sm">Booking successful!</div>}
+                  <div className="flex gap-2">
+                    <Button type="submit" disabled={bookingLoading || !selectedVehicle?.available} className="border-2 border-blue-600 text-blue-700 bg-white hover:bg-blue-50 font-semibold">
+                      {bookingLoading ? "Booking..." : "Book Now"}
+                    </Button>
+                    <Button type="button" variant="ghost" onClick={closeModal} className="bg-transparent text-neutral-600 hover:bg-neutral-100">
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
             </div>
           </div>
         </div>
@@ -730,11 +750,27 @@ export default function InventoryPage() {
           <form onSubmit={handleBookingSubmit} className="space-y-4">
             <div>
               <Label htmlFor="start_date">Start Date</Label>
-              <Input type="date" name="start_date" value={bookingForm.start_date} onChange={handleBookingChange} required />
+              <Input 
+                type="date" 
+                name="start_date" 
+                value={bookingForm.start_date} 
+                onChange={handleBookingChange} 
+                required 
+                className="text-black bg-white border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                style={{ color: '#000', backgroundColor: '#fff' }}
+              />
             </div>
             <div>
               <Label htmlFor="end_date">End Date</Label>
-              <Input type="date" name="end_date" value={bookingForm.end_date} onChange={handleBookingChange} required />
+              <Input 
+                type="date" 
+                name="end_date" 
+                value={bookingForm.end_date} 
+                onChange={handleBookingChange} 
+                required 
+                className="text-black bg-white border-gray-300 focus:ring-2 focus:ring-blue-200"
+                style={{ color: '#000', backgroundColor: '#fff' }}
+              />
             </div>
             <div>
               <Label>Total Price</Label>

@@ -87,6 +87,29 @@
   .tracking-widest {
     letter-spacing: 0.1em;
   }
+
+  /* Fix for date input text color */
+  input[type="date"] {
+    color: #000 !important;
+    background-color: #fff !important;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+  }
+
+  /* Calendar component text color fixes */
+  .rdp-day {
+    color: #000 !important;
+  }
+
+  .rdp-day_selected {
+    color: #fff !important;
+  }
+
+  .rdp-day_today {
+    color: #1e40af !important;
+  }
 }
 
 /* Custom scrollbar */

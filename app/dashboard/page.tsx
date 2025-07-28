@@ -27,7 +27,13 @@ export default function CustomerDashboard() {
         if (retry < 5) {
           setTimeout(() => checkSession(retry + 1), 300)
         } else {
-          if (isMounted) window.location.href = "/login"
+          if (isMounted) {
+            // Clear any hash fragments from the URL
+            if (window.location.hash) {
+              window.history.replaceState(null, '', window.location.pathname)
+            }
+            router.push("/login")
+          }
         }
         return
       }
@@ -61,11 +67,11 @@ export default function CustomerDashboard() {
     }
     checkSession()
     return () => { isMounted = false }
-  }, [])
+  }, [router])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push("/login")
+    router.push("/")
   }
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

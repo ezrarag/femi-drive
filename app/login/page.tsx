@@ -3,18 +3,49 @@
 import { useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
+  const router = useRouter()
+
   const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin + "/dashboard" } })
+    await supabase.auth.signInWithOAuth({ 
+      provider: "google", 
+      options: { 
+        redirectTo: window.location.origin + "/dashboard" 
+      } 
+    })
   }
 
   useEffect(() => {
-    // Optionally, check if already logged in and redirect
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) window.location.href = "/dashboard"
+    // Handle auth state changes and redirects
+    const handleAuthChange = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        // Clear any hash fragments from the URL
+        if (window.location.hash) {
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+        router.push("/dashboard")
+      }
+    }
+
+    // Check initial session
+    handleAuthChange()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Clear any hash fragments from the URL
+        if (window.location.hash) {
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+        router.push("/dashboard")
+      }
     })
-  }, [])
+
+    return () => subscription.unsubscribe()
+  }, [router])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 relative overflow-hidden">
