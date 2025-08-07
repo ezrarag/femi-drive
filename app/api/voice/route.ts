@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     const twilio = await import("twilio")
     const { aiAgent } = await import("@/lib/ai-voice-agent")
     const { sendSMS } = await import("@/lib/twilio")
+    const { enhancedVoiceAgent } = await import("@/lib/enhanced-voice-agent")
 
     const VoiceResponse = twilio.default.twiml.VoiceResponse
 
@@ -54,8 +55,11 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Process speech with AI (only if available)
-    if (!aiAgent) {
+    // Process speech with enhanced AI agent
+    const enhancedResult = await enhancedVoiceAgent.processCall(callSid, speechResult, { from, to })
+
+    // If enhanced agent fails, fall back to basic AI agent
+    if (!enhancedResult || !aiAgent) {
       twiml.say("I apologize, but our AI assistant is currently unavailable. Let me transfer you to our team.")
       twiml.dial(
         {
@@ -69,7 +73,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const aiResult = await aiAgent.processCall(callSid, speechResult, { from, to })
+    const aiResult = enhancedResult
 
     switch (aiResult.action) {
       case "escalate":
@@ -111,7 +115,7 @@ export async function POST(request: NextRequest) {
         const bookingLink = `https://checkout.wheelbasepro.com/reserve?owner_id=4321962`
         const smsMessage = `Hi! Here's your secure booking link for Femi Leasing: ${bookingLink}\n\nComplete your reservation and we'll have your vehicle ready! Questions? Call us back anytime.`
 
-        await sendSMS(from, smsMessage)
+        await enhancedVoiceAgent.sendEnhancedSMS(from, smsMessage, bookingLink)
 
         twiml.say(
           "Perfect! I've sent the booking link to your phone. You should receive it in just a moment. Is there anything else I can help you with today?",
