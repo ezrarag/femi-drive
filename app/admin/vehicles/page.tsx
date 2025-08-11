@@ -25,7 +25,9 @@ export default function AdminVehiclesPage() {
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user || !user.email || !user.email.endsWith("@femileasing.com")) {
+      // TEMPORARY: Allow any email for development - REMOVE BEFORE PRODUCTION
+      // if (!user || !user.email || !user.email.endsWith("@femileasing.com")) {
+      if (!user || !user.email) {
         window.location.href = "/admin/login"
       } else {
         setAuthLoading(false)
@@ -99,6 +101,9 @@ export default function AdminVehiclesPage() {
             <Link href="/admin/dashboard" className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Dashboard</Link>
             <Link href="/admin/add-vehicle" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add Vehicle</Link>
           </div>
+        </div>
+        <div className="mb-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-xs text-yellow-800">
+          ⚠️ Development Mode: Email restrictions temporarily disabled
         </div>
         {loading ? (
           <div className="text-center py-16 text-gray-500">Loading vehicles...</div>
