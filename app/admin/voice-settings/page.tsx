@@ -141,18 +141,18 @@ export default function VoiceSettingsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Voice Settings</h1>
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+        <h1 className="text-2xl sm:text-3xl font-bold">Voice Settings</h1>
         <Badge variant="outline">Enhanced AI Voice System</Badge>
       </div>
 
       <Tabs defaultValue="settings" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-          <TabsTrigger value="voices">Voice Library</TabsTrigger>
-          <TabsTrigger value="test">Voice Test</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+          <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
+          <TabsTrigger value="voices" className="text-xs sm:text-sm">Voice Library</TabsTrigger>
+          <TabsTrigger value="test" className="text-xs sm:text-sm">Voice Test</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="settings" className="space-y-4">
@@ -164,7 +164,7 @@ export default function VoiceSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Speech Recognition</Label>
                   <div className="flex items-center space-x-2">
@@ -174,7 +174,7 @@ export default function VoiceSettingsPage() {
                         setSettings(prev => ({ ...prev, useDeepgram: checked }))
                       }
                     />
-                    <Label>Use Deepgram (Enhanced)</Label>
+                    <Label className="text-sm">Use Deepgram (Enhanced)</Label>
                   </div>
                 </div>
 
@@ -187,7 +187,7 @@ export default function VoiceSettingsPage() {
                         setSettings(prev => ({ ...prev, useElevenLabs: checked }))
                       }
                     />
-                    <Label>Use ElevenLabs (High Quality)</Label>
+                    <Label className="text-sm">Use ElevenLabs (High Quality)</Label>
                   </div>
                 </div>
               </div>
@@ -231,13 +231,13 @@ export default function VoiceSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {voices.map((voice) => (
-                  <Card key={voice.voice_id} className="p-4">
+                  <Card key={voice.voice_id} className="p-3 sm:p-4">
                     <div className="space-y-2">
-                      <h3 className="font-semibold">{voice.name}</h3>
-                      <p className="text-sm text-muted-foreground">{voice.description}</p>
-                      <Badge variant="secondary">{voice.category}</Badge>
+                      <h3 className="font-semibold text-sm sm:text-base">{voice.name}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{voice.description}</p>
+                      <Badge variant="secondary" className="text-xs">{voice.category}</Badge>
                     </div>
                   </Card>
                 ))}
@@ -261,6 +261,7 @@ export default function VoiceSettingsPage() {
                   value={testText}
                   onChange={(e) => setTestText(e.target.value)}
                   placeholder="Enter text to test..."
+                  className="text-sm"
                 />
               </div>
 
@@ -304,26 +305,26 @@ export default function VoiceSettingsPage() {
             </CardHeader>
             <CardContent>
               {analytics ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{analytics.totalCalls}</div>
-                    <div className="text-sm text-muted-foreground">Total Calls</div>
+                    <div className="text-xl sm:text-2xl font-bold">{analytics.totalCalls}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Total Calls</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{Math.round(analytics.averageDuration / 1000)}s</div>
-                    <div className="text-sm text-muted-foreground">Avg Duration</div>
+                    <div className="text-xl sm:text-2xl font-bold">{Math.round(analytics.averageDuration / 1000)}s</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Avg Duration</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{Math.round(analytics.averageConfidence * 100)}%</div>
-                    <div className="text-sm text-muted-foreground">Avg Confidence</div>
+                    <div className="text-xl sm:text-2xl font-bold">{Math.round(analytics.averageConfidence * 100)}%</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Avg Confidence</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{Math.round(analytics.bookingRate * 100)}%</div>
-                    <div className="text-sm text-muted-foreground">Booking Rate</div>
+                    <div className="text-xl sm:text-2xl font-bold">{Math.round(analytics.bookingRate * 100)}%</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Booking Rate</div>
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-muted-foreground">
+                <div className="text-center text-muted-foreground text-sm">
                   No analytics data available
                 </div>
               )}

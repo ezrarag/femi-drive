@@ -285,23 +285,23 @@ export default function InventoryPage() {
   return (
     <div className="min-h-screen bg-gray-100 text-neutral-900">
       {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between p-6">
-        <div className="flex gap-4">
+      <nav className="relative z-50 flex items-center justify-between p-4 sm:p-6">
+        <div className="flex gap-2 sm:gap-4">
           <Link
             href="/"
-            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all"
+            className="nav-text px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all text-xs sm:text-sm"
           >
             Home
           </Link>
           <Link
             href="/inventory"
-            className="nav-text px-4 py-2 bg-neutral-900 text-white rounded-full border border-neutral-900 transition-all"
+            className="nav-text px-3 sm:px-4 py-2 bg-neutral-900 text-white rounded-full border border-neutral-900 transition-all text-xs sm:text-sm"
           >
             Fleet
           </Link>
           <Link
             href="/services"
-            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all"
+            className="nav-text px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all text-xs sm:text-sm"
           >
             Services
           </Link>
@@ -310,17 +310,17 @@ export default function InventoryPage() {
         {/* Center Logo */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="text-center">
-            <div className="text-sm font-bold tracking-widest">FE</div>
-            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
+            <div className="text-xs sm:text-sm font-bold tracking-widest">FE</div>
+            <div className="text-xs sm:text-sm font-bold tracking-widest -mt-1">MI</div>
           </div>
         </div>
 
-        <div className="flex gap-4 items-center relative">
+        <div className="flex gap-2 sm:gap-4 items-center relative">
           {/* Dropdown Menu */}
           <div className="relative">
             <button
               onClick={() => setMenuOpen((open) => !open)}
-              className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all font-medium"
+              className="nav-text px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all font-medium text-xs sm:text-sm"
               aria-haspopup="true"
               aria-expanded={menuOpen}
               aria-controls="main-menu-dropdown"
@@ -354,26 +354,26 @@ export default function InventoryPage() {
           {/* User/Login Button */}
           <button
             onClick={() => router.push(user ? "/dashboard" : "/login")}
-            className="nav-text px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all flex items-center gap-2"
+            className="nav-text px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all flex items-center gap-2 text-xs sm:text-sm"
             aria-label={user ? "Dashboard" : "Login"}
           >
-            <User className="w-5 h-5" />
+            <User className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden sm:inline">{user ? "Dashboard" : "Login"}</span>
           </button>
         </div>
       </nav>
 
       {/* Header Section */}
-      <div className="px-6 py-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="display-heading text-6xl md:text-8xl">FLEET</h1>
-          <h2 className="display-heading text-6xl md:text-8xl">OVERVIEW</h2>
+      <div className="px-4 sm:px-6 py-6 sm:py-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+          <h1 className="display-heading text-4xl sm:text-6xl md:text-8xl">FLEET</h1>
+          <h2 className="display-heading text-4xl sm:text-6xl md:text-8xl">OVERVIEW</h2>
         </div>
       </div>
 
       {/* Vehicle Grid */}
-      <div className="px-6 pb-32">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="px-4 sm:px-6 pb-32">
+        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
           {loadingVehicles ? (
             <div className="text-center py-16">
               <p className="body-text text-neutral-600">Loading vehicles...</p>
@@ -390,11 +390,11 @@ export default function InventoryPage() {
               if (vehicle.size === "large") {
                 return (
                   <div key={vehicle.id} className="group">
-                    <div className="label-text text-neutral-600 mb-4">
+                    <div className="label-text text-neutral-600 mb-3 sm:mb-4 text-xs sm:text-sm">
                       {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}
                     </div>
                     <div
-                      className={`relative w-full h-96 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
+                      className={`relative w-full h-64 sm:h-80 md:h-96 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
                       onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
@@ -403,46 +403,46 @@ export default function InventoryPage() {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute top-4 left-4 flex gap-2">
+                      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 flex gap-1 sm:gap-2">
                         {vehicle.gigReady && (
-                          <div className="px-3 py-1 bg-green-500 text-white label-text rounded-full">GIG READY</div>
+                          <div className="px-2 sm:px-3 py-1 bg-green-500 text-white label-text rounded-full text-xs">GIG READY</div>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFavorite(vehicle.id) }}
                           className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all"
                           aria-label={savedVehicleIds.includes(vehicle.id) ? "Unsave vehicle" : "Save vehicle"}
                         >
-                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-5 h-5 text-red-500 fill-red-500" : "w-5 h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
+                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-5 sm:h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
                         </button>
                       </div>
                       <div
-                        className={`absolute top-4 right-4 px-3 py-1 label-text rounded-full ${
+                        className={`absolute top-2 sm:top-4 right-2 sm:right-4 px-2 sm:px-3 py-1 label-text rounded-full text-xs ${
                           vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
                         }`}
                       >
                         {vehicle.available ? "AVAILABLE" : "RENTED"}
                       </div>
-                      <div className="absolute bottom-4 right-4 flex gap-2">
+                      <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 flex gap-1 sm:gap-2">
                         <button
                           data-action="details"
                           onClick={(e) => {
                             e.stopPropagation()
                             openModal(vehicle)
                           }}
-                          className="px-4 py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all"
+                          className="px-2 sm:px-4 py-1 sm:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs sm:text-sm"
                         >
                           DETAILS
                         </button>
                         {vehicle.available && (
-                          <div className="px-4 py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-2">
+                          <div className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm">
                             {isBookingOpen ? (
                               <>
-                                CLOSE BOOKING
+                                CLOSE
                                 <X className="w-3 h-3" />
                               </>
                             ) : (
                               <>
-                                CLICK TO BOOK
+                                BOOK
                                 <Calendar className="w-3 h-3" />
                               </>
                             )}
@@ -453,13 +453,13 @@ export default function InventoryPage() {
 
                     {/* Inline Booking Widget for Large Cards */}
                     {isBookingOpen && vehicle.available && (
-                      <div className="mt-6 bg-white rounded-lg border border-neutral-200 p-6 shadow-lg flex flex-col items-center">
-                        <h3 className="display-heading text-xl mb-4">
+                      <div className="mt-4 sm:mt-6 bg-white rounded-lg border border-neutral-200 p-4 sm:p-6 shadow-lg flex flex-col items-center">
+                        <h3 className="display-heading text-lg sm:text-xl mb-3 sm:mb-4 text-center">
                           Book {vehicle.year} {vehicle.make} {vehicle.model}
                         </h3>
                         <Button
                           onClick={() => openModal(vehicle)}
-                          className="w-full max-w-xs py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-lg"
+                          className="w-full max-w-xs py-2 sm:py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-base sm:text-lg"
                         >
                           Book This Vehicle
                         </Button>
@@ -473,7 +473,7 @@ export default function InventoryPage() {
             })
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
             {filteredVehicles
               .filter((v) => v.size === "medium" || v.size === "small")
               .map((vehicle, index) => {
@@ -482,11 +482,11 @@ export default function InventoryPage() {
 
                 return (
                   <div key={vehicle.id} className="group">
-                    <div className="label-text text-neutral-600 mb-4">
+                    <div className="label-text text-neutral-600 mb-3 sm:mb-4 text-xs sm:text-sm">
                       {cardNumber} {vehicle.make.toUpperCase()} - {vehicle.model.toUpperCase()} {vehicle.category}
                     </div>
                     <div
-                      className={`relative w-full h-64 aspect-video overflow-hidden rounded-lg bg-gray-100 ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
+                      className={`relative w-full h-48 sm:h-64 aspect-video overflow-hidden rounded-lg bg-gray-100 ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
                       onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
@@ -495,38 +495,38 @@ export default function InventoryPage() {
                         fill
                         className="object-cover object-center w-full h-full aspect-video"
                       />
-                      <div className="absolute top-4 left-4 flex gap-2">
+                      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 flex gap-1 sm:gap-2">
                         {vehicle.gigReady && (
-                          <div className="px-3 py-1 bg-green-500 text-white label-text rounded-full">GIG READY</div>
+                          <div className="px-2 sm:px-3 py-1 bg-green-500 text-white label-text rounded-full text-xs">GIG READY</div>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFavorite(vehicle.id) }}
                           className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all"
                           aria-label={savedVehicleIds.includes(vehicle.id) ? "Unsave vehicle" : "Save vehicle"}
                         >
-                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-5 h-5 text-red-500 fill-red-500" : "w-5 h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
+                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-5 sm:h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
                         </button>
                       </div>
                       <div
-                        className={`absolute top-4 right-4 px-3 py-1 label-text rounded-full ${
+                        className={`absolute top-2 sm:top-4 right-2 sm:right-4 px-2 sm:px-3 py-1 label-text rounded-full text-xs ${
                           vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
                         }`}
                       >
                         {vehicle.available ? "AVAILABLE" : "RENTED"}
                       </div>
-                      <div className="absolute bottom-4 right-4 flex gap-2">
+                      <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 flex gap-1 sm:gap-2">
                         <button
                           data-action="details"
                           onClick={(e) => {
                             e.stopPropagation()
                             openModal(vehicle)
                           }}
-                          className="px-3 py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs"
+                          className="px-2 sm:px-3 py-1 sm:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs"
                         >
                           DETAILS
                         </button>
                         {vehicle.available && (
-                          <div className="px-3 py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs">
+                          <div className="px-2 sm:px-3 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs">
                             {isBookingOpen ? (
                               <>
                                 CLOSE
@@ -534,7 +534,7 @@ export default function InventoryPage() {
                               </>
                             ) : (
                               <>
-                                CLICK TO BOOK
+                                BOOK
                                 <Calendar className="w-3 h-3" />
                               </>
                             )}
@@ -545,13 +545,13 @@ export default function InventoryPage() {
 
                     {/* Inline Booking Widget for Medium/Small Cards */}
                     {isBookingOpen && vehicle.available && (
-                      <div className="mt-4 bg-white rounded-lg border border-neutral-200 p-4 shadow-lg flex flex-col items-center">
-                        <h3 className="display-heading text-lg mb-3">
+                      <div className="mt-3 sm:mt-4 bg-white rounded-lg border border-neutral-200 p-3 sm:p-4 shadow-lg flex flex-col items-center">
+                        <h3 className="display-heading text-base sm:text-lg mb-2 sm:mb-3 text-center">
                           Book {vehicle.year} {vehicle.make} {vehicle.model}
                         </h3>
                         <Button
                           onClick={() => openModal(vehicle)}
-                          className="w-full max-w-xs py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-base"
+                          className="w-full max-w-xs py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-sm sm:text-base"
                         >
                           Book This Vehicle
                         </Button>

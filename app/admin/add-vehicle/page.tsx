@@ -89,9 +89,9 @@ export default function AddVehiclePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold mb-6">Add Vehicle</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-4 sm:p-8">
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Add Vehicle</h1>
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Name</label>
             <input
@@ -99,7 +99,7 @@ export default function AddVehiclePage() {
               name="name"
               value={form.name}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               required
             />
           </div>
@@ -110,7 +110,7 @@ export default function AddVehiclePage() {
               name="year"
               value={form.year}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               required
             />
           </div>
@@ -121,7 +121,7 @@ export default function AddVehiclePage() {
               name="slug"
               value={form.slug}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               required
             />
           </div>
@@ -131,7 +131,7 @@ export default function AddVehiclePage() {
               name="description"
               value={form.description}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               rows={3}
               required
             />
@@ -143,7 +143,7 @@ export default function AddVehiclePage() {
               name="price_per_day"
               value={form.price_per_day}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               required
             />
           </div>
@@ -154,7 +154,7 @@ export default function AddVehiclePage() {
               name="image_url"
               value={form.image_url}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               required
             />
           </div>
@@ -165,7 +165,7 @@ export default function AddVehiclePage() {
               name="booking_url"
               value={form.booking_url}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               required
             />
           </div>
@@ -181,7 +181,7 @@ export default function AddVehiclePage() {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-2 sm:py-3 rounded hover:bg-blue-700 transition text-sm sm:text-base"
             disabled={loading}
           >
             {loading ? "Adding..." : "Add Vehicle"}

@@ -64,50 +64,52 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black/40" />
       </div>
       {/* Main Content */}
-      <main className="relative z-40 flex items-center justify-center min-h-[calc(100vh-120px)]">
-        <div className="w-full max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+      <main className="relative z-40 flex items-center justify-center min-h-[calc(100vh-120px)] px-4 sm:px-6">
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 items-center">
           {/* Left Content */}
-          <div className="text-left">
-            <div className="label-text mb-4 opacity-80">{slides[currentSlide].label}</div>
-            <h1 className="display-heading text-6xl md:text-8xl lg:text-9xl leading-none mb-8">
+          <div className="text-left order-2 lg:order-1">
+            <div className="label-text mb-2 sm:mb-4 opacity-80">{slides[currentSlide].label}</div>
+            <h1 className="display-heading text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-9xl leading-none mb-4 sm:mb-8">
               {slides[currentSlide].title}
             </h1>
-            <div className="body-text leading-relaxed max-w-md mb-8">{slides[currentSlide].description}</div>
-            <Link href="/contact" className="label-text underline hover:no-underline transition-all">
+            <div className="body-text leading-relaxed max-w-md mb-4 sm:mb-8 text-sm sm:text-base">{slides[currentSlide].description}</div>
+            <Link href="/contact" className="label-text underline hover:no-underline transition-all text-sm sm:text-base">
               Read More
             </Link>
           </div>
 
           {/* Center CTA */}
-          <div className="flex justify-center">
+          <div className="flex justify-center order-1 lg:order-2 mb-6 lg:mb-0">
             <Link
               href="/inventory"
-              className="nav-text px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all text-center"
+              className="nav-text px-6 sm:px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all text-center text-sm sm:text-base"
             >
               {slides[currentSlide].cta}
             </Link>
           </div>
 
           {/* Right Content */}
-          <div className="text-right">
-            <h2 className="display-heading text-6xl md:text-8xl lg:text-9xl leading-none mb-8">
+          <div className="text-right order-3">
+            <h2 className="display-heading text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-9xl leading-none mb-4 sm:mb-8">
               {slides[currentSlide].subtitle}
             </h2>
-            <div className="label-text mb-4 opacity-80">{slides[currentSlide].info}</div>
+            <div className="label-text mb-2 sm:mb-4 opacity-80 text-sm sm:text-base">{slides[currentSlide].info}</div>
 
             {/* Navigation Arrows */}
-            <div className="flex justify-end gap-4 mt-8">
+            <div className="flex justify-end gap-2 sm:gap-4 mt-4 sm:mt-8">
               <button
                 onClick={prevSlide}
-                className="p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+                className="p-2 sm:p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+                aria-label="Previous slide"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={nextSlide}
-                className="p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+                className="p-2 sm:p-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
+                aria-label="Next slide"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
@@ -115,11 +117,11 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-40 px-6 pb-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4 label-text">
+      <footer className="relative z-40 px-4 sm:px-6 pb-4 sm:pb-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+          <div className="flex items-center gap-2 sm:gap-4 label-text text-xs sm:text-sm">
             <span>©2025 Femi Leasing</span>
-            <span>·</span>
+            <span className="hidden sm:inline">·</span>
             <Link href="/privacy" className="hover:underline">
               Privacy
             </Link>

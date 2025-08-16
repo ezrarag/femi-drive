@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@deepgram/sdk": "^4.11.2",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "latest",
     "@radix-ui/react-alert-dialog": "latest",
@@ -53,6 +54,7 @@
     "react": "^19",
     "react-day-picker": "latest",
     "react-dom": "^19",
+    "react-dropzone": "^14.3.8",
     "react-hook-form": "latest",
     "react-resizable-panels": "latest",
     "recharts": "latest",
@@ -61,8 +63,7 @@
     "tailwindcss-animate": "^1.0.7",
     "twilio": "latest",
     "vaul": "latest",
-    "zod": "^3.24.1",
-    "@deepgram/sdk": "^4.11.2"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22",
