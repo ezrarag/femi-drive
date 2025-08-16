@@ -1,16 +1,22 @@
 // Guard against missing OpenAI API key
 let openai: any = null
 
-if (process.env.OPENAI_API_KEY) {
-  try {
-    const OpenAI = require("openai")
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    })
-  } catch (error) {
-    console.warn("OpenAI not available:", error.message)
+// Initialize OpenAI client asynchronously
+async function initializeOpenAI() {
+  if (process.env.OPENAI_API_KEY && !openai) {
+    try {
+      const OpenAI = await import('openai')
+      openai = new OpenAI.default({
+        apiKey: process.env.OPENAI_API_KEY,
+      })
+    } catch (error) {
+      console.warn("OpenAI not available:", error.message)
+    }
   }
 }
+
+// Initialize on module load
+initializeOpenAI()
 
 export interface CallContext {
   callSid: string

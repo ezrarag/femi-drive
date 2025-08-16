@@ -170,17 +170,22 @@ export async function POST(request: NextRequest) {
     console.error("Voice processing error:", error)
 
     // Fallback response
-    const twilio = require("twilio")
-    const VoiceResponse = twilio.twiml.VoiceResponse
-    const twiml = new VoiceResponse()
+    try {
+      const twilio = await import("twilio")
+      const VoiceResponse = twilio.default.twiml.VoiceResponse
+      const twiml = new VoiceResponse()
 
-    twiml.say(
-      "I apologize, but I'm experiencing technical difficulties. Please call back in a few minutes or visit our website at femi leasing dot com.",
-    )
-    twiml.hangup()
+      twiml.say(
+        "I apologize, but I'm experiencing technical difficulties. Please call back in a few minutes or visit our website at femi leasing dot com.",
+      )
+      twiml.hangup()
 
-    return new NextResponse(twiml.toString(), {
-      headers: { "Content-Type": "text/xml" },
-    })
+      return new NextResponse(twiml.toString(), {
+        headers: { "Content-Type": "text/xml" },
+      })
+    } catch (fallbackError) {
+      console.error("Fallback error:", fallbackError)
+      return new NextResponse("Service temporarily unavailable", { status: 503 })
+    }
   }
 }

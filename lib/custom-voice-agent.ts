@@ -74,142 +74,177 @@ export class CustomVoiceAgent extends EventEmitter {
 
   private async processWithWhisper(audioBuffer: Buffer) {
     // OpenAI Whisper API implementation
-    const OpenAI = require('openai')
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    })
+    try {
+      const OpenAI = await import('openai')
+      const openai = new OpenAI.default({
+        apiKey: process.env.OPENAI_API_KEY,
+      })
 
-    const transcription = await openai.audio.transcriptions.create({
-      file: audioBuffer,
-      model: "whisper-1",
-    })
+      const transcription = await openai.audio.transcriptions.create({
+        file: audioBuffer,
+        model: "whisper-1",
+      })
 
-    return {
-      text: transcription.text,
-      confidence: 0.9 // Whisper doesn't return confidence scores
+      return {
+        text: transcription.text,
+        confidence: 0.9 // Whisper doesn't return confidence scores
+      }
+    } catch (error) {
+      console.error('Whisper processing failed:', error)
+      throw new Error('Speech-to-text processing failed')
     }
   }
 
   private async processWithDeepgram(audioBuffer: Buffer) {
     // Deepgram API implementation
-    const { Deepgram } = require('@deepgram/sdk')
-    const deepgram = new Deepgram(process.env.DEEPGRAM_API_KEY)
+    try {
+      const { Deepgram } = await import('@deepgram/sdk')
+      const deepgram = new Deepgram(process.env.DEEPGRAM_API_KEY)
 
-    const response = await deepgram.transcription.preRecorded(
-      { buffer: audioBuffer, mimetype: 'audio/wav' },
-      {
-        smart_format: true,
-        model: 'nova-2',
-        language: this.config.language,
+      const response = await deepgram.transcription.preRecorded(
+        { buffer: audioBuffer, mimetype: 'audio/wav' },
+        {
+          smart_format: true,
+          model: 'nova-2',
+          language: this.config.language,
+        }
+      )
+
+      return {
+        text: response.results?.channels[0]?.alternatives[0]?.transcript || '',
+        confidence: response.results?.channels[0]?.alternatives[0]?.confidence || 0
       }
-    )
-
-    return {
-      text: response.results?.channels[0]?.alternatives[0]?.transcript || '',
-      confidence: response.results?.channels[0]?.alternatives[0]?.confidence || 0
+    } catch (error) {
+      console.error('Deepgram processing failed:', error)
+      throw new Error('Speech-to-text processing failed')
     }
   }
 
   private async processWithAssemblyAI(audioBuffer: Buffer) {
     // AssemblyAI API implementation
-    const response = await fetch('https://api.assemblyai.com/v2/transcript', {
-      method: 'POST',
-      headers: {
-        'Authorization': process.env.ASSEMBLYAI_API_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        audio_url: audioBuffer.toString('base64'),
-        language_code: this.config.language,
-      }),
-    })
+    try {
+      const response = await fetch('https://api.assemblyai.com/v2/transcript', {
+        method: 'POST',
+        headers: {
+          'Authorization': process.env.ASSEMBLYAI_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          audio_url: audioBuffer.toString('base64'),
+          language_code: this.config.language,
+        }),
+      })
 
-    const result = await response.json()
-    return {
-      text: result.text || '',
-      confidence: result.confidence || 0
+      const result = await response.json()
+      return {
+        text: result.text || '',
+        confidence: result.confidence || 0
+      }
+    } catch (error) {
+      console.error('AssemblyAI processing failed:', error)
+      throw new Error('Speech-to-text processing failed')
     }
   }
 
   private async processWithAI(text: string): Promise<string> {
     // Use your existing OpenAI integration
-    const OpenAI = require('openai')
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    })
+    try {
+      const OpenAI = await import('openai')
+      const openai = new OpenAI.default({
+        apiKey: process.env.OPENAI_API_KEY,
+      })
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: `You are Femi, an AI assistant for Femi Leasing. Keep responses concise and helpful.`
-        },
-        ...this.conversationHistory.map(msg => ({
-          role: msg.role,
-          content: msg.content
-        }))
-      ],
-      max_tokens: 150,
-      temperature: 0.7,
-    })
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: `You are Femi, an AI assistant for Femi Leasing. Keep responses concise and helpful.`
+          },
+          ...this.conversationHistory.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }))
+        ],
+        max_tokens: 150,
+        temperature: 0.7,
+      })
 
-    return completion.choices[0]?.message?.content || "I apologize, I didn't understand that."
+      return completion.choices[0]?.message?.content || "I apologize, I didn't understand that."
+    } catch (error) {
+      console.error('AI processing failed:', error)
+      return "I apologize, I'm experiencing technical difficulties."
+    }
   }
 
   private async synthesizeWithElevenLabs(text: string): Promise<Buffer> {
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${this.config.voiceId || '21m00Tcm4TlvDq8ikWAM'}`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'audio/mpeg',
-        'Content-Type': 'application/json',
-        'xi-api-key': process.env.ELEVENLABS_API_KEY,
-      },
-      body: JSON.stringify({
-        text: text,
-        model_id: 'eleven_monolingual_v1',
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.5,
+    try {
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${this.config.voiceId || '21m00Tcm4TlvDq8ikWAM'}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': process.env.ELEVENLABS_API_KEY,
         },
-      }),
-    })
+        body: JSON.stringify({
+          text: text,
+          model_id: 'eleven_monolingual_v1',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.5,
+          },
+        }),
+      })
 
-    return Buffer.from(await response.arrayBuffer())
+      return Buffer.from(await response.arrayBuffer())
+    } catch (error) {
+      console.error('ElevenLabs synthesis failed:', error)
+      throw new Error('Text-to-speech synthesis failed')
+    }
   }
 
   private async synthesizeWithAzure(text: string): Promise<Buffer> {
     // Azure Cognitive Services TTS implementation
-    const response = await fetch(`https://eastus.tts.speech.microsoft.com/cognitiveservices/v1`, {
-      method: 'POST',
-      headers: {
-        'Ocp-Apim-Subscription-Key': process.env.AZURE_SPEECH_KEY,
-        'Content-Type': 'application/ssml+xml',
-        'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3',
-      },
-      body: `<speak version='1.0' xml:lang='en-US'>
-        <voice xml:lang='en-US' xml:gender='Female' name='en-US-JennyNeural'>
-          ${text}
-        </voice>
-      </speak>`,
-    })
+    try {
+      const response = await fetch(`https://eastus.tts.speech.microsoft.com/cognitiveservices/v1`, {
+        method: 'POST',
+        headers: {
+          'Ocp-Apim-Subscription-Key': process.env.AZURE_SPEECH_KEY,
+          'Content-Type': 'application/ssml+xml',
+          'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3',
+        },
+        body: `<speak version='1.0' xml:lang='en-US'>
+          <voice xml:lang='en-US' xml:gender='Female' name='en-US-JennyNeural'>
+            ${text}
+          </voice>
+        </speak>`,
+      })
 
-    return Buffer.from(await response.arrayBuffer())
+      return Buffer.from(await response.arrayBuffer())
+    } catch (error) {
+      console.error('Azure synthesis failed:', error)
+      throw new Error('Text-to-speech synthesis failed')
+    }
   }
 
   private async synthesizeWithGoogle(text: string): Promise<Buffer> {
     // Google Cloud Text-to-Speech implementation
-    const { TextToSpeechClient } = require('@google-cloud/text-to-speech')
-    const client = new TextToSpeechClient()
+    try {
+      const { TextToSpeechClient } = await import('@google-cloud/text-to-speech')
+      const client = new TextToSpeechClient()
 
-    const request = {
-      input: { text: text },
-      voice: { languageCode: 'en-US', ssmlGender: 'NEUTRAL' },
-      audioConfig: { audioEncoding: 'MP3' },
+      const request = {
+        input: { text: text },
+        voice: { languageCode: 'en-US', ssmlGender: 'NEUTRAL' },
+        audioConfig: { audioEncoding: 'MP3' },
+      }
+
+      const [response] = await client.synthesizeSpeech(request)
+      return Buffer.from(response.audioContent, 'base64')
+    } catch (error) {
+      console.error('Google synthesis failed:', error)
+      throw new Error('Text-to-speech synthesis failed')
     }
-
-    const [response] = await client.synthesizeSpeech(request)
-    return Buffer.from(response.audioContent, 'base64')
   }
 
   getConversationHistory() {

@@ -54,11 +54,11 @@ export class EnhancedVoiceAgent {
     const aiResult = await aiAgent.processCall(callSid, processedText, callInfo)
 
     // Generate audio response
-    let audioBuffer: Buffer | null = null
+    let generatedAudioBuffer: Buffer | null = null
 
     if (this.config.useElevenLabs && elevenLabsClient) {
       try {
-        audioBuffer = await elevenLabsClient.textToSpeech(aiResult.response)
+        generatedAudioBuffer = await elevenLabsClient.textToSpeech(aiResult.response)
         console.log('Generated ElevenLabs audio response')
       } catch (error) {
         console.warn('ElevenLabs TTS failed, will use Twilio TTS:', error)
@@ -67,7 +67,7 @@ export class EnhancedVoiceAgent {
 
     return {
       ...aiResult,
-      audioBuffer,
+      audioBuffer: generatedAudioBuffer,
       confidence
     }
   }

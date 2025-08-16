@@ -4,8 +4,11 @@ let twilioClient: any = null
 // Guard against missing environment variables
 if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
   try {
-    const twilio = require("twilio")
-    twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+    import("twilio").then((twilio) => {
+      twilioClient = twilio.default(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
+    }).catch((error) => {
+      console.warn("Twilio not available:", error.message)
+    })
   } catch (error) {
     console.warn("Twilio not available:", error.message)
   }
