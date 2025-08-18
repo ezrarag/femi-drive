@@ -2,6 +2,19 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Only run middleware on specific routes that need authentication
+  const { pathname } = request.nextUrl
+  
+  // Skip middleware for static files and API routes
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/static') ||
+    pathname.includes('.')
+  ) {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -28,9 +41,10 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired - required for Server Components
-  // https://supabase.com/docs/guides/auth/auth-helpers/nextjs#managing-sessions-with-middleware
-  await supabase.auth.getUser()
+  // Only refresh session for protected routes
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+    await supabase.auth.getUser()
+  }
 
   return supabaseResponse
 }
@@ -42,8 +56,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - api routes (handled separately)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

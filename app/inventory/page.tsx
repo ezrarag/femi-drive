@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { toast } from "sonner";
+import CheckoutModal from "@/components/CheckoutModal";
 
 // Add type declaration for window.Outdoorsy
 declare global {
@@ -49,6 +50,7 @@ export default function InventoryPage() {
   const router = useRouter()
   const [savedVehicleIds, setSavedVehicleIds] = useState<number[]>([])
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [bookingForm, setBookingForm] = useState({ start_date: "", end_date: "" });
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingError, setBookingError] = useState("");
@@ -72,7 +74,43 @@ export default function InventoryPage() {
       }
       setLoadingVehicles(false)
     }
+    
+    // Handle OAuth hash fragments if they exist
+    const handleHashFragment = async () => {
+      if (window.location.hash && window.location.hash.includes('access_token')) {
+        console.log('Detected OAuth hash fragment, attempting to handle...')
+        
+        // Extract the hash parameters
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        
+        if (accessToken) {
+          try {
+            // Set the session manually
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: hashParams.get('refresh_token') || '',
+            })
+            
+            if (!error) {
+              console.log('Session set successfully from hash fragment')
+              // Clear the hash fragment
+              window.history.replaceState(null, '', window.location.pathname)
+              // Refresh the page to update the user state
+              window.location.reload()
+            } else {
+              console.error('Error setting session from hash:', error)
+            }
+          } catch (err) {
+            console.error('Unexpected error handling hash fragment:', err)
+          }
+        }
+      }
+    }
+    
     fetchVehicles()
+    handleHashFragment()
+    
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
     // Fetch saved vehicles for logged-in user
     if (user) {
@@ -239,33 +277,10 @@ export default function InventoryPage() {
       setBookingError("Please select start and end dates.");
       return;
     }
-    setBookingLoading(true);
-    setBookingError("");
-    setBookingSuccess(false);
-    const res = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: user.id,
-        vehicle_id: selectedVehicle.id,
-        start_date: bookingForm.start_date,
-        end_date: bookingForm.end_date,
-        total_price: selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1),
-      }),
-    });
-    const data = await res.json();
-    setBookingLoading(false);
-    if (!res.ok) {
-      setBookingError(data.error || "Booking failed. Try again.");
-    } else {
-      setBookingSuccess(true);
-      toast.success("Booking successful!", {
-        description: "Your vehicle has been booked successfully.",
-      });
-      setTimeout(() => {
-        closeBookingModal();
-      }, 2000);
-    }
+    
+    // Close the booking modal and show checkout modal
+    setShowBookingModal(false);
+    setShowCheckoutModal(true);
   };
 
   const handleGoogleLogin = async () => {
@@ -753,11 +768,11 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {/* Booking Modal */}
+      {/* Booking Modal - Date Selection Only */}
       <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Book {selectedVehicle?.year} {selectedVehicle?.make} {selectedVehicle?.model}</DialogTitle>
+            <DialogTitle>Select Dates for {selectedVehicle?.year} {selectedVehicle?.make} {selectedVehicle?.model}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleBookingSubmit} className="space-y-4">
             <div>
@@ -786,21 +801,46 @@ export default function InventoryPage() {
             </div>
             <div>
               <Label>Total Price</Label>
-              <div className="font-semibold">
+              <div className="font-semibold text-lg">
                 {bookingForm.start_date && bookingForm.end_date && selectedVehicle ?
                   `$${selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}` :
                   "$0.00"}
               </div>
             </div>
             {bookingError && <div className="text-red-600 text-sm">{bookingError}</div>}
-            {bookingSuccess && <div className="text-green-600 text-sm">Booking successful!</div>}
             <DialogFooter>
-              <Button type="submit" disabled={bookingLoading}>{bookingLoading ? "Booking..." : "Book Now"}</Button>
+              <Button type="submit" disabled={!bookingForm.start_date || !bookingForm.end_date}>
+                Continue to Checkout
+              </Button>
               <Button type="button" variant="outline" onClick={closeBookingModal}>Cancel</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Checkout Modal */}
+      {selectedVehicle && bookingForm.start_date && bookingForm.end_date && (
+        <CheckoutModal
+          isOpen={showCheckoutModal}
+          onClose={() => setShowCheckoutModal(false)}
+          vehicle={selectedVehicle}
+          bookingDetails={{
+            start_date: bookingForm.start_date,
+            end_date: bookingForm.end_date,
+            total_price: selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1),
+            total_days: Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1
+          }}
+          onSuccess={() => {
+            setShowCheckoutModal(false);
+            setShowBookingModal(false);
+            setBookingForm({ start_date: "", end_date: "" });
+            setBookingError("");
+            setBookingSuccess(false);
+            // Refresh the page or update vehicle availability
+            window.location.reload();
+          }}
+        />
+      )}
 
       {/* Bottom Menu Overlay */}
       <AnimatePresence>

@@ -26,6 +26,39 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
+    // Handle OAuth hash fragments if they exist
+    const handleHashFragment = async () => {
+      if (window.location.hash && window.location.hash.includes('access_token')) {
+        console.log('Detected OAuth hash fragment on login page, attempting to handle...')
+        
+        // Extract the hash parameters
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        
+        if (accessToken) {
+          try {
+            // Set the session manually
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: hashParams.get('refresh_token') || '',
+            })
+            
+            if (!error) {
+              console.log('Session set successfully from hash fragment')
+              // Clear the hash fragment
+              window.history.replaceState(null, '', window.location.pathname)
+              // Redirect to dashboard
+              router.push("/dashboard")
+            } else {
+              console.error('Error setting session from hash:', error)
+            }
+          } catch (err) {
+            console.error('Unexpected error handling hash fragment:', err)
+          }
+        }
+      }
+    }
+    
     // Handle auth state changes and redirects
     const handleAuthChange = async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -38,7 +71,8 @@ export default function LoginPage() {
       }
     }
 
-    // Check initial session
+    // Check initial session and handle hash fragments
+    handleHashFragment()
     handleAuthChange()
 
     // Listen for auth state changes

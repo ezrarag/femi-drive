@@ -8,6 +8,8 @@ export async function GET(request: NextRequest) {
   const error = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
 
+  console.log('Auth callback received:', { code: !!code, error, errorDescription, url: request.url })
+
   if (error) {
     console.error('OAuth error:', error, errorDescription)
     return NextResponse.redirect(
@@ -42,15 +44,18 @@ export async function GET(request: NextRequest) {
     )
     
     try {
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
+      console.log('Exchanging code for session...')
+      const { error: exchangeError, data } = await supabase.auth.exchangeCodeForSession(code)
       
-      if (error) {
-        console.error('Session exchange error:', error)
+      if (exchangeError) {
+        console.error('Session exchange error:', exchangeError)
         return NextResponse.redirect(
           `${requestUrl.origin}/login?error=${encodeURIComponent('Authentication failed. Please try again.')}`
         )
       }
 
+      console.log('Session exchange successful, user:', data.user?.email)
+      
       // Successful authentication - redirect to inventory page where user was trying to book
       return NextResponse.redirect(`${requestUrl.origin}/inventory`)
     } catch (err) {
@@ -62,5 +67,6 @@ export async function GET(request: NextRequest) {
   }
 
   // No code or error - redirect to login
+  console.log('No code or error found, redirecting to login')
   return NextResponse.redirect(`${requestUrl.origin}/login`)
 }
