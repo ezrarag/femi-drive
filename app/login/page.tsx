@@ -9,12 +9,20 @@ export default function LoginPage() {
   const router = useRouter()
 
   const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ 
-      provider: "google", 
-      options: { 
-        redirectTo: window.location.origin + "/dashboard" 
-      } 
-    })
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ 
+        provider: "google", 
+        options: { 
+          redirectTo: window.location.origin + "/auth/callback" 
+        } 
+      })
+      
+      if (error) {
+        console.error('Login error:', error)
+      }
+    } catch (err) {
+      console.error('Unexpected login error:', err)
+    }
   }
 
   useEffect(() => {

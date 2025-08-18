@@ -269,12 +269,24 @@ export default function InventoryPage() {
   };
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ 
-      provider: "google", 
-      options: { 
-        redirectTo: window.location.origin + "/inventory" 
-      } 
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ 
+        provider: "google", 
+        options: { 
+          redirectTo: window.location.origin + "/auth/callback" 
+        } 
+      });
+      
+      if (error) {
+        toast.error("Login failed", {
+          description: error.message,
+        });
+      }
+    } catch (err) {
+      toast.error("Login failed", {
+        description: "An unexpected error occurred. Please try again.",
+      });
+    }
   };
 
   // Clean up script when component unmounts
