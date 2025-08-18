@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calendar, CreditCard, User, Mail, Phone, MapPin } from "lucide-react"
+import { Calendar, CreditCard, User, Mail, Phone, MapPin, Chrome } from "lucide-react"
 import { toast } from "sonner"
+import { supabase } from "@/lib/supabase"
 
 interface CheckoutModalProps {
   isOpen: boolean
@@ -31,6 +32,8 @@ export default function CheckoutModal({
 }: CheckoutModalProps) {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [authLoading, setAuthLoading] = useState(false)
+  const [user, setUser] = useState<any>(null)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -46,6 +49,36 @@ export default function CheckoutModal({
     cardholderName: ""
   })
 
+  // Check if user is already authenticated when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      checkUserAuth()
+    }
+  }, [isOpen])
+
+  const checkUserAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      setUser(user)
+      populateFormWithUserData(user)
+    }
+  }
+
+  const populateFormWithUserData = (user: any) => {
+    // Extract name from user metadata
+    const fullName = user.user_metadata?.full_name || user.user_metadata?.name || ""
+    const [firstName, ...lastNameParts] = fullName.split(" ")
+    const lastName = lastNameParts.join(" ") || ""
+    
+    setFormData(prev => ({
+      ...prev,
+      firstName: firstName || "",
+      lastName: lastName || "",
+      email: user.email || "",
+      // Phone and address will need to be filled manually or fetched from user profile
+    }))
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,
@@ -55,6 +88,14 @@ export default function CheckoutModal({
 
   const handleNext = () => {
     if (step === 1) {
+      // Check if user is authenticated
+      if (!user) {
+        toast.error("Please sign in to continue", {
+          description: "You can use Google Sign-In or fill in your information manually"
+        })
+        return
+      }
+      
       // Validate personal info
       if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
         toast.error("Please fill in all required fields")
@@ -73,6 +114,73 @@ export default function CheckoutModal({
 
   const handleBack = () => {
     setStep(step - 1)
+  }
+
+  const handleGoogleLogin = async () => {
+    setAuthLoading(true)
+    
+    try {
+      // Open Google OAuth in a popup window
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        }
+      })
+
+      if (error) {
+        throw error
+      }
+
+      // If we have a URL, open it in a popup
+      if (data.url) {
+        const popup = window.open(
+          data.url,
+          'google-oauth',
+          'width=500,height=600,scrollbars=yes,resizable=yes'
+        )
+
+        // Listen for the popup to close and check auth status
+        const checkPopup = setInterval(async () => {
+          if (popup?.closed) {
+            clearInterval(checkPopup)
+            
+            // Check if user is now authenticated
+            const { data: { user: newUser } } = await supabase.auth.getUser()
+            if (newUser) {
+              setUser(newUser)
+              populateFormWithUserData(newUser)
+              toast.success("Successfully signed in with Google!")
+            }
+            setAuthLoading(false)
+          }
+        }, 500)
+
+        // Also listen for auth state changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_IN' && session?.user) {
+            setUser(session.user)
+            populateFormWithUserData(session.user)
+            toast.success("Successfully signed in with Google!")
+            setAuthLoading(false)
+            if (popup && !popup.closed) {
+              popup.close()
+            }
+          }
+        })
+
+        // Cleanup subscription after 30 seconds
+        setTimeout(() => subscription.unsubscribe(), 30000)
+      }
+    } catch (error) {
+      console.error("Google login error:", error)
+      toast.error("Google login failed. Please try again.")
+      setAuthLoading(false)
+    }
   }
 
   const handlePayment = async () => {
@@ -97,8 +205,11 @@ export default function CheckoutModal({
         }),
       })
 
+      const responseData = await response.json()
+
       if (!response.ok) {
-        throw new Error("Failed to create booking")
+        console.error("Booking API error:", responseData)
+        throw new Error(responseData.error || `Failed to create booking: ${response.status}`)
       }
 
       toast.success("Payment successful! Your booking has been confirmed.")
@@ -112,7 +223,9 @@ export default function CheckoutModal({
 
     } catch (error) {
       console.error("Payment error:", error)
-      toast.error("Payment failed. Please try again.")
+      toast.error("Payment failed. Please try again.", {
+        description: error instanceof Error ? error.message : "Unknown error occurred"
+      })
     } finally {
       setLoading(false)
     }
@@ -190,6 +303,71 @@ export default function CheckoutModal({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Google Login Option */}
+                  <div className="text-center">
+                                      {user ? (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-green-800 text-sm">
+                            ✅ Signed in as <strong>{user.email}</strong>
+                          </p>
+                          <p className="text-green-600 text-xs mt-1">
+                            Your information has been pre-filled
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            await supabase.auth.signOut()
+                            setUser(null)
+                            setFormData({
+                              firstName: "",
+                              lastName: "",
+                              email: "",
+                              phone: "",
+                              address: "",
+                              city: "",
+                              state: "",
+                              zipCode: "",
+                              cardNumber: "",
+                              expiryDate: "",
+                              cvv: "",
+                              cardholderName: ""
+                            })
+                          }}
+                          className="text-green-600 hover:text-green-800 text-xs"
+                        >
+                          Sign Out
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                      <>
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleGoogleLogin}
+                          disabled={authLoading}
+                          className="mt-3 w-full"
+                        >
+                          <Chrome className="w-4 h-4 mr-2" />
+                          {authLoading ? "Signing in..." : "Continue with Google"}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name *</Label>
@@ -351,7 +529,7 @@ export default function CheckoutModal({
               
               <Button
                 onClick={handleNext}
-                disabled={loading}
+                disabled={loading || authLoading}
                 className="min-w-[120px]"
               >
                 {loading ? (

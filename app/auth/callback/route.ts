@@ -56,7 +56,59 @@ export async function GET(request: NextRequest) {
 
       console.log('Session exchange successful, user:', data.user?.email)
       
-      // Successful authentication - redirect to inventory page where user was trying to book
+      // Check if this is a popup window (for checkout modal)
+      const userAgent = request.headers.get('user-agent') || ''
+      const isPopup = userAgent.includes('popup') || requestUrl.searchParams.get('popup') === 'true'
+      
+      if (isPopup) {
+        // For popup windows, show a success page that will close itself
+        return new NextResponse(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Authentication Successful</title>
+              <style>
+                body { 
+                  font-family: Arial, sans-serif; 
+                  text-align: center; 
+                  padding: 50px; 
+                  background: #f0f9ff;
+                }
+                .success { 
+                  color: #059669; 
+                  font-size: 24px; 
+                  margin-bottom: 20px;
+                }
+                .message { 
+                  color: #374151; 
+                  margin-bottom: 30px;
+                }
+                .close-btn { 
+                  background: #3b82f6; 
+                  color: white; 
+                  padding: 12px 24px; 
+                  border: none; 
+                  border-radius: 6px; 
+                  cursor: pointer;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="success">✅ Authentication Successful!</div>
+              <div class="message">You can now close this window and continue with your booking.</div>
+              <button class="close-btn" onclick="window.close()">Close Window</button>
+              <script>
+                // Auto-close after 3 seconds
+                setTimeout(() => window.close(), 3000);
+              </script>
+            </body>
+          </html>
+        `, {
+          headers: { 'Content-Type': 'text/html' }
+        })
+      }
+      
+      // For regular redirects, go to inventory page
       return NextResponse.redirect(`${requestUrl.origin}/inventory`)
     } catch (err) {
       console.error('Unexpected error during auth callback:', err)

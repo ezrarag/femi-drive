@@ -34,18 +34,14 @@ export default function InventoryPage() {
   const [selectedType, setSelectedType] = useState("available")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null)
-  const [showBookingWidget, setShowBookingWidget] = useState(false)
-  const [bookingVehicle, setBookingVehicle] = useState<any>(null)
-  const [showInlineBooking, setShowInlineBooking] = useState<Record<string, boolean>>({})
-  // Remove wheelbaseScriptLoaded state
-  // Remove useEffect for script loading and cleanup
-  // Remove useEffect for widget loading
+  // Remove unused state variables
 
   // Remove static vehicles array
   const [vehicles, setVehicles] = useState<any[]>([])
   const [loadingVehicles, setLoadingVehicles] = useState(true)
   const [fetchError, setFetchError] = useState("")
   const [user, setUser] = useState<any>(null)
+  const [userLoading, setUserLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
   const [savedVehicleIds, setSavedVehicleIds] = useState<number[]>([])
@@ -55,8 +51,18 @@ export default function InventoryPage() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingError, setBookingError] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [showVehicleDetails, setShowVehicleDetails] = useState(false);
   // Add state to store unavailable dates for the selected vehicle
   const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
+
+  // Debug logging for modal state
+  useEffect(() => {
+    console.log('Modal state changed:', {
+      showBookingModal,
+      selectedVehicle: selectedVehicle?.id,
+      user: user?.email
+    });
+  }, [showBookingModal, selectedVehicle, user]);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -75,62 +81,88 @@ export default function InventoryPage() {
       setLoadingVehicles(false)
     }
     
-    // Handle OAuth hash fragments if they exist
-    const handleHashFragment = async () => {
-      if (window.location.hash && window.location.hash.includes('access_token')) {
-        console.log('Detected OAuth hash fragment, attempting to handle...')
+    // Only fetch vehicles once on component mount
+    fetchVehicles()
+  }, []) // Remove user dependency to prevent re-fetching
+
+  // Separate useEffect for user authentication - only run once
+  useEffect(() => {
+    let isMounted = true
+    
+    const getUser = async () => {
+      if (!isMounted) return
+      
+      try {
+        setUserLoading(true)
+        const { data: { user } } = await supabase.auth.getUser()
+        console.log('User loaded:', user?.email || 'No user')
         
-        // Extract the hash parameters
-        const hashParams = new URLSearchParams(window.location.hash.substring(1))
-        const accessToken = hashParams.get('access_token')
-        
-        if (accessToken) {
-          try {
-            // Set the session manually
-            const { error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: hashParams.get('refresh_token') || '',
-            })
-            
-            if (!error) {
-              console.log('Session set successfully from hash fragment')
-              // Clear the hash fragment
-              window.history.replaceState(null, '', window.location.pathname)
-              // Refresh the page to update the user state
-              window.location.reload()
-            } else {
-              console.error('Error setting session from hash:', error)
-            }
-          } catch (err) {
-            console.error('Unexpected error handling hash fragment:', err)
+        if (isMounted) {
+          setUser(user)
+          
+          // Fetch saved vehicles for logged-in user
+          if (user) {
+            supabase
+              .from("saved_vehicles")
+              .select("vehicle_id")
+              .eq("user_id", user.id)
+              .then(({ data }) => {
+                if (isMounted) {
+                  setSavedVehicleIds(data?.map((v: any) => v.vehicle_id) || [])
+                }
+              })
           }
+        }
+      } catch (error) {
+        console.error('Error loading user:', error)
+      } finally {
+        if (isMounted) {
+          setUserLoading(false)
         }
       }
     }
     
-    fetchVehicles()
-    handleHashFragment()
+    getUser()
     
-    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
-    // Fetch saved vehicles for logged-in user
-    if (user) {
-      supabase
-        .from("saved_vehicles")
-        .select("vehicle_id")
-        .eq("user_id", user.id)
-        .then(({ data }) => {
-          setSavedVehicleIds(data?.map((v: any) => v.vehicle_id) || [])
-        })
+    // Listen for auth state changes - but only update if component is mounted
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return
+      
+      console.log('Auth state change:', event, session?.user?.email || 'No user')
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser(session.user)
+        // Fetch saved vehicles for new user
+        supabase
+          .from("saved_vehicles")
+          .select("vehicle_id")
+          .eq("user_id", session.user.id)
+          .then(({ data }) => {
+            if (isMounted) {
+              setSavedVehicleIds(data?.map((v: any) => v.vehicle_id) || [])
+            }
+          })
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null)
+        setSavedVehicleIds([])
+      }
+    })
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
     }
-  }, [user])
+  }, []) // No dependencies to prevent re-running
 
   // Fetch unavailable dates when selectedVehicle changes
   useEffect(() => {
     if (!selectedVehicle) return;
-    // Fetch bookings for this vehicle
-    fetch(`/api/bookings?vehicle_id=${selectedVehicle.id}`)
-      .then(res => res.json())
-      .then(data => {
+    
+    const fetchUnavailableDates = async () => {
+      try {
+        const res = await fetch(`/api/bookings?vehicle_id=${selectedVehicle.id}`)
+        const data = await res.json()
+        
         if (Array.isArray(data.bookings)) {
           // Collect all booked date ranges
           const dates: Date[] = [];
@@ -145,7 +177,12 @@ export default function InventoryPage() {
           });
           setUnavailableDates(dates);
         }
-      });
+      } catch (error) {
+        console.error('Error fetching unavailable dates:', error)
+      }
+    }
+    
+    fetchUnavailableDates()
   }, [selectedVehicle]);
 
   const filteredVehicles = vehicles.filter((vehicle) => {
@@ -162,52 +199,9 @@ export default function InventoryPage() {
     return matchesSearch && matchesPrice && matchesType
   })
 
-  // 2. For each vehicle, when the user clicks the "Click to Book" button, toggle a showInlineBooking[vehicle.id] state (already implemented)
-  const toggleInlineBooking = (vehicleId: number) => {
-    setShowInlineBooking((prev) => ({
-      ...prev,
-      [vehicleId]: !prev[vehicleId],
-    }))
-  }
 
-  // 3. When showInlineBooking[vehicle.id] is true and vehicle.wheelbaseCheckoutUrl exists, render an inline <iframe> inside a container
-  // Replace the old Wheelbase widget div with:
-  // <div className="booking-iframe-container">
-  //   <iframe
-  //     src={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
-  //     width="100%"
-  //     height="600"
-  //     frameBorder="0"
-  //     allowFullScreen
-  //     loading="lazy"
-  //     title={`Book ${vehicle.make} ${vehicle.model}`}
-  //   ></iframe>
-  // </div>
-  // ...
-  // 4. Always render a visible fallback "Book on Wheelbase" button that opens vehicle.wheelbaseCheckoutUrl in a new tab
-  // ...
-  // <a
-  //   href={vehicle.wheelbaseCheckoutUrl || 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'}
-  //   target="_blank"
-  //   rel="noopener noreferrer"
-  //   className="inline-block mt-2 text-blue-600 underline"
-  // >
-  //   Book on Wheelbase
-  // </a>
-  // ...
-  // 5. Add a booking-iframe-container CSS class with a light shadow and rounded corners
-  // ...
-  // 6. Ensure the code is clean and commented clearly so it's easy to maintain
-  // ...
 
-  // Add the CSS class for iframe container (in a <style jsx> block or in your global CSS)
-  // .booking-iframe-container {
-  //   border-radius: 0.75rem;
-  //   box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-  //   overflow: hidden;
-  //   background: #fff;
-  //   margin-bottom: 1rem;
-  // }
+
 
   // Handle card click - open booking unless clicking on details button
   const handleCardClick = (e: React.MouseEvent, vehicle: any) => {
@@ -216,7 +210,8 @@ export default function InventoryPage() {
     if (!isDetailsButton && vehicle.available) {
       e.preventDefault()
       e.stopPropagation()
-      toggleInlineBooking(vehicle.id)
+      // Instead of toggleInlineBooking, open the booking modal directly
+      openBookingModal(vehicle)
     }
   }
 
@@ -245,17 +240,32 @@ export default function InventoryPage() {
   }
 
   const openBookingModal = (vehicle: any) => {
+    console.log('Opening booking modal for vehicle:', vehicle.id);
     setSelectedVehicle(vehicle);
     setShowBookingModal(true);
     setBookingForm({ start_date: "", end_date: "" });
     setBookingError("");
     setBookingSuccess(false);
+    setShowVehicleDetails(false);
+    
+    // Auto-scroll to center the selected vehicle card
+    setTimeout(() => {
+      const vehicleCard = document.querySelector(`[data-vehicle-id="${vehicle.id}"]`);
+      if (vehicleCard) {
+        vehicleCard.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center'
+        });
+      }
+    }, 100); // Small delay to ensure modal is open
   };
   const closeBookingModal = () => {
     setShowBookingModal(false);
     setBookingForm({ start_date: "", end_date: "" });
     setBookingError("");
     setBookingSuccess(false);
+    setShowVehicleDetails(false);
   };
   const handleBookingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBookingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -401,9 +411,11 @@ export default function InventoryPage() {
       {/* Vehicle Grid */}
       <div className="px-4 sm:px-6 pb-32">
         <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-          {loadingVehicles ? (
+          {loadingVehicles || userLoading ? (
             <div className="text-center py-16">
-              <p className="body-text text-neutral-600">Loading vehicles...</p>
+              <p className="body-text text-neutral-600">
+                {loadingVehicles ? "Loading vehicles..." : "Loading user data..."}
+              </p>
             </div>
           ) : fetchError ? (
             <div className="text-center py-16">
@@ -412,11 +424,10 @@ export default function InventoryPage() {
           ) : (
             filteredVehicles.map((vehicle, index) => {
               const cardNumber = String(index + 1).padStart(2, "0")
-              const isBookingOpen = showInlineBooking[vehicle.id]
 
               if (vehicle.size === "large") {
                 return (
-                  <div key={vehicle.id} className="group">
+                  <div key={vehicle.id} className="group" data-vehicle-id={vehicle.id}>
                     <div className="label-text text-neutral-600 mb-3 sm:mb-4 text-xs sm:text-sm">
                       {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}
                     </div>
@@ -461,37 +472,21 @@ export default function InventoryPage() {
                           DETAILS
                         </button>
                         {vehicle.available && (
-                          <div className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm">
-                            {isBookingOpen ? (
-                              <>
-                                CLOSE
-                                <X className="w-3 h-3" />
-                              </>
-                            ) : (
-                              <>
-                                BOOK
-                                <Calendar className="w-3 h-3" />
-                              </>
-                            )}
-                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openBookingModal(vehicle);
+                            }}
+                            className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                          >
+                            <Calendar className="w-3 h-3" />
+                            BOOK
+                          </button>
                         )}
                       </div>
                     </div>
 
-                    {/* Inline Booking Widget for Large Cards */}
-                    {isBookingOpen && vehicle.available && (
-                      <div className="mt-4 sm:mt-6 bg-white rounded-lg border border-neutral-200 p-4 sm:p-6 shadow-lg flex flex-col items-center">
-                        <h3 className="display-heading text-lg sm:text-xl mb-3 sm:mb-4 text-center">
-                          Book {vehicle.year} {vehicle.make} {vehicle.model}
-                        </h3>
-                        <Button
-                          onClick={() => openModal(vehicle)}
-                          className="w-full max-w-xs py-2 sm:py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-base sm:text-lg"
-                        >
-                          Book This Vehicle
-                        </Button>
-                      </div>
-                    )}
+
                   </div>
                 )
               }
@@ -505,10 +500,9 @@ export default function InventoryPage() {
               .filter((v) => v.size === "medium" || v.size === "small")
               .map((vehicle, index) => {
                 const cardNumber = String(filteredVehicles.findIndex((v) => v.id === vehicle.id) + 1).padStart(2, "0")
-                const isBookingOpen = showInlineBooking[vehicle.id]
 
                 return (
-                  <div key={vehicle.id} className="group">
+                  <div key={vehicle.id} className="group" data-vehicle-id={vehicle.id}>
                     <div className="label-text text-neutral-600 mb-3 sm:mb-4 text-xs sm:text-sm">
                       {cardNumber} {vehicle.make.toUpperCase()} - {vehicle.model.toUpperCase()} {vehicle.category}
                     </div>
@@ -553,37 +547,21 @@ export default function InventoryPage() {
                           DETAILS
                         </button>
                         {vehicle.available && (
-                          <div className="px-2 sm:px-3 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs">
-                            {isBookingOpen ? (
-                              <>
-                                CLOSE
-                                <X className="w-3 h-3" />
-                              </>
-                            ) : (
-                              <>
-                                BOOK
-                                <Calendar className="w-3 h-3" />
-                              </>
-                            )}
-                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openBookingModal(vehicle);
+                            }}
+                            className="px-2 sm:px-3 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs hover:bg-blue-700 transition-colors cursor-pointer"
+                          >
+                            <Calendar className="w-3 h-3" />
+                            BOOK
+                          </button>
                         )}
                       </div>
                     </div>
 
-                    {/* Inline Booking Widget for Medium/Small Cards */}
-                    {isBookingOpen && vehicle.available && (
-                      <div className="mt-3 sm:mt-4 bg-white rounded-lg border border-neutral-200 p-3 sm:p-4 shadow-lg flex flex-col items-center">
-                        <h3 className="display-heading text-base sm:text-lg mb-2 sm:mb-3 text-center">
-                          Book {vehicle.year} {vehicle.make} {vehicle.model}
-                        </h3>
-                        <Button
-                          onClick={() => openModal(vehicle)}
-                          className="w-full max-w-xs py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-sm sm:text-base"
-                        >
-                          Book This Vehicle
-                        </Button>
-                      </div>
-                    )}
+
                   </div>
                 )
               })}
@@ -698,6 +676,11 @@ export default function InventoryPage() {
                       />
                     </PopoverTrigger>
                     <PopoverContent align="start" className="p-0 w-auto bg-white">
+                      <div className="p-3 border-b bg-gray-50">
+                        <p className="text-sm font-medium text-gray-700">
+                          Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle.price_per_day}/day</span>
+                        </p>
+                      </div>
                       <Calendar
                         mode="single"
                         selected={bookingForm.start_date ? new Date(bookingForm.start_date) : undefined}
@@ -729,7 +712,12 @@ export default function InventoryPage() {
                         disabled={!selectedVehicle?.available}
                       />
                     </PopoverTrigger>
-                    <PopoverContent align="start" className="p-0 w-auto bg-white">
+                                          <PopoverContent align="start" className="p-0 w-auto bg-white">
+                        <div className="p-3 border-b bg-gray-50">
+                          <p className="text-sm font-medium text-gray-700">
+                            Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle.price_per_day}/day</span>
+                          </p>
+                        </div>
                         <Calendar
                           mode="single"
                           selected={bookingForm.end_date ? new Date(bookingForm.end_date) : undefined}
@@ -769,45 +757,173 @@ export default function InventoryPage() {
       )}
 
       {/* Booking Modal - Date Selection Only */}
-      <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select Dates for {selectedVehicle?.year} {selectedVehicle?.make} {selectedVehicle?.model}</DialogTitle>
-          </DialogHeader>
+      {selectedVehicle && (
+        <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl">
+                Book {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
+              </DialogTitle>
+              <div className="text-sm text-gray-600 mt-1">
+                Daily Rate: <span className="font-semibold text-blue-600">${selectedVehicle.price_per_day}/day</span>
+              </div>
+            </DialogHeader>
+          
           <form onSubmit={handleBookingSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="start_date">Start Date</Label>
-              <Input 
-                type="date" 
-                name="start_date" 
-                value={bookingForm.start_date} 
-                onChange={handleBookingChange} 
-                required 
-                className="text-black bg-white border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
-                style={{ color: '#000', backgroundColor: '#fff' }}
-              />
+            {/* Date Selection */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="start_date">Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Input
+                      type="text"
+                      name="start_date"
+                      value={bookingForm.start_date}
+                      onChange={handleBookingChange}
+                      placeholder="Select start date"
+                      readOnly
+                      className="cursor-pointer bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                      style={{ background: '#fff', color: '#111', fontWeight: 500 }}
+                      required
+                      disabled={!selectedVehicle?.available}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="p-0 w-auto bg-white">
+                    <div className="p-3 border-b bg-gray-50">
+                      <p className="text-sm font-medium text-gray-700">
+                        Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle?.price_per_day}/day</span>
+                      </p>
+                    </div>
+                    <Calendar
+                      mode="single"
+                      selected={bookingForm.start_date ? new Date(bookingForm.start_date) : undefined}
+                      onSelect={(date: Date | undefined) => {
+                        if (date) {
+                          setBookingForm(prev => ({ ...prev, start_date: date.toISOString().slice(0, 10) }));
+                        }
+                      }}
+                      initialFocus
+                      disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.end_date ? date > new Date(bookingForm.end_date) : false)}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label htmlFor="end_date">End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Input
+                      type="text"
+                      name="end_date"
+                      value={bookingForm.end_date}
+                      onChange={handleBookingChange}
+                      placeholder="Select end date"
+                      readOnly
+                      className="cursor-pointer bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                      style={{ background: '#fff', color: '#111', fontWeight: 500 }}
+                      required
+                      disabled={!selectedVehicle?.available}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="p-0 w-auto bg-white">
+                    <div className="p-3 border-b bg-gray-50">
+                      <p className="text-sm font-medium text-gray-700">
+                        Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle?.price_per_day}/day</span>
+                      </p>
+                    </div>
+                    <Calendar
+                      mode="single"
+                      selected={bookingForm.end_date ? new Date(bookingForm.end_date) : undefined}
+                      onSelect={(date: Date | undefined) => {
+                        if (date) {
+                          setBookingForm(prev => ({ ...prev, end_date: date.toISOString().slice(0, 10) }));
+                        }
+                      }}
+                      initialFocus
+                      disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.start_date ? date < new Date(bookingForm.start_date) : false)}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="end_date">End Date</Label>
-              <Input 
-                type="date" 
-                name="end_date" 
-                value={bookingForm.end_date} 
-                onChange={handleBookingChange} 
-                required 
-                className="text-black bg-white border-gray-300 focus:ring-2 focus:ring-blue-200"
-                style={{ color: '#000', backgroundColor: '#fff' }}
-              />
-            </div>
-            <div>
+            
+            {/* Total Price */}
+            <div className="bg-gray-50 p-3 rounded-lg">
               <Label>Total Price</Label>
-              <div className="font-semibold text-lg">
+              <div className="font-semibold text-lg text-blue-600">
                 {bookingForm.start_date && bookingForm.end_date && selectedVehicle ?
                   `$${selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}` :
                   "$0.00"}
               </div>
             </div>
+            
+            {/* Collapsible Vehicle Details */}
+            <div className="border-t pt-4">
+              <button
+                type="button"
+                onClick={() => setShowVehicleDetails(!showVehicleDetails)}
+                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                <span>{showVehicleDetails ? 'Hide' : 'Show'} vehicle details</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${showVehicleDetails ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {showVehicleDetails && (
+                <div className="mt-3 space-y-3 text-sm">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="font-medium text-gray-700">Mileage:</span>
+                      <span className="ml-2 text-gray-600">{selectedVehicle?.mileage} miles</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Transmission:</span>
+                      <span className="ml-2 text-gray-600">{selectedVehicle?.transmission}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Location:</span>
+                      <span className="ml-2 text-gray-600">{selectedVehicle?.location}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Status:</span>
+                      <span className={`ml-2 ${selectedVehicle?.available ? 'text-green-600' : 'text-red-600'}`}>
+                        {selectedVehicle?.available ? 'Available' : 'Rented'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <span className="font-medium text-gray-700">Features:</span>
+                                         <div className="mt-1 grid grid-cols-2 gap-1">
+                       {selectedVehicle?.features?.map((feature: string, index: number) => (
+                         <div key={index} className="text-gray-600">• {feature}</div>
+                       ))}
+                     </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div>
+                      <span className="font-medium text-gray-700">Insurance:</span>
+                      <span className="ml-2 text-gray-600">{selectedVehicle?.insurance}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Maintenance:</span>
+                      <span className="ml-2 text-gray-600">{selectedVehicle?.maintenance}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
             {bookingError && <div className="text-red-600 text-sm">{bookingError}</div>}
+            
             <DialogFooter>
               <Button type="submit" disabled={!bookingForm.start_date || !bookingForm.end_date}>
                 Continue to Checkout
@@ -816,7 +932,8 @@ export default function InventoryPage() {
             </DialogFooter>
           </form>
         </DialogContent>
-      </Dialog>
+        </Dialog>
+      )}
 
       {/* Checkout Modal */}
       {selectedVehicle && bookingForm.start_date && bookingForm.end_date && (
