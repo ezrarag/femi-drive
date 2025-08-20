@@ -3,16 +3,15 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, X, Menu, ExternalLink, User, Heart } from "lucide-react"
+import { Search, X, Menu, ExternalLink, User, Heart, Calendar } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+
 import { toast } from "sonner";
 import CheckoutModal from "@/components/CheckoutModal";
 
@@ -45,24 +44,24 @@ export default function InventoryPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
   const [savedVehicleIds, setSavedVehicleIds] = useState<number[]>([])
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [bookingForm, setBookingForm] = useState({ start_date: "", end_date: "" });
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingError, setBookingError] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [showVehicleDetails, setShowVehicleDetails] = useState(false);
-  // Add state to store unavailable dates for the selected vehicle
-  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
+
+  // Add state for inline booking form
+  const [showInlineBooking, setShowInlineBooking] = useState(false);
 
   // Debug logging for modal state
   useEffect(() => {
     console.log('Modal state changed:', {
-      showBookingModal,
+      showInlineBooking,
       selectedVehicle: selectedVehicle?.id,
       user: user?.email
     });
-  }, [showBookingModal, selectedVehicle, user]);
+  }, [showInlineBooking, selectedVehicle, user]);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -154,36 +153,7 @@ export default function InventoryPage() {
     }
   }, []) // No dependencies to prevent re-running
 
-  // Fetch unavailable dates when selectedVehicle changes
-  useEffect(() => {
-    if (!selectedVehicle) return;
-    
-    const fetchUnavailableDates = async () => {
-      try {
-        const res = await fetch(`/api/bookings?vehicle_id=${selectedVehicle.id}`)
-        const data = await res.json()
-        
-        if (Array.isArray(data.bookings)) {
-          // Collect all booked date ranges
-          const dates: Date[] = [];
-          data.bookings.forEach((b: any) => {
-            if (b.status !== 'cancelled') {
-              const start = new Date(b.start_date);
-              const end = new Date(b.end_date);
-              for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                dates.push(new Date(d));
-              }
-            }
-          });
-          setUnavailableDates(dates);
-        }
-      } catch (error) {
-        console.error('Error fetching unavailable dates:', error)
-      }
-    }
-    
-    fetchUnavailableDates()
-  }, [selectedVehicle]);
+
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
@@ -211,7 +181,7 @@ export default function InventoryPage() {
       e.preventDefault()
       e.stopPropagation()
       // Instead of toggleInlineBooking, open the booking modal directly
-      openBookingModal(vehicle)
+      openModal(vehicle)
     }
   }
 
@@ -221,6 +191,7 @@ export default function InventoryPage() {
   }
   const closeModal = () => {
     setSelectedVehicle(null)
+    setShowInlineBooking(false)
   }
 
   const toggleFavorite = async (vehicleId: number) => {
@@ -239,34 +210,7 @@ export default function InventoryPage() {
     }
   }
 
-  const openBookingModal = (vehicle: any) => {
-    console.log('Opening booking modal for vehicle:', vehicle.id);
-    setSelectedVehicle(vehicle);
-    setShowBookingModal(true);
-    setBookingForm({ start_date: "", end_date: "" });
-    setBookingError("");
-    setBookingSuccess(false);
-    setShowVehicleDetails(false);
-    
-    // Auto-scroll to center the selected vehicle card
-    setTimeout(() => {
-      const vehicleCard = document.querySelector(`[data-vehicle-id="${vehicle.id}"]`);
-      if (vehicleCard) {
-        vehicleCard.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center'
-        });
-      }
-    }, 100); // Small delay to ensure modal is open
-  };
-  const closeBookingModal = () => {
-    setShowBookingModal(false);
-    setBookingForm({ start_date: "", end_date: "" });
-    setBookingError("");
-    setBookingSuccess(false);
-    setShowVehicleDetails(false);
-  };
+
   const handleBookingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBookingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -288,8 +232,8 @@ export default function InventoryPage() {
       return;
     }
     
-    // Close the booking modal and show checkout modal
-    setShowBookingModal(false);
+    // Close the inline booking and show checkout modal
+    setShowInlineBooking(false);
     setShowCheckoutModal(true);
   };
 
@@ -475,7 +419,7 @@ export default function InventoryPage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              openBookingModal(vehicle);
+                              openModal(vehicle);
                             }}
                             className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm hover:bg-blue-700 transition-colors cursor-pointer"
                           >
@@ -546,18 +490,7 @@ export default function InventoryPage() {
                         >
                           DETAILS
                         </button>
-                        {vehicle.available && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openBookingModal(vehicle);
-                            }}
-                            className="px-2 sm:px-3 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs hover:bg-blue-700 transition-colors cursor-pointer"
-                          >
-                            <Calendar className="w-3 h-3" />
-                            BOOK
-                          </button>
-                        )}
+
                       </div>
                     </div>
 
@@ -575,11 +508,11 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* Vehicle Details Modal */}
+      {/* Vehicle Details Modal with Inline Booking */}
       {selectedVehicle && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={closeModal}>
           <div
-            className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative animate-fadein"
+            className="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden shadow-2xl relative animate-fadein"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Sticky close button for mobile/desktop */}
@@ -591,349 +524,268 @@ export default function InventoryPage() {
             >
               <X className="w-5 h-5" />
             </button>
-            <div className="relative w-full aspect-video bg-gray-100 rounded-t-2xl overflow-hidden">
-              <Image
-                src={selectedVehicle.image_url || "/placeholder.svg"}
-                alt={`${selectedVehicle.year} ${selectedVehicle.make} ${selectedVehicle.model}`}
-                fill
-                className="object-cover object-center w-full h-full aspect-video"
-              />
-            </div>
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="display-heading text-2xl mb-2">
-                    {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
-                  </h2>
-                  <p className="body-text text-neutral-600">{selectedVehicle.description}</p>
+            
+            {/* Container for both sections */}
+            <div className="flex h-full min-h-0">
+              {/* Vehicle Details Section */}
+              <motion.div 
+                className={`flex-shrink-0 transition-all duration-500 ease-in-out ${
+                  showInlineBooking ? 'w-[35%]' : 'w-full'
+                }`}
+                animate={{
+                  width: showInlineBooking ? '35%' : '100%'
+                }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              >
+                <div className="relative w-full h-40 bg-gray-100 rounded-t-2xl overflow-hidden">
+                  <Image
+                    src={selectedVehicle.image_url || "/placeholder.svg"}
+                    alt={`${selectedVehicle.year} ${selectedVehicle.make} ${selectedVehicle.model}`}
+                    fill
+                    className="object-cover object-center w-full h-full"
+                  />
                 </div>
-                <div className="text-right">
-                  <div className="display-heading text-3xl">${selectedVehicle.price_per_day}</div>
-                  <div className="label-text text-neutral-600">per day</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                  <div className="label-text text-neutral-600 mb-1">Mileage</div>
-                  <div className="body-text">{selectedVehicle.mileage} miles</div>
-                </div>
-                <div>
-                  <div className="label-text text-neutral-600 mb-1">Transmission</div>
-                  <div className="body-text">{selectedVehicle.transmission}</div>
-                </div>
-                <div>
-                  <div className="label-text text-neutral-600 mb-1">Location</div>
-                  <div className="body-text">{selectedVehicle.location}</div>
-                </div>
-                <div>
-                  <div className="label-text text-neutral-600 mb-1">Status</div>
-                  <div className={`body-text ${selectedVehicle.available ? "text-green-600" : "text-red-600"}`}>
-                    {selectedVehicle.available ? "Available" : "Rented"}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <div className="label-text text-neutral-600 mb-2">Features</div>
-                <div className="grid grid-cols-2 gap-2">
-                  {selectedVehicle.features.map((feature: string, index: number) => (
-                    <div key={index} className="body-text">
-                      • {feature}
+                <div className="p-6 overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h2 className="display-heading text-xl mb-1">
+                        {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
+                      </h2>
+                      <p className="body-text text-neutral-600 text-sm">{selectedVehicle.description}</p>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="text-right">
+                      <div className="display-heading text-2xl">${selectedVehicle.price_per_day}</div>
+                      <div className="label-text text-neutral-600 text-sm">per day</div>
+                    </div>
+                  </div>
 
-              <div className="space-y-3 mb-6">
-                <div>
-                  <span className="label-text text-neutral-600">Insurance: </span>
-                  <span className="body-text">{selectedVehicle.insurance}</span>
-                </div>
-                <div>
-                  <span className="label-text text-neutral-600">Maintenance: </span>
-                  <span className="body-text">{selectedVehicle.maintenance}</span>
-                </div>
-              </div>
-
-              {/* Booking Form UI (replaces Wheelbase iframe) */}
-              <form onSubmit={handleBookingSubmit} className="space-y-4" style={{ maxWidth: 400 }}>
-                <div>
-                  <Label htmlFor="start_date">Start Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Input
-                        type="text"
-                        name="start_date"
-                        value={bookingForm.start_date}
-                        onChange={handleBookingChange}
-                        placeholder="Select start date"
-                        readOnly
-                        className="cursor-pointer bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
-                        style={{ background: '#fff', color: '#111', fontWeight: 500 }}
-                        required
-                        disabled={!selectedVehicle.available}
-                      />
-                    </PopoverTrigger>
-                    <PopoverContent align="start" className="p-0 w-auto bg-white">
-                      <div className="p-3 border-b bg-gray-50">
-                        <p className="text-sm font-medium text-gray-700">
-                          Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle.price_per_day}/day</span>
-                        </p>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                      <div className="label-text text-neutral-600 mb-1">Mileage</div>
+                      <div className="body-text">{selectedVehicle.mileage} miles</div>
+                    </div>
+                    <div>
+                      <div className="label-text text-neutral-600 mb-1">Transmission</div>
+                      <div className="body-text">{selectedVehicle.transmission}</div>
+                    </div>
+                    <div>
+                      <div className="label-text text-neutral-600 mb-1">Location</div>
+                      <div className="body-text">{selectedVehicle.location}</div>
+                    </div>
+                    <div>
+                      <div className="label-text text-neutral-600 mb-1">Status</div>
+                      <div className={`body-text ${selectedVehicle.available ? "text-green-600" : "text-red-600"}`}>
+                        {selectedVehicle.available ? "Available" : "Rented"}
                       </div>
-                      <Calendar
-                        mode="single"
-                        selected={bookingForm.start_date ? new Date(bookingForm.start_date) : undefined}
-                        onSelect={(date: Date | undefined) => {
-                          if (date) {
-                            setBookingForm(prev => ({ ...prev, start_date: date.toISOString().slice(0, 10) }));
-                          }
-                        }}
-                        initialFocus
-                        disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.end_date ? date > new Date(bookingForm.end_date) : false)}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div>
-                  <Label htmlFor="end_date">End Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Input
-                        type="text"
-                        name="end_date"
-                        value={bookingForm.end_date}
-                        onChange={handleBookingChange}
-                        placeholder="Select end date"
-                        readOnly
-                        className="cursor-pointer bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
-                        style={{ background: '#fff', color: '#111', fontWeight: 500 }}
-                        required
-                        disabled={!selectedVehicle?.available}
-                      />
-                    </PopoverTrigger>
-                                          <PopoverContent align="start" className="p-0 w-auto bg-white">
-                        <div className="p-3 border-b bg-gray-50">
-                          <p className="text-sm font-medium text-gray-700">
-                            Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle.price_per_day}/day</span>
-                          </p>
-                        </div>
-                        <Calendar
-                          mode="single"
-                          selected={bookingForm.end_date ? new Date(bookingForm.end_date) : undefined}
-                          onSelect={(date: Date | undefined) => {
-                            if (date) {
-                              setBookingForm(prev => ({ ...prev, end_date: date.toISOString().slice(0, 10) }));
-                            }
-                          }}
-                          initialFocus
-                          disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.start_date ? date < new Date(bookingForm.start_date) : false)}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <div>
-                    <Label>Total Price</Label>
-                    <div className="font-semibold">
-                      {bookingForm.start_date && bookingForm.end_date && selectedVehicle ?
-                        `$${selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}` :
-                        "$0.00"}
                     </div>
                   </div>
-                  {bookingError && <div className="text-red-600 text-sm">{bookingError}</div>}
-                  {bookingSuccess && <div className="text-green-600 text-sm">Booking successful!</div>}
-                  <div className="flex gap-2">
-                    <Button type="submit" disabled={bookingLoading || !selectedVehicle?.available} className="border-2 border-blue-600 text-blue-700 bg-white hover:bg-blue-50 font-semibold">
-                      {bookingLoading ? "Booking..." : "Book Now"}
-                    </Button>
-                    <Button type="button" variant="ghost" onClick={closeModal} className="bg-transparent text-neutral-600 hover:bg-neutral-100">
-                      Cancel
-                    </Button>
+
+                  <div className="mb-4">
+                    <div className="label-text text-neutral-600 mb-2">Features</div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {selectedVehicle.features.map((feature: string, index: number) => (
+                        <div key={index} className="body-text text-sm">
+                          • {feature}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </form>
+
+                  <div className="space-y-2 mb-4">
+                    <div>
+                      <span className="label-text text-neutral-600 text-sm">Insurance: </span>
+                      <span className="body-text text-sm">{selectedVehicle.insurance}</span>
+                    </div>
+                    <div>
+                      <span className="label-text text-neutral-600 text-sm">Maintenance: </span>
+                      <span className="body-text text-sm">{selectedVehicle.maintenance}</span>
+                    </div>
+                  </div>
+
+                  {/* Book Now Button */}
+                  {selectedVehicle.available && (
+                    <div className="pt-3 pb-3 border-t relative z-0">
+                      <Button 
+                        onClick={() => setShowInlineBooking(true)}
+                        className="w-full bg-blue-600 text-white hover:bg-blue-700 font-semibold py-2"
+                      >
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Book Now
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Inline Booking Section */}
+              <motion.div 
+                className={`flex-shrink-0 bg-gray-50 border-l transition-all duration-500 ease-in-out ${
+                  showInlineBooking ? 'w-[65%] opacity-100' : 'w-0 opacity-0'
+                }`}
+                animate={{
+                  width: showInlineBooking ? '65%' : '0%',
+                  opacity: showInlineBooking ? 1 : 0
+                }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              >
+                {showInlineBooking && (
+                  <div className="p-6 h-full overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setShowInlineBooking(false)}
+                          className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                        >
+                          ← Back to Details
+                        </button>
+                        <span className="text-gray-400">|</span>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Book {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => setShowInlineBooking(false)}
+                        className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    
+                    <form onSubmit={handleBookingSubmit} className="space-y-3">
+                      {/* Date Selection */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="start_date">Start Date</Label>
+                          <Input
+                            type="date"
+                            name="start_date"
+                            value={bookingForm.start_date}
+                            onChange={handleBookingChange}
+                            min={new Date().toISOString().slice(0, 10)}
+                            className="bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                            style={{ background: '#fff', color: '#111', fontWeight: 500 }}
+                            required
+                            disabled={!selectedVehicle?.available}
+                          />
+                          <p className="text-xs text-gray-500 mt-1">Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle?.price_per_day}/day</span></p>
+                        </div>
+                        <div>
+                          <Label htmlFor="end_date">End Date</Label>
+                          <Input
+                            type="date"
+                            name="end_date"
+                            value={bookingForm.end_date}
+                            onChange={handleBookingChange}
+                            min={bookingForm.start_date || new Date().toISOString().slice(0, 10)}
+                            className="bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                            style={{ background: '#fff', color: '#111', fontWeight: 500 }}
+                            required
+                            disabled={!selectedVehicle?.available}
+                          />
+                          <p className="text-xs text-gray-500 mt-1">Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle?.price_per_day}/day</span></p>
+                        </div>
+                      </div>
+                      
+                      {/* Total Price */}
+                      <div className="bg-white p-4 rounded-lg border">
+                        <Label>Total Price</Label>
+                        <div className="font-semibold text-lg text-blue-600">
+                          {bookingForm.start_date && bookingForm.end_date && selectedVehicle ?
+                            `$${selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}` :
+                            "$0.00"}
+                        </div>
+                      </div>
+                      
+                      {/* Collapsible Vehicle Details */}
+                      <div className="border-t pt-4">
+                        <button
+                          type="button"
+                          onClick={() => setShowVehicleDetails(!showVehicleDetails)}
+                          className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                        >
+                          <span>{showVehicleDetails ? 'Hide' : 'Show'} vehicle details</span>
+                          <svg
+                            className={`w-4 h-4 transition-transform ${showVehicleDetails ? 'rotate-180' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        
+                        {showVehicleDetails && (
+                          <div className="mt-3 space-y-3 text-sm">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <span className="font-medium text-gray-700">Mileage:</span>
+                                <span className="ml-2 text-gray-600">{selectedVehicle?.mileage} miles</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Transmission:</span>
+                                <span className="ml-2 text-gray-600">{selectedVehicle?.transmission}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Location:</span>
+                                <span className="ml-2 text-gray-600">{selectedVehicle?.location}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Status:</span>
+                                <span className={`ml-2 ${selectedVehicle?.available ? 'text-green-600' : 'text-red-600'}`}>
+                                  {selectedVehicle?.available ? 'Available' : 'Rented'}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <span className="font-medium text-gray-700">Features:</span>
+                              <div className="mt-1 grid grid-cols-2 gap-1">
+                                {selectedVehicle?.features?.map((feature: string, index: number) => (
+                                  <div key={index} className="text-gray-600">• {feature}</div>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <div>
+                                <span className="font-medium text-gray-700">Insurance:</span>
+                                <span className="ml-2 text-gray-600">{selectedVehicle?.insurance}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Maintenance:</span>
+                                <span className="ml-2 text-gray-600">{selectedVehicle?.maintenance}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {bookingError && <div className="text-red-600 text-sm">{bookingError}</div>}
+                      
+                      <div className="flex gap-2 pt-4 pb-4">
+                        <Button type="submit" disabled={!bookingForm.start_date || !bookingForm.end_date} className="flex-1 bg-blue-600 text-white hover:bg-blue-700">
+                          Continue to Checkout
+                        </Button>
+                        <button 
+                          type="button" 
+                          onClick={() => setShowInlineBooking(false)}
+                          className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                        >
+                          ← Back
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+              </motion.div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Booking Modal - Date Selection Only */}
-      {selectedVehicle && (
-        <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle className="text-xl">
-                Book {selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}
-              </DialogTitle>
-              <div className="text-sm text-gray-600 mt-1">
-                Daily Rate: <span className="font-semibold text-blue-600">${selectedVehicle.price_per_day}/day</span>
-              </div>
-            </DialogHeader>
+
           
-          <form onSubmit={handleBookingSubmit} className="space-y-4">
-            {/* Date Selection */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="start_date">Start Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Input
-                      type="text"
-                      name="start_date"
-                      value={bookingForm.start_date}
-                      onChange={handleBookingChange}
-                      placeholder="Select start date"
-                      readOnly
-                      className="cursor-pointer bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
-                      style={{ background: '#fff', color: '#111', fontWeight: 500 }}
-                      required
-                      disabled={!selectedVehicle?.available}
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="p-0 w-auto bg-white">
-                    <div className="p-3 border-b bg-gray-50">
-                      <p className="text-sm font-medium text-gray-700">
-                        Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle?.price_per_day}/day</span>
-                      </p>
-                    </div>
-                    <Calendar
-                      mode="single"
-                      selected={bookingForm.start_date ? new Date(bookingForm.start_date) : undefined}
-                      onSelect={(date: Date | undefined) => {
-                        if (date) {
-                          setBookingForm(prev => ({ ...prev, start_date: date.toISOString().slice(0, 10) }));
-                        }
-                      }}
-                      initialFocus
-                      disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.end_date ? date > new Date(bookingForm.end_date) : false)}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div>
-                <Label htmlFor="end_date">End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Input
-                      type="text"
-                      name="end_date"
-                      value={bookingForm.end_date}
-                      onChange={handleBookingChange}
-                      placeholder="Select end date"
-                      readOnly
-                      className="cursor-pointer bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
-                      style={{ background: '#fff', color: '#111', fontWeight: 500 }}
-                      required
-                      disabled={!selectedVehicle?.available}
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="p-0 w-auto bg-white">
-                    <div className="p-3 border-b bg-gray-50">
-                      <p className="text-sm font-medium text-gray-700">
-                        Daily Rate: <span className="text-blue-600 font-semibold">${selectedVehicle?.price_per_day}/day</span>
-                      </p>
-                    </div>
-                    <Calendar
-                      mode="single"
-                      selected={bookingForm.end_date ? new Date(bookingForm.end_date) : undefined}
-                      onSelect={(date: Date | undefined) => {
-                        if (date) {
-                          setBookingForm(prev => ({ ...prev, end_date: date.toISOString().slice(0, 10) }));
-                        }
-                      }}
-                      initialFocus
-                      disabled={date => unavailableDates.some(d => d.toDateString() === date.toDateString()) || (bookingForm.start_date ? date < new Date(bookingForm.start_date) : false)}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            
-            {/* Total Price */}
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <Label>Total Price</Label>
-              <div className="font-semibold text-lg text-blue-600">
-                {bookingForm.start_date && bookingForm.end_date && selectedVehicle ?
-                  `$${selectedVehicle.price_per_day * (Math.ceil((new Date(bookingForm.end_date).getTime() - new Date(bookingForm.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1)}` :
-                  "$0.00"}
-              </div>
-            </div>
-            
-            {/* Collapsible Vehicle Details */}
-            <div className="border-t pt-4">
-              <button
-                type="button"
-                onClick={() => setShowVehicleDetails(!showVehicleDetails)}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                <span>{showVehicleDetails ? 'Hide' : 'Show'} vehicle details</span>
-                <svg
-                  className={`w-4 h-4 transition-transform ${showVehicleDetails ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {showVehicleDetails && (
-                <div className="mt-3 space-y-3 text-sm">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="font-medium text-gray-700">Mileage:</span>
-                      <span className="ml-2 text-gray-600">{selectedVehicle?.mileage} miles</span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">Transmission:</span>
-                      <span className="ml-2 text-gray-600">{selectedVehicle?.transmission}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">Location:</span>
-                      <span className="ml-2 text-gray-600">{selectedVehicle?.location}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">Status:</span>
-                      <span className={`ml-2 ${selectedVehicle?.available ? 'text-green-600' : 'text-red-600'}`}>
-                        {selectedVehicle?.available ? 'Available' : 'Rented'}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <span className="font-medium text-gray-700">Features:</span>
-                                         <div className="mt-1 grid grid-cols-2 gap-1">
-                       {selectedVehicle?.features?.map((feature: string, index: number) => (
-                         <div key={index} className="text-gray-600">• {feature}</div>
-                       ))}
-                     </div>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <div>
-                      <span className="font-medium text-gray-700">Insurance:</span>
-                      <span className="ml-2 text-gray-600">{selectedVehicle?.insurance}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">Maintenance:</span>
-                      <span className="ml-2 text-gray-600">{selectedVehicle?.maintenance}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {bookingError && <div className="text-red-600 text-sm">{bookingError}</div>}
-            
-            <DialogFooter>
-              <Button type="submit" disabled={!bookingForm.start_date || !bookingForm.end_date}>
-                Continue to Checkout
-              </Button>
-              <Button type="button" variant="outline" onClick={closeBookingModal}>Cancel</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-        </Dialog>
-      )}
+          
 
       {/* Checkout Modal */}
       {selectedVehicle && bookingForm.start_date && bookingForm.end_date && (
@@ -949,7 +801,7 @@ export default function InventoryPage() {
           }}
           onSuccess={() => {
             setShowCheckoutModal(false);
-            setShowBookingModal(false);
+            setShowInlineBooking(false);
             setBookingForm({ start_date: "", end_date: "" });
             setBookingError("");
             setBookingSuccess(false);
@@ -1000,10 +852,10 @@ export default function InventoryPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="display-heading text-2xl">Filter Vehicles</h2>
+                <h2 className="display-heading text-2xl text-black">Filter Vehicles</h2>
                 <button
                   onClick={() => setIsMenuOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-all"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-all text-black"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1012,7 +864,7 @@ export default function InventoryPage() {
               <div className="space-y-6">
                 {/* Search */}
                 <div>
-                  <label className="label-text block mb-2">Search</label>
+                  <label className="label-text block mb-2 text-black">Search</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                     <input
@@ -1020,18 +872,18 @@ export default function InventoryPage() {
                       placeholder="Search by make or model..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="body-text w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500"
+                      className="body-text w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500 text-black bg-white"
                     />
                   </div>
                 </div>
 
                 {/* Vehicle Type */}
                 <div>
-                  <label className="label-text block mb-2">Vehicle Type</label>
+                  <label className="label-text block mb-2 text-black">Vehicle Type</label>
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="body-text w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500"
+                    className="body-text w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500 text-black bg-white"
                   >
                     <option value="all">All Types</option>
                     <option value="available">Available</option>
@@ -1043,7 +895,7 @@ export default function InventoryPage() {
 
                 {/* Price Range */}
                 <div>
-                  <label className="label-text block mb-2">
+                  <label className="label-text block mb-2 text-black">
                     Daily Rate: ${priceRange[0]} - ${priceRange[1]}
                   </label>
                   <div className="space-y-2">
@@ -1055,7 +907,7 @@ export default function InventoryPage() {
                       onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
                       className="w-full"
                     />
-                    <div className="flex justify-between text-sm text-neutral-500">
+                    <div className="flex justify-between text-sm text-gray-600">
                       <span>$0</span>
                       <span>$200</span>
                     </div>

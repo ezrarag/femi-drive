@@ -111,6 +111,32 @@
     color: #1e40af !important;
   }
 
+  /* Disabled dates styling */
+  .rdp-day_disabled {
+    color: #9ca3af !important;
+    background-color: #f3f4f6 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+  }
+
+  .rdp-day_disabled:hover {
+    background-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    opacity: 0.6 !important;
+  }
+
+  /* Calendar popover z-index fix */
+  [data-radix-popper-content-wrapper] {
+    z-index: 999999 !important;
+  }
+
+  /* Calendar popover styling */
+  .rdp {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
   /* Mobile-specific improvements */
   @media (max-width: 768px) {
     /* Ensure minimum touch target size */
