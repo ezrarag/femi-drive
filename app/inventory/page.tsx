@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, X, Menu, ExternalLink, User, Calendar } from "lucide-react"
+import { Search, X, Menu, ExternalLink, User, Calendar, Heart } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
@@ -53,6 +53,9 @@ export default function InventoryPage() {
 
   // Add state for inline booking form
   const [showInlineBooking, setShowInlineBooking] = useState(false);
+
+  // Add state for saved vehicles
+  const [savedVehicleIds, setSavedVehicleIds] = useState<string[]>([]);
 
   // Debug logging for modal state
 
@@ -121,8 +124,16 @@ export default function InventoryPage() {
     setShowInlineBooking(false)
   }
 
-
-
+  // Toggle favorite status for a vehicle
+  const toggleFavorite = (vehicleId: string) => {
+    setSavedVehicleIds(prev => {
+      if (prev.includes(vehicleId)) {
+        return prev.filter(id => id !== vehicleId)
+      } else {
+        return [...prev, vehicleId]
+      }
+    })
+  }
 
   const handleBookingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBookingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
