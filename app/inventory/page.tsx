@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, X, Menu, ExternalLink, User, Heart, Calendar } from "lucide-react"
+import { Search, X, Menu, ExternalLink, User, Calendar } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
@@ -39,11 +39,11 @@ export default function InventoryPage() {
   const [vehicles, setVehicles] = useState<any[]>([])
   const [loadingVehicles, setLoadingVehicles] = useState(true)
   const [fetchError, setFetchError] = useState("")
-  const [user, setUser] = useState<any>(null)
-  const [userLoading, setUserLoading] = useState(true)
+
+
   const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
-  const [savedVehicleIds, setSavedVehicleIds] = useState<number[]>([])
+
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [bookingForm, setBookingForm] = useState({ start_date: "", end_date: "" });
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -84,74 +84,7 @@ export default function InventoryPage() {
     fetchVehicles()
   }, []) // Remove user dependency to prevent re-fetching
 
-  // Separate useEffect for user authentication - only run once
-  useEffect(() => {
-    let isMounted = true
-    
-    const getUser = async () => {
-      if (!isMounted) return
-      
-      try {
-        setUserLoading(true)
-        const { data: { user } } = await supabase.auth.getUser()
-        console.log('User loaded:', user?.email || 'No user')
-        
-        if (isMounted) {
-          setUser(user)
-          
-          // Fetch saved vehicles for logged-in user
-          if (user) {
-            supabase
-              .from("saved_vehicles")
-              .select("vehicle_id")
-              .eq("user_id", user.id)
-              .then(({ data }) => {
-                if (isMounted) {
-                  setSavedVehicleIds(data?.map((v: any) => v.vehicle_id) || [])
-                }
-              })
-          }
-        }
-      } catch (error) {
-        console.error('Error loading user:', error)
-      } finally {
-        if (isMounted) {
-          setUserLoading(false)
-        }
-      }
-    }
-    
-    getUser()
-    
-    // Listen for auth state changes - but only update if component is mounted
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!isMounted) return
-      
-      console.log('Auth state change:', event, session?.user?.email || 'No user')
-      
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user)
-        // Fetch saved vehicles for new user
-        supabase
-          .from("saved_vehicles")
-          .select("vehicle_id")
-          .eq("user_id", session.user.id)
-          .then(({ data }) => {
-            if (isMounted) {
-              setSavedVehicleIds(data?.map((v: any) => v.vehicle_id) || [])
-            }
-          })
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null)
-        setSavedVehicleIds([])
-      }
-    })
 
-    return () => {
-      isMounted = false
-      subscription.unsubscribe()
-    }
-  }, []) // No dependencies to prevent re-running
 
 
 
@@ -194,21 +127,7 @@ export default function InventoryPage() {
     setShowInlineBooking(false)
   }
 
-  const toggleFavorite = async (vehicleId: number) => {
-    if (!user) {
-      router.push("/login")
-      return
-    }
-    if (savedVehicleIds.includes(vehicleId)) {
-      // Remove from saved_vehicles
-      await supabase.from("saved_vehicles").delete().eq("user_id", user.id).eq("vehicle_id", vehicleId)
-      setSavedVehicleIds((ids) => ids.filter((id) => id !== vehicleId))
-    } else {
-      // Add to saved_vehicles
-      await supabase.from("saved_vehicles").insert({ user_id: user.id, vehicle_id: vehicleId })
-      setSavedVehicleIds((ids) => [...ids, vehicleId])
-    }
-  }
+
 
 
   const handleBookingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,47 +135,20 @@ export default function InventoryPage() {
   };
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast.error("You must be logged in to book a vehicle.", {
-        description: "Please sign in with Google to continue with your booking.",
-        action: {
-          label: "Sign In",
-          onClick: () => handleGoogleLogin(),
-        },
-        duration: 5000,
-      });
-      return;
-    }
+    console.log("Booking form submitted:", { bookingForm });
+    
     if (!bookingForm.start_date || !bookingForm.end_date) {
       setBookingError("Please select start and end dates.");
       return;
     }
     
-    // Close the inline booking and show checkout modal
-    setShowInlineBooking(false);
+    console.log("Opening checkout modal...");
+    // Show checkout modal - authentication will happen there
     setShowCheckoutModal(true);
+    // Don't close inline booking yet - let CheckoutModal handle it
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({ 
-        provider: "google", 
-        options: { 
-          redirectTo: window.location.origin + "/auth/callback" 
-        } 
-      });
-      
-      if (error) {
-        toast.error("Login failed", {
-          description: error.message,
-        });
-      }
-    } catch (err) {
-      toast.error("Login failed", {
-        description: "An unexpected error occurred. Please try again.",
-      });
-    }
-  };
+
 
   // Clean up script when component unmounts
   // Remove wheelbaseScriptLoaded state
@@ -788,6 +680,12 @@ export default function InventoryPage() {
           
 
       {/* Checkout Modal */}
+      {console.log("CheckoutModal render check:", { 
+        selectedVehicle: !!selectedVehicle, 
+        startDate: !!bookingForm.start_date, 
+        endDate: !!bookingForm.end_date,
+        showCheckoutModal 
+      })}
       {selectedVehicle && bookingForm.start_date && bookingForm.end_date && (
         <CheckoutModal
           isOpen={showCheckoutModal}
@@ -807,6 +705,10 @@ export default function InventoryPage() {
             setBookingSuccess(false);
             // Refresh the page or update vehicle availability
             window.location.reload();
+          }}
+          onClose={() => {
+            setShowCheckoutModal(false);
+            // Keep the inline booking open if user cancels checkout
           }}
         />
       )}
