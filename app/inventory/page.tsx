@@ -55,13 +55,7 @@ export default function InventoryPage() {
   const [showInlineBooking, setShowInlineBooking] = useState(false);
 
   // Debug logging for modal state
-  useEffect(() => {
-    console.log('Modal state changed:', {
-      showInlineBooking,
-      selectedVehicle: selectedVehicle?.id,
-      user: user?.email
-    });
-  }, [showInlineBooking, selectedVehicle, user]);
+
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -135,14 +129,12 @@ export default function InventoryPage() {
   };
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Booking form submitted:", { bookingForm });
     
     if (!bookingForm.start_date || !bookingForm.end_date) {
       setBookingError("Please select start and end dates.");
       return;
     }
     
-    console.log("Opening checkout modal...");
     // Show checkout modal - authentication will happen there
     setShowCheckoutModal(true);
     // Don't close inline booking yet - let CheckoutModal handle it
@@ -226,12 +218,12 @@ export default function InventoryPage() {
           </div>
           {/* User/Login Button */}
           <button
-            onClick={() => router.push(user ? "/dashboard" : "/login")}
+            onClick={() => router.push("/login")}
             className="nav-text px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all flex items-center gap-2 text-xs sm:text-sm"
-            aria-label={user ? "Dashboard" : "Login"}
+            aria-label="Login"
           >
             <User className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="hidden sm:inline">{user ? "Dashboard" : "Login"}</span>
+            <span className="hidden sm:inline">Login</span>
           </button>
         </div>
       </nav>
@@ -247,10 +239,10 @@ export default function InventoryPage() {
       {/* Vehicle Grid */}
       <div className="px-4 sm:px-6 pb-32">
         <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-          {loadingVehicles || userLoading ? (
+          {loadingVehicles ? (
             <div className="text-center py-16">
               <p className="body-text text-neutral-600">
-                {loadingVehicles ? "Loading vehicles..." : "Loading user data..."}
+                Loading vehicles...
               </p>
             </div>
           ) : fetchError ? (
@@ -680,12 +672,6 @@ export default function InventoryPage() {
           
 
       {/* Checkout Modal */}
-      {console.log("CheckoutModal render check:", { 
-        selectedVehicle: !!selectedVehicle, 
-        startDate: !!bookingForm.start_date, 
-        endDate: !!bookingForm.end_date,
-        showCheckoutModal 
-      })}
       {selectedVehicle && bookingForm.start_date && bookingForm.end_date && (
         <CheckoutModal
           isOpen={showCheckoutModal}
