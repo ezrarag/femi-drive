@@ -35,6 +35,7 @@
 - [x] **NEW**: Added working date selection with validation and autofill
 - [x] **NEW**: Implemented SMS notifications for all booking events
 - [x] **NEW**: Added instant SMS alerts to 404-973-9860 for booking confirmations
+- [x] **NEW**: Replaced custom booking system with direct Wheelbase redirects
 
 ### UI/UX Improvements
 - [x] Fixed date input styling (black text on white background)
@@ -94,10 +95,10 @@
 ## 🔄 In Progress
 
 ### Performance & Stability Issues
-- [ ] **URGENT**: Fix inventory page flickering during social login
-- [ ] **URGENT**: Ensure booking modal appears consistently after authentication
-- [ ] **URGENT**: Test complete checkout flow from start to finish
-- [ ] **URGENT**: Verify modal state persistence across page refreshes
+- [x] **COMPLETED**: Replaced complex booking system with simple Wheelbase redirects
+- [x] **COMPLETED**: Eliminated booking modal flickering and authentication issues
+- [x] **COMPLETED**: Simplified user experience - direct redirect to checkout
+- [ ] **URGENT**: Test Wheelbase redirect functionality for all vehicle types
 
 ### Database Setup
 - [ ] Implement Supabase database schema using provided AI prompt
@@ -110,12 +111,12 @@
 
 ### Critical User Flow Testing
 - [ ] **TEST**: Clear browser cache and test inventory page performance
-- [ ] **TEST**: Click "Book Now" on any vehicle - modal should open immediately
-- [ ] **TEST**: Select dates and click "Continue to Checkout" - should open checkout modal
-- [ ] **TEST**: Click "Continue with Google" in checkout - popup should open and authenticate
-- [ ] **TEST**: After Google login - form should auto-populate and allow payment
-- [ ] **TEST**: Complete full booking flow - should redirect to dashboard
-- [ ] **TEST**: Verify no more page flickering during authentication
+- [ ] **TEST**: Click "Book Now" on Dodge Charger - should redirect to Wheelbase URL 457237
+- [ ] **TEST**: Click "Book Now" on Nissan Altima - should redirect to Wheelbase URL 463737
+- [ ] **TEST**: Click "Book Now" on Volkswagen Passat - should redirect to Wheelbase URL 454552
+- [ ] **TEST**: Verify all redirects open in new tab/window
+- [ ] **TEST**: Test fallback URL for unknown vehicle types
+- [ ] **TEST**: Verify no more booking modal or authentication issues
 
 ### Performance Testing
 - [ ] **TEST**: Check browser console for debug logs during authentication

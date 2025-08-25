@@ -8,12 +8,12 @@ import { supabase } from "@/lib/supabase"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+// import { Input } from "@/components/ui/input";
+// import { Button } from "@/components/ui/button";
+// import { Label } from "@/components/ui/label";
 
-import { toast } from "sonner";
-import CheckoutModal from "@/components/CheckoutModal";
+// import { toast } from "sonner";
+// import CheckoutModal from "@/components/CheckoutModal";
 
 // Add type declaration for window.Outdoorsy
 declare global {
@@ -32,7 +32,7 @@ export default function InventoryPage() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
   const [selectedType, setSelectedType] = useState("available")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [selectedVehicle, setSelectedVehicle] = useState<any>(null)
+  // const [selectedVehicle, setSelectedVehicle] = useState<any>(null)
   // Remove unused state variables
 
   // Remove static vehicles array
@@ -44,21 +44,45 @@ export default function InventoryPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
 
-  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-  const [bookingForm, setBookingForm] = useState({ start_date: "", end_date: "" });
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingError, setBookingError] = useState("");
-  const [bookingSuccess, setBookingSuccess] = useState(false);
-  const [showVehicleDetails, setShowVehicleDetails] = useState(false);
+  // COMMENTED OUT: All booking-related state variables
+  // const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  // const [bookingForm, setBookingForm] = useState({ start_date: "", end_date: "" });
+  // const [bookingLoading, setBookingLoading] = useState(false);
+  // const [bookingError, setBookingError] = useState("");
+  // const [bookingSuccess, setBookingSuccess] = useState(false);
+  // const [showVehicleDetails, setShowVehicleDetails] = useState(false);
 
-  // Add state for inline booking form
-  const [showInlineBooking, setShowInlineBooking] = useState(false);
+  // COMMENTED OUT: Add state for inline booking form
+  // const [showInlineBooking, setShowInlineBooking] = useState(false);
 
   // Add state for saved vehicles
   const [savedVehicleIds, setSavedVehicleIds] = useState<string[]>([]);
 
-  // Debug logging for modal state
+  // COMMENTED OUT: Debug logging for modal state
 
+  // Function to get Wheelbase checkout URL based on vehicle make and model
+  const getWheelbaseUrl = (vehicle: any): string => {
+    const make = vehicle.make?.toLowerCase()
+    const model = vehicle.model?.toLowerCase()
+    
+    // Map specific vehicles to their Wheelbase URLs
+    if (make === 'dodge' && model === 'charger') {
+      return 'https://checkout.wheelbasepro.com/reserve/457237?locale=en-us'
+    } else if (make === 'nissan' && model === 'altima') {
+      return 'https://checkout.wheelbasepro.com/reserve/463737?locale=en-us'
+    } else if (make === 'volkswagen' && model === 'passat') {
+      return 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'
+    }
+    
+    // Default fallback URL (you can change this to a general booking page)
+    return 'https://checkout.wheelbasepro.com'
+  }
+
+  // Function to handle booking redirect
+  const handleBookNow = (vehicle: any) => {
+    const wheelbaseUrl = getWheelbaseUrl(vehicle)
+    window.open(wheelbaseUrl, '_blank')
+  }
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -81,10 +105,6 @@ export default function InventoryPage() {
     fetchVehicles()
   }, []) // Remove user dependency to prevent re-fetching
 
-
-
-
-
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
       (vehicle.make?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
@@ -99,30 +119,26 @@ export default function InventoryPage() {
     return matchesSearch && matchesPrice && matchesType
   })
 
+  // COMMENTED OUT: Handle card click - open booking unless clicking on details button
+  // const handleCardClick = (e: React.MouseEvent, vehicle: any) => {
+  //   const isDetailsButton = (e.target as HTMLElement).closest('[data-action="details"]')
 
+  //   if (!isDetailsButton && vehicle.available) {
+  //     e.preventDefault()
+  //     e.stopPropagation()
+  //     // Instead of toggleInlineBooking, open the booking modal directly
+  //     openModal(vehicle)
+  //   }
+  // }
 
-
-
-  // Handle card click - open booking unless clicking on details button
-  const handleCardClick = (e: React.MouseEvent, vehicle: any) => {
-    const isDetailsButton = (e.target as HTMLElement).closest('[data-action="details"]')
-
-    if (!isDetailsButton && vehicle.available) {
-      e.preventDefault()
-      e.stopPropagation()
-      // Instead of toggleInlineBooking, open the booking modal directly
-      openModal(vehicle)
-    }
-  }
-
-  // Re-add openModal and closeModal for modal functionality
-  const openModal = (vehicle: any) => {
-    setSelectedVehicle(vehicle)
-  }
-  const closeModal = () => {
-    setSelectedVehicle(null)
-    setShowInlineBooking(false)
-  }
+  // COMMENTED OUT: Re-add openModal and closeModal for modal functionality
+  // const openModal = (vehicle: any) => {
+  //   setSelectedVehicle(vehicle)
+  // }
+  // const closeModal = () => {
+  //   setSelectedVehicle(null)
+  //   setShowInlineBooking(false)
+  // }
 
   // Toggle favorite status for a vehicle
   const toggleFavorite = (vehicleId: string) => {
@@ -135,25 +151,24 @@ export default function InventoryPage() {
     })
   }
 
-  const handleBookingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBookingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-  const handleBookingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // COMMENTED OUT: All booking form handling functions
+  // const handleBookingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setBookingForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  // };
+  // const handleBookingSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
     
-    if (!bookingForm.start_date || !bookingForm.end_date) {
-      setBookingError("Please select start and end dates.");
-      return;
-    }
+  //   if (!bookingForm.start_date || !bookingForm.end_date) {
+  //     setBookingError("Please select start and end dates.");
+  //     return;
+  //   }
     
-    // Show checkout modal - authentication will happen there
-    setShowCheckoutModal(true);
-    // Don't close inline booking yet - let CheckoutModal handle it
-  };
+  //   // Show checkout modal - authentication will happen there
+  //   setShowCheckoutModal(true);
+  //   // Don't close inline booking yet - let CheckoutModal handle it
+  // };
 
-
-
-  // Clean up script when component unmounts
+  // COMMENTED OUT: Clean up script when component unmounts
   // Remove wheelbaseScriptLoaded state
   // Remove useEffect for script loading and cleanup
   // Remove useEffect for widget loading
@@ -272,7 +287,7 @@ export default function InventoryPage() {
                     </div>
                     <div
                       className={`relative w-full h-64 sm:h-80 md:h-96 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
-                      onClick={(e) => handleCardClick(e, vehicle)}
+                      // COMMENTED OUT: onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
                         src={vehicle.image_url || "/placeholder.svg"}
@@ -289,7 +304,7 @@ export default function InventoryPage() {
                           className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all"
                           aria-label={savedVehicleIds.includes(vehicle.id) ? "Unsave vehicle" : "Save vehicle"}
                         >
-                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-5 sm:h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
+                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-5 sm:w-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-5 sm:w-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
                         </button>
                       </div>
                       <div
@@ -304,7 +319,7 @@ export default function InventoryPage() {
                           data-action="details"
                           onClick={(e) => {
                             e.stopPropagation()
-                            openModal(vehicle)
+                            // COMMENTED OUT: openModal(vehicle)
                           }}
                           className="px-2 sm:px-4 py-1 sm:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs sm:text-sm"
                         >
@@ -314,7 +329,9 @@ export default function InventoryPage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              openModal(vehicle);
+                              // COMMENTED OUT: openModal(vehicle);
+                              // NEW: Redirect to Wheelbase checkout
+                              handleBookNow(vehicle);
                             }}
                             className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm hover:bg-blue-700 transition-colors cursor-pointer"
                           >
@@ -324,8 +341,6 @@ export default function InventoryPage() {
                         )}
                       </div>
                     </div>
-
-
                   </div>
                 )
               }
@@ -347,7 +362,7 @@ export default function InventoryPage() {
                     </div>
                     <div
                       className={`relative w-full h-48 sm:h-64 aspect-video overflow-hidden rounded-lg bg-gray-100 ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
-                      onClick={(e) => handleCardClick(e, vehicle)}
+                      // COMMENTED OUT: onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
                         src={vehicle.image_url || "/placeholder.svg"}
@@ -364,7 +379,7 @@ export default function InventoryPage() {
                           className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all"
                           aria-label={savedVehicleIds.includes(vehicle.id) ? "Unsave vehicle" : "Save vehicle"}
                         >
-                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-5 sm:h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
+                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-5 sm:w-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-5 sm:w-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
                         </button>
                       </div>
                       <div
@@ -379,17 +394,28 @@ export default function InventoryPage() {
                           data-action="details"
                           onClick={(e) => {
                             e.stopPropagation()
-                            openModal(vehicle)
+                            // COMMENTED OUT: openModal(vehicle)
                           }}
-                          className="px-2 sm:px-3 py-1 sm:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs"
+                          className="px-2 sm:px-4 py-1 sm:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs"
                         >
                           DETAILS
                         </button>
-
+                        {vehicle.available && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // COMMENTED OUT: openModal(vehicle);
+                              // NEW: Redirect to Wheelbase checkout
+                              handleBookNow(vehicle);
+                            }}
+                            className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                          >
+                            <Calendar className="w-3 h-3" />
+                            BOOK
+                          </button>
+                        )}
                       </div>
                     </div>
-
-
                   </div>
                 )
               })}
@@ -403,14 +429,13 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* Vehicle Details Modal with Inline Booking */}
-      {selectedVehicle && (
+      {/* COMMENTED OUT: Vehicle Details Modal with Inline Booking */}
+      {/* {selectedVehicle && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={closeModal}>
           <div
             className="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden shadow-2xl relative animate-fadein"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Sticky close button for mobile/desktop */}
             <button
               onClick={closeModal}
               className="sticky top-4 right-4 z-10 float-right p-2 bg-white/90 rounded-full hover:bg-white transition-all shadow-md"
@@ -420,9 +445,7 @@ export default function InventoryPage() {
               <X className="w-5 h-5" />
             </button>
             
-            {/* Container for both sections */}
             <div className="flex h-full min-h-0">
-              {/* Vehicle Details Section */}
               <motion.div 
                 className={`flex-shrink-0 transition-all duration-500 ease-in-out ${
                   showInlineBooking ? 'w-[35%]' : 'w-full'
@@ -497,7 +520,6 @@ export default function InventoryPage() {
                     </div>
                   </div>
 
-                  {/* Book Now Button */}
                   {selectedVehicle.available && (
                     <div className="pt-3 pb-3 border-t relative z-0">
                       <Button 
@@ -512,18 +534,17 @@ export default function InventoryPage() {
                 </div>
               </motion.div>
 
-              {/* Inline Booking Section */}
-              <motion.div 
-                className={`flex-shrink-0 bg-gray-50 border-l transition-all duration-500 ease-in-out ${
-                  showInlineBooking ? 'w-[65%] opacity-100' : 'w-0 opacity-0'
-                }`}
-                animate={{
-                  width: showInlineBooking ? '65%' : '0%',
-                  opacity: showInlineBooking ? 1 : 0
-                }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-              >
-                {showInlineBooking && (
+              {showInlineBooking && (
+                <motion.div 
+                  className={`flex-shrink-0 bg-gray-50 border-l transition-all duration-500 ease-in-out ${
+                    showInlineBooking ? 'w-[65%] opacity-100' : 'w-0 opacity-0'
+                  }`}
+                  animate={{
+                    width: showInlineBooking ? '65%' : '0%',
+                    opacity: showInlineBooking ? 1 : 0
+                  }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                >
                   <div className="p-6 h-full overflow-y-auto max-h-[calc(85vh-200px)] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -547,7 +568,6 @@ export default function InventoryPage() {
                     </div>
                     
                     <form onSubmit={handleBookingSubmit} className="space-y-3">
-                      {/* Date Selection */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="start_date">Start Date</Label>
@@ -572,7 +592,7 @@ export default function InventoryPage() {
                             value={bookingForm.end_date}
                             onChange={handleBookingChange}
                             min={bookingForm.start_date || new Date().toISOString().slice(0, 10)}
-                            className="bg-white text-black border border-neutral-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200"
+                            className="bg-white text-black border border-neutral-400 focus:ring-blue-200"
                             style={{ background: '#fff', color: '#111', fontWeight: 500 }}
                             required
                             disabled={!selectedVehicle?.available}
@@ -581,7 +601,6 @@ export default function InventoryPage() {
                         </div>
                       </div>
                       
-                      {/* Total Price */}
                       <div className="bg-white p-4 rounded-lg border">
                         <Label>Total Price</Label>
                         <div className="font-semibold text-lg text-blue-600">
@@ -591,7 +610,6 @@ export default function InventoryPage() {
                         </div>
                       </div>
                       
-                      {/* Collapsible Vehicle Details */}
                       <div className="border-t pt-4">
                         <button
                           type="button"
@@ -671,19 +689,15 @@ export default function InventoryPage() {
                       </div>
                     </form>
                   </div>
-                )}
-              </motion.div>
+                </motion.div>
+              )}
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
-
-          
-          
-
-      {/* Checkout Modal */}
-      {selectedVehicle && bookingForm.start_date && bookingForm.end_date && (
+      {/* COMMENTED OUT: Checkout Modal */}
+      {/* {selectedVehicle && bookingForm.start_date && bookingForm.end_date && (
         <CheckoutModal
           isOpen={showCheckoutModal}
           onClose={() => setShowCheckoutModal(false)}
@@ -700,15 +714,13 @@ export default function InventoryPage() {
             setBookingForm({ start_date: "", end_date: "" });
             setBookingError("");
             setBookingSuccess(false);
-            // Refresh the page or update vehicle availability
             window.location.reload();
           }}
           onClose={() => {
             setShowCheckoutModal(false);
-            // Keep the inline booking open if user cancels checkout
           }}
         />
-      )}
+      )} */}
 
       {/* Bottom Menu Overlay */}
       <AnimatePresence>
@@ -802,8 +814,16 @@ export default function InventoryPage() {
                       type="range"
                       min="0"
                       max="200"
+                      value={priceRange[0]}
+                      onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+                      className="w-full"
+                    />
+                    <input
+                      type="range"
+                      min="0"
+                      max="200"
                       value={priceRange[1]}
-                      onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
+                      onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
                       className="w-full"
                     />
                     <div className="flex justify-between text-sm text-gray-600">
