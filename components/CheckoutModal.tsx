@@ -7,7 +7,6 @@
 // import { Label } from "@/components/ui/label"
 // import { Calendar, CreditCard, User, Phone, Mail, MapPin, Car, X } from "lucide-react"
 // import { toast } from "sonner"
-// import { supabase } from "@/lib/supabase"
 
 // interface CheckoutModalProps {
 //   isOpen: boolean
@@ -53,7 +52,7 @@
 //   }, [isOpen])
 
 //   const checkUser = async () => {
-//     const { data: { user } } = await supabase.auth.getUser()
+//     // TODO: Implement authentication when backend is ready
 //     if (user) {
 //       setUser(user)
 //       // Pre-fill form with user data if available
@@ -72,7 +71,7 @@
 //     setAuthLoading(true)
     
 //     try {
-//       const { data, error } = await supabase.auth.signInWithOAuth({
+//       // TODO: Implement OAuth when backend is ready
 //         provider: 'google',
 //         options: {
 //           redirectTo: `${window.location.origin}/auth/callback`
@@ -82,7 +81,7 @@
 //       if (error) throw error
 
 //       // Subscribe to auth state changes
-//       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+//       // TODO: Implement auth state change when backend is ready
 //         if (event === 'SIGNED_IN' && session?.user) {
 //           setUser(session.user)
 //           setAuthLoading(false)

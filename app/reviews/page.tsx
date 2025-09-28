@@ -4,16 +4,12 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { PhoneDisplay } from "@/components/phone-display";
 import ReviewCard from "@/components/ReviewCard";
-import { supabase } from "@/lib/supabase";
+// TODO: Implement reviews when backend is ready
 import React from "react";
 
 async function getReviews() {
-  const { data, error } = await supabase
-    .from("reviews")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return data || [];
+  // TODO: Implement reviews when backend is ready
+  return [];
 }
 
 export default function ReviewsPage() {

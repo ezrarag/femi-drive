@@ -1,7 +1,7 @@
 // COMMENTED OUT: All booking API functionality has been replaced with direct Wheelbase redirects
 // import { NextRequest, NextResponse } from "next/server"
 // import { cookies } from "next/headers"
-// import { createServerClient } from "@supabase/ssr"
+// TODO: Implement authentication when backend is ready
 // import { sendSMS } from "@/lib/twilio"
 
 // async function parseBody(request: NextRequest) {
@@ -19,7 +19,7 @@
 //   // Get the user from the session
 //   const cookieStore = await cookies()
   
-//   const supabase = createServerClient(
+//   // TODO: Implement Supabase client when backend is ready
 //     process.env.NEXT_PUBLIC_SUPABASE_URL!,
 //     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 //     {
@@ -42,7 +42,7 @@
 //     }
 //   )
 
-//   const { data: { user }, error: userError } = await supabase.auth.getUser()
+//   // TODO: Implement user authentication when backend is ready
   
 //   if (userError) {
 //     console.error("User auth error:", userError)
@@ -73,7 +73,7 @@
 //   console.log("Creating booking for user:", user.id, "vehicle:", vehicle_id)
   
 //   // Insert booking with the authenticated user's ID
-//   const { data, error } = await supabase.from("bookings").insert([
+//   // TODO: Implement database operations when backend is ready.from("bookings").insert([
 //     {
 //       user_id: user.id,
 //       vehicle_id,
@@ -125,7 +125,7 @@
 // export async function GET(request: NextRequest) {
 //   const cookieStore = await cookies()
   
-//   const supabase = createServerClient(
+//   // TODO: Implement Supabase client when backend is ready
 //     process.env.NEXT_PUBLIC_SUPABASE_URL!,
 //     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 //     {
@@ -148,13 +148,13 @@
 //     }
 //   )
 
-//   const { data: { user }, error: userError } = await supabase.auth.getUser()
+//   // TODO: Implement user authentication when backend is ready
   
 //   if (userError || !user) {
 //     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 //   }
 
-//   const { data, error } = await supabase
+//   // TODO: Implement database operations when backend is ready
 //     .from("bookings")
 //     .select(`
 //       *,
@@ -179,7 +179,7 @@
 // export async function PUT(request: NextRequest) {
 //   const cookieStore = await cookies()
   
-//   const supabase = createServerClient(
+//   // TODO: Implement Supabase client when backend is ready
 //     process.env.NEXT_PUBLIC_SUPABASE_URL!,
 //     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 //     {
@@ -202,7 +202,7 @@
 //     }
 //   )
 
-//   const { data: { user }, error: userError } = await supabase.auth.getUser()
+//   // TODO: Implement user authentication when backend is ready
   
 //   if (userError || !user) {
 //     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -219,7 +219,7 @@
 //   }
   
 //   // Update the booking
-//   const { data, error } = await supabase
+//   // TODO: Implement database operations when backend is ready
 //     .from("bookings")
 //     .update({ status, updated_at: new Date().toISOString() })
 //     .eq("id", booking_id)

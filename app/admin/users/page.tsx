@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase, checkAdminRole, getAllUsers, updateUserRole } from "@/lib/supabase"
+// TODO: Implement authentication when backend is ready
 import Link from "next/link"
 import { User, Shield, ShieldCheck, ShieldX, Mail, Calendar, Edit } from "lucide-react"
 
@@ -24,13 +24,15 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      // TODO: Implement user authentication when backend is ready
+      const user = null // Placeholder
       if (!user) {
         window.location.href = "/admin/login"
         return
       }
 
-      const isAdmin = await checkAdminRole(user.id)
+      // TODO: Implement admin role check when backend is ready
+      const isAdmin = false // Placeholder
       if (!isAdmin) {
         window.location.href = "/admin/login"
         return
@@ -50,7 +52,8 @@ export default function AdminUsersPage() {
   const loadUsers = async () => {
     try {
       setLoading(true)
-      const userData = await getAllUsers()
+      // TODO: Implement users fetch when backend is ready
+      const userData = [] // Placeholder
       setUsers(userData)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load users")
@@ -61,7 +64,7 @@ export default function AdminUsersPage() {
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
     try {
-      await updateUserRole(userId, newRole as 'user' | 'admin' | 'super_admin')
+      // TODO: Implement user role update when backend is ready
       await loadUsers() // Refresh the list
       setEditingUser(null)
       setEditingRole("")

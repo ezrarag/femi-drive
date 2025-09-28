@@ -32,7 +32,7 @@ export default function AboutPage() {
       <div className="absolute inset-0 overflow-hidden z-0">
         <video autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover">
           <source
-            src="https://wayxucjcejqxydflxwgo.supabase.co/storage/v1/object/public/site-assets/homepage/coverr-electric-car-driving-in-the-dark-woods-668-1080p.mp4"
+            src="/placeholder-video.mp4"
             type="video/mp4"
           />
           Your browser does not support the video tag.

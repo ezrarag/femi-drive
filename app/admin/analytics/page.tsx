@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase, checkAdminRole } from "@/lib/supabase"
+// TODO: Implement authentication when backend is ready
 import Link from "next/link"
 import { 
   TrendingUp, 
@@ -35,13 +35,15 @@ export default function AdminAnalyticsPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      // TODO: Implement user authentication when backend is ready
+      const user = null // Placeholder
       if (!user) {
         window.location.href = "/admin/login"
         return
       }
 
-      const isAdmin = await checkAdminRole(user.id)
+      // TODO: Implement admin role check when backend is ready
+      const isAdmin = false // Placeholder
       if (!isAdmin) {
         window.location.href = "/admin/login"
         return

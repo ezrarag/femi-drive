@@ -1,7 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 export default function LeaveReviewForm() {
   const { register, handleSubmit, reset } = useForm();
@@ -11,21 +10,12 @@ export default function LeaveReviewForm() {
   const onSubmit = async (data: any) => {
     setLoading(true);
     setMessage(null);
-    const { error } = await supabase.from("reviews").insert([
-      {
-        name: data.name,
-        rating: Number(data.rating),
-        vehicle: data.vehicle,
-        comment: data.comment,
-      },
-    ]);
-    setLoading(false);
-    if (error) {
-      setMessage("Error submitting review. Please try again.");
-    } else {
+    // TODO: Implement review submission when backend is ready
+    setTimeout(() => {
+      setLoading(false);
       reset();
       setMessage("Thanks for your feedback!");
-    }
+    }, 1000);
   };
 
   return (

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+// TODO: Implement authentication when backend is ready
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
@@ -10,16 +10,8 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ 
-        provider: "google", 
-        options: { 
-          redirectTo: window.location.origin + "/auth/callback" 
-        } 
-      })
-      
-      if (error) {
-        console.error('Login error:', error)
-      }
+      // TODO: Implement OAuth when backend is ready
+      console.log('OAuth login not implemented yet')
     } catch (err) {
       console.error('Unexpected login error:', err)
     }
@@ -38,12 +30,11 @@ export default function LoginPage() {
         if (accessToken) {
           try {
             // Set the session manually
-            const { error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: hashParams.get('refresh_token') || '',
-            })
+            // TODO: Implement session setting when backend is ready
+            console.log('Session setting not implemented yet')
             
-            if (!error) {
+            // TODO: Handle session success when backend is ready
+            if (true) {
               console.log('Session set successfully from hash fragment')
               // Clear the hash fragment
               window.history.replaceState(null, '', window.location.pathname)
@@ -61,7 +52,7 @@ export default function LoginPage() {
     
     // Handle auth state changes and redirects
     const handleAuthChange = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      // TODO: Implement session check when backend is ready
       if (session?.user) {
         // Clear any hash fragments from the URL
         if (window.location.hash) {
@@ -76,17 +67,12 @@ export default function LoginPage() {
     handleAuthChange()
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        // Clear any hash fragments from the URL
-        if (window.location.hash) {
-          window.history.replaceState(null, '', window.location.pathname)
-        }
-        router.push("/dashboard")
-      }
-    })
+    // TODO: Implement auth state change when backend is ready
+    const subscription = null // Placeholder
 
-    return () => subscription.unsubscribe()
+    return () => {
+      // TODO: Implement subscription cleanup when backend is ready
+    }
   }, [router])
 
   return (
@@ -98,14 +84,14 @@ export default function LoginPage() {
         muted
         playsInline
         className="absolute inset-0 w-full h-full object-cover z-0"
-        src="https://wayxucjcejqxydflxwgo.supabase.co/storage/v1/object/public/site-assets/homepage/coverr-electric-car-driving-in-the-dark-woods-668-1080p.mp4"
+        src="/placeholder-video.mp4"
       />
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/40 z-10" />
       {/* Login Card */}
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm flex flex-col items-center relative z-20">
         <div className="mb-6 flex flex-col items-center">
-          <Image src="https://wayxucjcejqxydflxwgo.supabase.co/storage/v1/object/public/site-assets/login/f9lugl5xwm8hkwltjdhm-removebg-preview.png" alt="Femi Leasing Logo" width={48} height={48} className="mb-2" />
+          <Image src="/placeholder-logo.png" alt="Femi Leasing Logo" width={48} height={48} className="mb-2" />
           <h1 className="text-2xl font-bold text-neutral-900 mb-1">Sign in to Femi Leasing</h1>
           <p className="text-neutral-500 text-center text-sm">Welcome! Please sign in with Google to access your dashboard and manage your bookings.</p>
         </div>

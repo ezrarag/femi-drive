@@ -1,9 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { User, Menu, X, Phone } from "lucide-react"
-import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 
 interface NavBarProps {
@@ -20,25 +19,9 @@ function getInitials(name: string) {
 }
 
 export default function NavBar({ variant = "light", transparent = false, noBorder = false }: NavBarProps) {
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const router = useRouter()
-
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      setUser(user)
-      if (user) {
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("name, avatar_url")
-          .eq("id", user.id)
-          .single()
-        setProfile(profileData)
-      }
-    })
-  }, [])
 
   const base = transparent
     ? "bg-transparent text-white"
@@ -145,23 +128,15 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
               </div>
             )}
           </div>
-          {/* User/Login Button */}
-          <button
-            onClick={() => router.push(user ? "/dashboard" : "/login")}
-            className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} flex items-center gap-2 transition-all text-xs 2xl:text-sm`}
-            aria-label={user ? "Dashboard" : "Login"}
-          >
-            {user && profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="Avatar" className="w-5 h-5 2xl:w-6 2xl:h-6 rounded-full object-cover" />
-            ) : user && profile?.name ? (
-              <span className="w-5 h-5 2xl:w-6 2xl:h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700 text-xs">
-                {getInitials(profile.name)}
-              </span>
-            ) : (
-              <User className="w-4 h-4 2xl:w-5 2xl:h-5" />
-            )}
-            <span className="hidden 2xl:inline">{user ? "Dashboard" : "Login"}</span>
-          </button>
+        {/* User/Login Button */}
+        <button
+          onClick={() => router.push("/login")}
+          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} flex items-center gap-2 transition-all text-xs 2xl:text-sm`}
+          aria-label="Login"
+        >
+          <User className="w-4 h-4 2xl:w-5 2xl:h-5" />
+          <span className="hidden 2xl:inline">Login</span>
+        </button>
         </div>
 
         {/* Mobile User Buttons */}
@@ -177,19 +152,11 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
           
           {/* User Button */}
           <button
-            onClick={() => router.push(user ? "/dashboard" : "/login")}
+            onClick={() => router.push("/login")}
             className={`p-2 rounded-lg ${hover} flex items-center gap-2 transition-all min-w-[44px] min-h-[44px]`}
-            aria-label={user ? "Dashboard" : "Login"}
+            aria-label="Login"
           >
-            {user && profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full object-cover" />
-            ) : user && profile?.name ? (
-              <span className="w-6 h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700 text-xs">
-                {getInitials(profile.name)}
-              </span>
-            ) : (
-              <User className="w-5 h-5" />
-            )}
+            <User className="w-5 h-5" />
           </button>
         </div>
       </div>

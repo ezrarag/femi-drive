@@ -2,14 +2,15 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+// TODO: Implement authentication when backend is ready
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      // TODO: Implement user authentication when backend is ready
+      const user = null // Placeholder
       // TEMPORARY: Allow any email for development - REMOVE BEFORE PRODUCTION
       // if (!user || !user.email || !user.email.endsWith("@femileasing.com")) {
       if (!user || !user.email) {

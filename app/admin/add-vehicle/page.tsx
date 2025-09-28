@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+// TODO: Implement authentication when backend is ready
 
 export default function AddVehiclePage() {
   const [form, setForm] = useState({
@@ -21,7 +21,8 @@ export default function AddVehiclePage() {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      // TODO: Implement user authentication when backend is ready
+      const user = null // Placeholder
       if (!user || !user.email || !user.email.endsWith("@femileasing.com")) {
         window.location.href = "/admin/login"
       } else {
@@ -57,34 +58,19 @@ export default function AddVehiclePage() {
     setError("")
     setSuccess(false)
     // Insert into Supabase
-    const { data, error } = await supabase.from("vehicles").insert([
-      {
-        name: form.name,
-        year: Number(form.year),
-        slug: form.slug,
-        description: form.description,
-        price_per_day: Number(form.price_per_day),
-        image_url: form.image_url,
-        booking_url: form.booking_url,
-        available: form.available,
-      },
-    ])
+    // TODO: Implement vehicle insertion when backend is ready
     setLoading(false)
-    if (error) {
-      setError(error.message)
-    } else {
-      setSuccess(true)
-      setForm({
-        name: "",
-        year: "",
-        slug: "",
-        description: "",
-        price_per_day: "",
-        image_url: "",
-        booking_url: "",
-        available: true,
-      })
-    }
+    setSuccess(true)
+    setForm({
+      name: "",
+      year: "",
+      slug: "",
+      description: "",
+      price_per_day: "",
+      image_url: "",
+      booking_url: "",
+      available: true,
+    })
   }
 
   return (

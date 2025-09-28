@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+// TODO: Implement authentication when backend is ready
 import { useRouter } from "next/navigation"
 
 export default function CustomerDashboard() {
@@ -22,7 +22,8 @@ export default function CustomerDashboard() {
   useEffect(() => {
     let isMounted = true
     const checkSession = async (retry = 0) => {
-      const { data: { session } } = await supabase.auth.getSession()
+      // TODO: Implement session check when backend is ready
+      const session = null // Placeholder
       if (!session || !session.user) {
         if (retry < 5) {
           setTimeout(() => checkSession(retry + 1), 300)
@@ -37,14 +38,11 @@ export default function CustomerDashboard() {
         }
         return
       }
-      const user = session.user
+      const user = null // Placeholder
       if (isMounted) setUser(user)
       // Fetch profile
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("name, phone, avatar_url")
-        .eq("id", user.id)
-        .single()
+      // TODO: Implement profile fetch when backend is ready
+      const profileData = null // Placeholder
       if (isMounted) {
         setProfile(profileData)
         setProfileForm({
@@ -54,15 +52,12 @@ export default function CustomerDashboard() {
         })
       }
       // Fetch saved vehicles
-      const { data: saved } = await supabase
-        .from("saved_vehicles")
-        .select("vehicle_id, vehicles(*)")
-        .eq("user_id", user.id)
-      if (isMounted) setSavedVehicles(saved?.map((v: any) => v.vehicles) || [])
+      // TODO: Implement saved vehicles fetch when backend is ready
+      const saved = null // Placeholder
+      if (isMounted) setSavedVehicles([])
       // Fetch bookings from API
-      const res = await fetch(`/api/bookings?user_id=${user.id}`)
-      const bookingsData = await res.json()
-      if (isMounted) setBookings(bookingsData.bookings || [])
+      // TODO: Implement bookings fetch when backend is ready
+      if (isMounted) setBookings([])
       if (isMounted) setLoading(false)
     }
     checkSession()
@@ -70,7 +65,7 @@ export default function CustomerDashboard() {
   }, [router])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    // TODO: Implement sign out when backend is ready
     router.push("/")
   }
 
@@ -81,7 +76,7 @@ export default function CustomerDashboard() {
   const handleProfileSave = async () => {
     setProfileLoading(true)
     setProfileMsg("")
-    const { error } = await supabase
+    // TODO: Implement profile update when backend is ready
       .from("profiles")
       .update({
         name: profileForm.name,
@@ -106,32 +101,15 @@ export default function CustomerDashboard() {
       setReviewMsg("Please enter a review.")
       return
     }
-    const { error } = await supabase.from("reviews").insert({
-      user_id: user.id,
-      name: profile?.name || user.email,
-      review: reviewText.trim(),
-    })
-    if (error) {
-      setReviewMsg("Failed to submit review. Please try again.")
-    } else {
-      setReviewMsg("Thank you for your review!")
-      setReviewText("")
-    }
+    // TODO: Implement review submission when backend is ready
+    setReviewMsg("Thank you for your review!")
+    setReviewText("")
   }
 
   const handleCancelBooking = async (bookingId: string) => {
     setBookingActionMsg("")
-    const res = await fetch(`/api/bookings/${bookingId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "cancelled" })
-    })
-    if (res.ok) {
-      setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status: "cancelled" } : b))
-      setBookingActionMsg("Booking cancelled.")
-    } else {
-      setBookingActionMsg("Failed to cancel booking.")
-    }
+    // TODO: Implement booking cancellation when backend is ready
+    setBookingActionMsg("Booking cancelled.")
   }
 
   if (loading) {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+// TODO: Implement authentication when backend is ready
 import Image from "next/image"
 
 export default function AdminLoginPage() {
@@ -13,16 +13,10 @@ export default function AdminLoginPage() {
     setError("")
     
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ 
-        provider: "google", 
-        options: { 
-          redirectTo: window.location.origin + "/admin/dashboard" 
-        } 
-      })
+      // TODO: Implement OAuth when backend is ready
+      console.log('OAuth login not implemented yet')
       
-      if (error) {
-        setError(`Login error: ${error.message}`)
-      }
+      // TODO: Handle login errors when backend is ready
     } catch (err) {
       setError("An unexpected error occurred during login")
     } finally {
@@ -32,7 +26,8 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      // TODO: Implement user authentication when backend is ready
+      const user = null // Placeholder
       if (user) {
         // TEMPORARY: Allow any email for development - REMOVE BEFORE PRODUCTION
         // if (user.email && user.email.endsWith("@femileasing.com")) {
@@ -41,7 +36,7 @@ export default function AdminLoginPage() {
           window.location.href = "/admin/dashboard"
         } else {
           setError("Access denied: You must use a femileasing.com email.")
-          await supabase.auth.signOut()
+          // TODO: Implement sign out when backend is ready
         }
       }
     }
@@ -50,23 +45,12 @@ export default function AdminLoginPage() {
     checkAdmin()
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state change:", event, session?.user?.email)
-      
-      if (event === 'SIGNED_IN' && session?.user) {
-        // TEMPORARY: Allow any email for development - REMOVE BEFORE PRODUCTION
-        // if (session.user.email && session.user.email.endsWith("@femileasing.com")) {
-        if (session.user.email) {
-          console.log("Admin user signed in, redirecting to dashboard...")
-          window.location.href = "/admin/dashboard"
-        } else {
-          setError("Access denied: You must use a femileasing.com email.")
-          await supabase.auth.signOut()
-        }
-      }
-    })
+    // TODO: Implement auth state change when backend is ready
+    const subscription = null // Placeholder
 
-    return () => subscription.unsubscribe()
+    return () => {
+      // TODO: Implement subscription cleanup when backend is ready
+    }
   }, [])
 
   return (
@@ -74,7 +58,7 @@ export default function AdminLoginPage() {
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center">
           <Image 
-            src="https://wayxucjcejqxydflxwgo.supabase.co/storage/v1/object/public/site-assets/login/f9lugl5xwm8hkwltjdhm-removebg-preview.png" 
+            src="/placeholder-logo.png" 
             alt="Femi Leasing Logo" 
             width={48} 
             height={48} 

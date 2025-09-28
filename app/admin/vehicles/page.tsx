@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+// TODO: Implement authentication when backend is ready
 import Link from "next/link"
 
 function debounce(fn: (...args: any[]) => void, delay: number) {
@@ -24,7 +24,8 @@ export default function AdminVehiclesPage() {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      // TODO: Implement user authentication when backend is ready
+      const user = null // Placeholder
       // TEMPORARY: Allow any email for development - REMOVE BEFORE PRODUCTION
       // if (!user || !user.email || !user.email.endsWith("@femileasing.com")) {
       if (!user || !user.email) {
@@ -48,9 +49,8 @@ export default function AdminVehiclesPage() {
     const fetchVehicles = async () => {
       setLoading(true)
       setError("")
-      const { data, error } = await supabase.from("vehicles").select("*").order("make", { ascending: true })
-      if (error) setError(error.message)
-      setVehicles(data || [])
+      // TODO: Implement vehicles fetch when backend is ready
+      setVehicles([])
       setLoading(false)
     }
     fetchVehicles()
@@ -60,9 +60,9 @@ export default function AdminVehiclesPage() {
   const debouncedSave = debounce(async (form: any) => {
     setSaving(true)
     setSaveStatus("Saving...")
-    const { error } = await supabase.from("vehicles").update(form).eq("id", form.id)
+    // TODO: Implement vehicle update when backend is ready
     setSaving(false)
-    setSaveStatus(error ? "Error saving" : "Saved!")
+    setSaveStatus("Saved!")
     setTimeout(() => setSaveStatus(""), 1200)
     // Optionally, refresh the vehicle list
   }, 800)
