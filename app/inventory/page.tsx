@@ -3,9 +3,10 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, X, Menu, ExternalLink, User, Calendar, Heart } from "lucide-react"
+import { Search, X, Menu, Calendar, Heart } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
+import NavBar from "@/components/NavBar"
 
 // import { Input } from "@/components/ui/input";
 // import { Button } from "@/components/ui/button";
@@ -98,7 +99,6 @@ export default function InventoryPage() {
   const [fetchError] = useState("")
 
 
-  const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
 
   // COMMENTED OUT: All booking-related state variables
@@ -214,83 +214,7 @@ export default function InventoryPage() {
   return (
     <div className="min-h-screen bg-gray-100 text-neutral-900">
       {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between p-3 sm:p-4 md:p-6">
-        <div className="flex gap-2 sm:gap-3 md:gap-4">
-          <Link
-            href="/"
-            className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all text-xs sm:text-sm"
-          >
-            Home
-          </Link>
-          <Link
-            href="/inventory"
-            className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-neutral-900 text-white rounded-full border border-neutral-900 transition-all text-xs sm:text-sm"
-          >
-            Fleet
-          </Link>
-          <Link
-            href="/services"
-            className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all text-xs sm:text-sm"
-          >
-            Services
-          </Link>
-        </div>
-
-        {/* Center Logo */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="text-center">
-            <div className="text-xs sm:text-sm font-bold tracking-widest">FE</div>
-            <div className="text-xs sm:text-sm font-bold tracking-widest -mt-1">MI</div>
-          </div>
-        </div>
-
-        <div className="flex gap-2 sm:gap-3 md:gap-4 items-center relative">
-          {/* Dropdown Menu */}
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen((open) => !open)}
-              className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all font-medium text-xs sm:text-sm min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-haspopup="true"
-              aria-expanded={menuOpen}
-              aria-controls="main-menu-dropdown"
-              type="button"
-            >
-              Menu
-            </button>
-            {menuOpen && (
-              <div
-                id="main-menu-dropdown"
-                className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-neutral-200 z-50"
-                onMouseLeave={() => setMenuOpen(false)}
-              >
-                <Link
-                  href="/about"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-t-lg min-h-[44px] flex items-center"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  About
-                </Link>
-                <Link
-                  href="/contact"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-b-lg min-h-[44px] flex items-center"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Contact
-                </Link>
-              </div>
-            )}
-          </div>
-          {/* User/Login Button */}
-          <button
-            onClick={() => router.push("/login")}
-            className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all flex items-center gap-2 text-xs sm:text-sm min-w-[44px] min-h-[44px]"
-            aria-label="Login"
-          >
-            <User className="w-4 h-4 sm:w-4 md:w-5 md:h-5" />
-            <span className="hidden sm:inline">Login</span>
-          </button>
-        </div>
-      </nav>
+      <NavBar variant="light" />
 
       {/* Header Section */}
       <div className="px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">

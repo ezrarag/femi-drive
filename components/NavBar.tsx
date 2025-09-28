@@ -54,38 +54,41 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
 
   return (
     <nav className={`relative z-50 flex items-center justify-between p-3 sm:p-4 md:p-6 ${base} ${border ? `border-b ${border}` : ""}`}> 
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className={`xl:hidden p-2 rounded-lg ${hover} transition-all min-w-[44px] min-h-[44px] flex items-center justify-center`}
-        aria-label="Toggle mobile menu"
-      >
-        {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
+      {/* Left Section - Mobile Menu Button or Desktop Navigation */}
+      <div className="flex items-center">
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className={`xl:hidden p-2 rounded-lg ${hover} transition-all min-w-[44px] min-h-[44px] flex items-center justify-center`}
+          aria-label="Toggle mobile menu"
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
 
-      {/* Desktop Navigation - Show on xl and up */}
-      <div className="hidden xl:flex gap-2 2xl:gap-4">
-        <Link
-          href="/"
-          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} transition-all text-xs 2xl:text-sm`}
-        >
-          Home
-        </Link>
-        <Link
-          href="/inventory"
-          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${variant === "dark" ? "bg-white/10 text-white" : "bg-neutral-900 text-white"} transition-all text-xs 2xl:text-sm`}
-        >
-          Fleet
-        </Link>
-        <Link
-          href="/services"
-          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} transition-all text-xs 2xl:text-sm`}
-        >
-          Services
-        </Link>
+        {/* Desktop Navigation - Show on xl and up */}
+        <div className="hidden xl:flex gap-2 2xl:gap-4">
+          <Link
+            href="/"
+            className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} transition-all text-xs 2xl:text-sm`}
+          >
+            Home
+          </Link>
+          <Link
+            href="/inventory"
+            className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${variant === "dark" ? "bg-white/10 text-white" : "bg-neutral-900 text-white"} transition-all text-xs 2xl:text-sm`}
+          >
+            Fleet
+          </Link>
+          <Link
+            href="/services"
+            className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} transition-all text-xs 2xl:text-sm`}
+          >
+            Services
+          </Link>
+        </div>
       </div>
 
-      {/* Center Logo */}
+      {/* Center Logo - Always centered */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="text-center">
           <div className="text-xs sm:text-sm font-bold tracking-widest">FE</div>
@@ -93,99 +96,102 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
         </div>
       </div>
 
-      {/* Desktop User Menu - Show on xl and up */}
-      <div className="hidden xl:flex gap-2 2xl:gap-4 items-center relative">
-        {/* Phone Button */}
-        <button
-          onClick={() => window.open('facetime://201-898-7281', '_self')}
-          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} flex items-center gap-2 transition-all text-xs 2xl:text-sm`}
-          aria-label="Call 201-898-7281"
-        >
-          <Phone className="w-4 h-4 2xl:w-5 2xl:h-5" />
-          <span className="hidden 2xl:inline">Call</span>
-        </button>
-        
-        {/* Dropdown Menu */}
-        <div className="relative">
+      {/* Right Section - Desktop User Menu or Mobile User Buttons */}
+      <div className="flex items-center">
+        {/* Desktop User Menu - Show on xl and up */}
+        <div className="hidden xl:flex gap-2 2xl:gap-4 items-center relative">
+          {/* Phone Button */}
           <button
-            onClick={() => setMenuOpen((open) => !open)}
-            className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} font-medium transition-all text-xs 2xl:text-sm`}
-            aria-haspopup="true"
-            aria-expanded={menuOpen}
-            aria-controls="main-menu-dropdown"
-            type="button"
+            onClick={() => window.open('facetime://201-898-7281', '_self')}
+            className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} flex items-center gap-2 transition-all text-xs 2xl:text-sm`}
+            aria-label="Call 201-898-7281"
           >
-            Menu
+            <Phone className="w-4 h-4 2xl:w-5 2xl:h-5" />
+            <span className="hidden 2xl:inline">Call</span>
           </button>
-          {menuOpen && (
-            <div
-              id="main-menu-dropdown"
-              className={`absolute right-0 mt-2 w-40 rounded-lg shadow-lg border z-50 ${dropdownBg}`}
-              onMouseLeave={() => setMenuOpen(false)}
+          
+          {/* Dropdown Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((open) => !open)}
+              className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} font-medium transition-all text-xs 2xl:text-sm`}
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
+              aria-controls="main-menu-dropdown"
+              type="button"
             >
-              <Link
-                href="/about"
-                className={`block px-4 py-2 rounded-t-lg ${dropdownHover}`}
-                onClick={() => setMenuOpen(false)}
+              Menu
+            </button>
+            {menuOpen && (
+              <div
+                id="main-menu-dropdown"
+                className={`absolute right-0 mt-2 w-40 rounded-lg shadow-lg border z-50 ${dropdownBg}`}
+                onMouseLeave={() => setMenuOpen(false)}
               >
-                About
-              </Link>
-              <Link
-                href="/contact"
-                className={`block px-4 py-2 rounded-b-lg ${dropdownHover}`}
-                onClick={() => setMenuOpen(false)}
-              >
-                Contact
-              </Link>
-            </div>
-          )}
+                <Link
+                  href="/about"
+                  className={`block px-4 py-2 rounded-t-lg ${dropdownHover}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  About
+                </Link>
+                <Link
+                  href="/contact"
+                  className={`block px-4 py-2 rounded-b-lg ${dropdownHover}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+              </div>
+            )}
+          </div>
+          {/* User/Login Button */}
+          <button
+            onClick={() => router.push(user ? "/dashboard" : "/login")}
+            className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} flex items-center gap-2 transition-all text-xs 2xl:text-sm`}
+            aria-label={user ? "Dashboard" : "Login"}
+          >
+            {user && profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Avatar" className="w-5 h-5 2xl:w-6 2xl:h-6 rounded-full object-cover" />
+            ) : user && profile?.name ? (
+              <span className="w-5 h-5 2xl:w-6 2xl:h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700 text-xs">
+                {getInitials(profile.name)}
+              </span>
+            ) : (
+              <User className="w-4 h-4 2xl:w-5 2xl:h-5" />
+            )}
+            <span className="hidden 2xl:inline">{user ? "Dashboard" : "Login"}</span>
+          </button>
         </div>
-        {/* User/Login Button */}
-        <button
-          onClick={() => router.push(user ? "/dashboard" : "/login")}
-          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} flex items-center gap-2 transition-all text-xs 2xl:text-sm`}
-          aria-label={user ? "Dashboard" : "Login"}
-        >
-          {user && profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt="Avatar" className="w-5 h-5 2xl:w-6 2xl:h-6 rounded-full object-cover" />
-          ) : user && profile?.name ? (
-            <span className="w-5 h-5 2xl:w-6 2xl:h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700 text-xs">
-              {getInitials(profile.name)}
-            </span>
-          ) : (
-            <User className="w-4 h-4 2xl:w-5 2xl:h-5" />
-          )}
-          <span className="hidden 2xl:inline">{user ? "Dashboard" : "Login"}</span>
-        </button>
-      </div>
 
-      {/* Mobile User Button */}
-      <div className="xl:hidden flex items-center gap-2">
-        {/* Phone Button */}
-        <button
-          onClick={() => window.open('facetime://201-898-7281', '_self')}
-          className={`p-2 rounded-lg ${hover} flex items-center gap-2 transition-all min-w-[44px] min-h-[44px]`}
-          aria-label="Call 201-898-7281"
-        >
-          <Phone className="w-5 h-5" />
-        </button>
-        
-        {/* User Button */}
-        <button
-          onClick={() => router.push(user ? "/dashboard" : "/login")}
-          className={`p-2 rounded-lg ${hover} flex items-center gap-2 transition-all min-w-[44px] min-h-[44px]`}
-          aria-label={user ? "Dashboard" : "Login"}
-        >
-          {user && profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full object-cover" />
-          ) : user && profile?.name ? (
-            <span className="w-6 h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700 text-xs">
-              {getInitials(profile.name)}
-            </span>
-          ) : (
-            <User className="w-5 h-5" />
-          )}
-        </button>
+        {/* Mobile User Buttons */}
+        <div className="xl:hidden flex items-center gap-2">
+          {/* Phone Button */}
+          <button
+            onClick={() => window.open('facetime://201-898-7281', '_self')}
+            className={`p-2 rounded-lg ${hover} flex items-center gap-2 transition-all min-w-[44px] min-h-[44px]`}
+            aria-label="Call 201-898-7281"
+          >
+            <Phone className="w-5 h-5" />
+          </button>
+          
+          {/* User Button */}
+          <button
+            onClick={() => router.push(user ? "/dashboard" : "/login")}
+            className={`p-2 rounded-lg ${hover} flex items-center gap-2 transition-all min-w-[44px] min-h-[44px]`}
+            aria-label={user ? "Dashboard" : "Login"}
+          >
+            {user && profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full object-cover" />
+            ) : user && profile?.name ? (
+              <span className="w-6 h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700 text-xs">
+                {getInitials(profile.name)}
+              </span>
+            ) : (
+              <User className="w-5 h-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu Overlay */}
