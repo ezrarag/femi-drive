@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { User, Menu, X } from "lucide-react"
+import { User, Menu, X, Phone } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 
@@ -53,33 +53,33 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
   const dropdownHover = variant === "dark" ? "hover:bg-white/10" : "hover:bg-gray-100"
 
   return (
-    <nav className={`relative z-50 flex items-center justify-between p-4 sm:p-6 ${base} ${border ? `border-b ${border}` : ""}`}> 
+    <nav className={`relative z-50 flex items-center justify-between p-3 sm:p-4 md:p-6 ${base} ${border ? `border-b ${border}` : ""}`}> 
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className={`lg:hidden p-2 rounded-lg ${hover} transition-all`}
+        className={`xl:hidden p-2 rounded-lg ${hover} transition-all min-w-[44px] min-h-[44px] flex items-center justify-center`}
         aria-label="Toggle mobile menu"
       >
         {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
 
-      {/* Desktop Navigation */}
-      <div className="hidden lg:flex gap-4">
+      {/* Desktop Navigation - Show on xl and up */}
+      <div className="hidden xl:flex gap-2 2xl:gap-4">
         <Link
           href="/"
-          className={`nav-text px-4 py-2 rounded-full border ${border} ${hover} transition-all`}
+          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} transition-all text-xs 2xl:text-sm`}
         >
           Home
         </Link>
         <Link
           href="/inventory"
-          className={`nav-text px-4 py-2 rounded-full border ${border} ${variant === "dark" ? "bg-white/10 text-white" : "bg-neutral-900 text-white"} transition-all`}
+          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${variant === "dark" ? "bg-white/10 text-white" : "bg-neutral-900 text-white"} transition-all text-xs 2xl:text-sm`}
         >
           Fleet
         </Link>
         <Link
           href="/services"
-          className={`nav-text px-4 py-2 rounded-full border ${border} ${hover} transition-all`}
+          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} transition-all text-xs 2xl:text-sm`}
         >
           Services
         </Link>
@@ -88,18 +88,28 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
       {/* Center Logo */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="text-center">
-          <div className="text-sm font-bold tracking-widest">FE</div>
-          <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
+          <div className="text-xs sm:text-sm font-bold tracking-widest">FE</div>
+          <div className="text-xs sm:text-sm font-bold tracking-widest -mt-1">MI</div>
         </div>
       </div>
 
-      {/* Desktop User Menu */}
-      <div className="hidden lg:flex gap-4 items-center relative">
+      {/* Desktop User Menu - Show on xl and up */}
+      <div className="hidden xl:flex gap-2 2xl:gap-4 items-center relative">
+        {/* Phone Button */}
+        <button
+          onClick={() => window.open('facetime://201-898-7281', '_self')}
+          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} flex items-center gap-2 transition-all text-xs 2xl:text-sm`}
+          aria-label="Call 201-898-7281"
+        >
+          <Phone className="w-4 h-4 2xl:w-5 2xl:h-5" />
+          <span className="hidden 2xl:inline">Call</span>
+        </button>
+        
         {/* Dropdown Menu */}
         <div className="relative">
           <button
             onClick={() => setMenuOpen((open) => !open)}
-            className={`nav-text px-4 py-2 rounded-full border ${border} ${hover} font-medium transition-all`}
+            className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} font-medium transition-all text-xs 2xl:text-sm`}
             aria-haspopup="true"
             aria-expanded={menuOpen}
             aria-controls="main-menu-dropdown"
@@ -133,85 +143,97 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
         {/* User/Login Button */}
         <button
           onClick={() => router.push(user ? "/dashboard" : "/login")}
-          className={`nav-text px-4 py-2 rounded-full border ${border} ${hover} flex items-center gap-2 transition-all`}
+          className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} flex items-center gap-2 transition-all text-xs 2xl:text-sm`}
+          aria-label={user ? "Dashboard" : "Login"}
+        >
+          {user && profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt="Avatar" className="w-5 h-5 2xl:w-6 2xl:h-6 rounded-full object-cover" />
+          ) : user && profile?.name ? (
+            <span className="w-5 h-5 2xl:w-6 2xl:h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700 text-xs">
+              {getInitials(profile.name)}
+            </span>
+          ) : (
+            <User className="w-4 h-4 2xl:w-5 2xl:h-5" />
+          )}
+          <span className="hidden 2xl:inline">{user ? "Dashboard" : "Login"}</span>
+        </button>
+      </div>
+
+      {/* Mobile User Button */}
+      <div className="xl:hidden flex items-center gap-2">
+        {/* Phone Button */}
+        <button
+          onClick={() => window.open('facetime://201-898-7281', '_self')}
+          className={`p-2 rounded-lg ${hover} flex items-center gap-2 transition-all min-w-[44px] min-h-[44px]`}
+          aria-label="Call 201-898-7281"
+        >
+          <Phone className="w-5 h-5" />
+        </button>
+        
+        {/* User Button */}
+        <button
+          onClick={() => router.push(user ? "/dashboard" : "/login")}
+          className={`p-2 rounded-lg ${hover} flex items-center gap-2 transition-all min-w-[44px] min-h-[44px]`}
           aria-label={user ? "Dashboard" : "Login"}
         >
           {user && profile?.avatar_url ? (
             <img src={profile.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full object-cover" />
           ) : user && profile?.name ? (
-            <span className="w-6 h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700">
+            <span className="w-6 h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700 text-xs">
               {getInitials(profile.name)}
             </span>
           ) : (
             <User className="w-5 h-5" />
           )}
-          <span className="hidden sm:inline">{user ? "Dashboard" : "Login"}</span>
         </button>
       </div>
 
-      {/* Mobile User Button */}
-      <button
-        onClick={() => router.push(user ? "/dashboard" : "/login")}
-        className={`lg:hidden p-2 rounded-lg ${hover} flex items-center gap-2 transition-all`}
-        aria-label={user ? "Dashboard" : "Login"}
-      >
-        {user && profile?.avatar_url ? (
-          <img src={profile.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full object-cover" />
-        ) : user && profile?.name ? (
-          <span className="w-6 h-6 rounded-full bg-neutral-300 flex items-center justify-center font-bold text-neutral-700">
-            {getInitials(profile.name)}
-          </span>
-        ) : (
-          <User className="w-5 h-5" />
-        )}
-      </button>
-
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black/50 z-50" onClick={() => setMobileMenuOpen(false)}>
-          <div className="absolute top-0 right-0 w-64 h-full bg-white shadow-xl p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="xl:hidden fixed inset-0 bg-black/50 z-50 animate-in fade-in duration-200" onClick={() => setMobileMenuOpen(false)}>
+          <div className={`absolute top-0 right-0 w-72 sm:w-80 h-full ${variant === "dark" ? "bg-black" : "bg-white"} shadow-xl p-6 animate-in slide-in-from-right duration-300`} onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-bold">Menu</h2>
+              <h2 className={`text-xl font-bold ${variant === "dark" ? "text-white" : "text-black"}`}>Menu</h2>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className={`p-2 ${variant === "dark" ? "hover:bg-white/10" : "hover:bg-gray-100"} rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center`}
               >
-                <X className="w-6 h-6" />
+                <X className={`w-6 h-6 ${variant === "dark" ? "text-white" : "text-black"}`} />
               </button>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-1">
               <Link
                 href="/"
-                className="block py-3 px-4 rounded-lg hover:bg-gray-100 transition-all text-lg"
+                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-75`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 href="/inventory"
-                className="block py-3 px-4 rounded-lg hover:bg-gray-100 transition-all text-lg"
+                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-100`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Fleet
               </Link>
               <Link
                 href="/services"
-                className="block py-3 px-4 rounded-lg hover:bg-gray-100 transition-all text-lg"
+                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-125`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Services
               </Link>
               <Link
                 href="/about"
-                className="block py-3 px-4 rounded-lg hover:bg-gray-100 transition-all text-lg"
+                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-150`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 About
               </Link>
               <Link
                 href="/contact"
-                className="block py-3 px-4 rounded-lg hover:bg-gray-100 transition-all text-lg"
+                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-175`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact

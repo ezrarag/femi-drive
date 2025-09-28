@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Search, X, Menu, ExternalLink, User, Calendar, Heart } from "lucide-react"
-import { supabase } from "@/lib/supabase"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 
@@ -35,10 +34,68 @@ export default function InventoryPage() {
   // const [selectedVehicle, setSelectedVehicle] = useState<any>(null)
   // Remove unused state variables
 
-  // Remove static vehicles array
-  const [vehicles, setVehicles] = useState<any[]>([])
-  const [loadingVehicles, setLoadingVehicles] = useState(true)
-  const [fetchError, setFetchError] = useState("")
+  // Static vehicles data
+  const [vehicles] = useState<any[]>([
+    {
+      id: "1",
+      make: "Dodge",
+      model: "Charger",
+      year: 2016,
+      price_per_day: 89,
+      available: true,
+      size: "large",
+      category: "Sedan",
+      gigReady: true,
+      image_url: "https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2FVehicles%2FCharger%20-%202016%2Fvrbq724va4eltjzfxacg.webp?alt=media&token=40860584-3b42-4bf9-a7f1-aac05971619a",
+      description: "Powerful and stylish sedan perfect for rideshare",
+      mileage: 45000,
+      transmission: "Automatic",
+      location: "Newark, NJ",
+      features: ["Bluetooth", "Backup Camera", "Cruise Control", "USB Ports"],
+      insurance: "Full Coverage",
+      maintenance: "Regular Service"
+    },
+    {
+      id: "2", 
+      make: "Nissan",
+      model: "Altima",
+      year: 2023,
+      price_per_day: 75,
+      available: true,
+      size: "medium",
+      category: "Sedan",
+      gigReady: true,
+      image_url: "https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2FVehicles%2FAltima%20-%202023%2Fcrnlw8q8ksxfqfccdehp.webp?alt=media&token=f41f4128-adb4-490f-82a5-e77b847abcaa",
+      description: "Reliable and fuel-efficient sedan",
+      mileage: 12000,
+      transmission: "Automatic",
+      location: "Newark, NJ",
+      features: ["Bluetooth", "Backup Camera", "Cruise Control"],
+      insurance: "Full Coverage",
+      maintenance: "Regular Service"
+    },
+    {
+      id: "3",
+      make: "Volkswagen",
+      model: "Passat",
+      year: 2015,
+      price_per_day: 65,
+      available: true,
+      size: "medium",
+      category: "Sedan",
+      gigReady: true,
+      image_url: "https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2FVehicles%2FPassat%2Flm58zgcoez8ne9cdsu3c.webp?alt=media&token=6d1c0d93-62af-47cb-9218-1e558a0daf6e",
+      description: "Comfortable and spacious sedan",
+      mileage: 65000,
+      transmission: "Automatic",
+      location: "Newark, NJ",
+      features: ["Bluetooth", "Backup Camera", "Cruise Control", "Heated Seats"],
+      insurance: "Full Coverage",
+      maintenance: "Regular Service"
+    }
+  ])
+  const [loadingVehicles] = useState(false)
+  const [fetchError] = useState("")
 
 
   const [menuOpen, setMenuOpen] = useState(false)
@@ -84,26 +141,7 @@ export default function InventoryPage() {
     window.open(wheelbaseUrl, '_blank')
   }
 
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      setLoadingVehicles(true)
-      setFetchError("")
-      const { data, error } = await supabase
-        .from("vehicles")
-        .select("*")
-        .order("make", { ascending: true })
-      if (error) {
-        setFetchError(error.message)
-        setVehicles([])
-      } else {
-        setVehicles(data || [])
-      }
-      setLoadingVehicles(false)
-    }
-    
-    // Only fetch vehicles once on component mount
-    fetchVehicles()
-  }, []) // Remove user dependency to prevent re-fetching
+  // Static data - no need for useEffect
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
@@ -176,23 +214,23 @@ export default function InventoryPage() {
   return (
     <div className="min-h-screen bg-gray-100 text-neutral-900">
       {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between p-4 sm:p-6">
-        <div className="flex gap-2 sm:gap-4">
+      <nav className="relative z-50 flex items-center justify-between p-3 sm:p-4 md:p-6">
+        <div className="flex gap-2 sm:gap-3 md:gap-4">
           <Link
             href="/"
-            className="nav-text px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all text-xs sm:text-sm"
+            className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all text-xs sm:text-sm"
           >
             Home
           </Link>
           <Link
             href="/inventory"
-            className="nav-text px-3 sm:px-4 py-2 bg-neutral-900 text-white rounded-full border border-neutral-900 transition-all text-xs sm:text-sm"
+            className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-neutral-900 text-white rounded-full border border-neutral-900 transition-all text-xs sm:text-sm"
           >
             Fleet
           </Link>
           <Link
             href="/services"
-            className="nav-text px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all text-xs sm:text-sm"
+            className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all text-xs sm:text-sm"
           >
             Services
           </Link>
@@ -206,12 +244,12 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        <div className="flex gap-2 sm:gap-4 items-center relative">
+        <div className="flex gap-2 sm:gap-3 md:gap-4 items-center relative">
           {/* Dropdown Menu */}
           <div className="relative">
             <button
               onClick={() => setMenuOpen((open) => !open)}
-              className="nav-text px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all font-medium text-xs sm:text-sm"
+              className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all font-medium text-xs sm:text-sm min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-haspopup="true"
               aria-expanded={menuOpen}
               aria-controls="main-menu-dropdown"
@@ -227,14 +265,14 @@ export default function InventoryPage() {
               >
                 <Link
                   href="/about"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-t-lg"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-t-lg min-h-[44px] flex items-center"
                   onClick={() => setMenuOpen(false)}
                 >
                   About
                 </Link>
                 <Link
                   href="/contact"
-                  className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-b-lg"
+                  className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-b-lg min-h-[44px] flex items-center"
                   onClick={() => setMenuOpen(false)}
                 >
                   Contact
@@ -245,26 +283,26 @@ export default function InventoryPage() {
           {/* User/Login Button */}
           <button
             onClick={() => router.push("/login")}
-            className="nav-text px-3 sm:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all flex items-center gap-2 text-xs sm:text-sm"
+            className="nav-text px-3 sm:px-3 md:px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-neutral-300 hover:bg-white transition-all flex items-center gap-2 text-xs sm:text-sm min-w-[44px] min-h-[44px]"
             aria-label="Login"
           >
-            <User className="w-4 h-4 sm:w-5 sm:h-5" />
+            <User className="w-4 h-4 sm:w-4 md:w-5 md:h-5" />
             <span className="hidden sm:inline">Login</span>
           </button>
         </div>
       </nav>
 
       {/* Header Section */}
-      <div className="px-4 sm:px-6 py-6 sm:py-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
-          <h1 className="display-heading text-4xl sm:text-6xl md:text-8xl">FLEET</h1>
-          <h2 className="display-heading text-4xl sm:text-6xl md:text-8xl">OVERVIEW</h2>
+      <div className="px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 md:gap-0">
+          <h1 className="display-heading text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl">FLEET</h1>
+          <h2 className="display-heading text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl">OVERVIEW</h2>
         </div>
       </div>
 
       {/* Vehicle Grid */}
-      <div className="px-4 sm:px-6 pb-32">
-        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+      <div className="px-3 sm:px-4 md:px-6 pb-24 sm:pb-28 md:pb-32">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 md:space-y-8">
           {loadingVehicles ? (
             <div className="text-center py-16">
               <p className="body-text text-neutral-600">
@@ -282,11 +320,11 @@ export default function InventoryPage() {
               if (vehicle.size === "large") {
                 return (
                   <div key={vehicle.id} className="group" data-vehicle-id={vehicle.id}>
-                    <div className="label-text text-neutral-600 mb-3 sm:mb-4 text-xs sm:text-sm">
+                    <div className="label-text text-neutral-600 mb-2 sm:mb-3 md:mb-4 text-xs sm:text-sm">
                       {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}
                     </div>
                     <div
-                      className={`relative w-full h-64 sm:h-80 md:h-96 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
+                      className={`relative w-full h-48 sm:h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
                       // COMMENTED OUT: onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
@@ -295,33 +333,33 @@ export default function InventoryPage() {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 flex gap-1 sm:gap-2">
+                      <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 flex gap-1 sm:gap-2">
                         {vehicle.gigReady && (
-                          <div className="px-2 sm:px-3 py-1 bg-green-500 text-white label-text rounded-full text-xs">GIG READY</div>
+                          <div className="px-2 sm:px-2.5 md:px-3 py-1 bg-green-500 text-white label-text rounded-full text-xs">GIG READY</div>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFavorite(vehicle.id) }}
-                          className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all"
+                          className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
                           aria-label={savedVehicleIds.includes(vehicle.id) ? "Unsave vehicle" : "Save vehicle"}
                         >
-                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-5 sm:w-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-5 sm:w-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
+                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-4 md:w-5 md:h-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-4 md:w-5 md:h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
                         </button>
                       </div>
                       <div
-                        className={`absolute top-2 sm:top-4 right-2 sm:right-4 px-2 sm:px-3 py-1 label-text rounded-full text-xs ${
+                        className={`absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 px-2 sm:px-2.5 md:px-3 py-1 label-text rounded-full text-xs ${
                           vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
                         }`}
                       >
                         {vehicle.available ? "AVAILABLE" : "RENTED"}
                       </div>
-                      <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 flex gap-1 sm:gap-2">
+                      <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 right-2 sm:right-3 md:right-4 flex gap-1 sm:gap-2">
                         <button
                           data-action="details"
                           onClick={(e) => {
                             e.stopPropagation()
                             // COMMENTED OUT: openModal(vehicle)
                           }}
-                          className="px-2 sm:px-4 py-1 sm:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs sm:text-sm"
+                          className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs sm:text-sm min-h-[44px] flex items-center"
                         >
                           DETAILS
                         </button>
@@ -333,9 +371,9 @@ export default function InventoryPage() {
                               // NEW: Redirect to Wheelbase checkout
                               handleBookNow(vehicle);
                             }}
-                            className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                            className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm hover:bg-blue-700 transition-colors cursor-pointer min-h-[44px]"
                           >
-                            <Calendar className="w-3 h-3" />
+                            <Calendar className="w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4" />
                             BOOK
                           </button>
                         )}
@@ -349,7 +387,7 @@ export default function InventoryPage() {
             })
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
             {filteredVehicles
               .filter((v) => v.size === "medium" || v.size === "small")
               .map((vehicle, index) => {
@@ -357,11 +395,11 @@ export default function InventoryPage() {
 
                 return (
                   <div key={vehicle.id} className="group" data-vehicle-id={vehicle.id}>
-                    <div className="label-text text-neutral-600 mb-3 sm:mb-4 text-xs sm:text-sm">
+                    <div className="label-text text-neutral-600 mb-2 sm:mb-3 md:mb-4 text-xs sm:text-sm">
                       {cardNumber} {vehicle.make.toUpperCase()} - {vehicle.model.toUpperCase()} {vehicle.category}
                     </div>
                     <div
-                      className={`relative w-full h-48 sm:h-64 aspect-video overflow-hidden rounded-lg bg-gray-100 ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
+                      className={`relative w-full h-40 sm:h-48 md:h-56 lg:h-64 aspect-video overflow-hidden rounded-lg bg-gray-100 ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
                       // COMMENTED OUT: onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
@@ -370,33 +408,33 @@ export default function InventoryPage() {
                         fill
                         className="object-cover object-center w-full h-full aspect-video"
                       />
-                      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 flex gap-1 sm:gap-2">
+                      <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 flex gap-1 sm:gap-2">
                         {vehicle.gigReady && (
-                          <div className="px-2 sm:px-3 py-1 bg-green-500 text-white label-text rounded-full text-xs">GIG READY</div>
+                          <div className="px-2 sm:px-2.5 md:px-3 py-1 bg-green-500 text-white label-text rounded-full text-xs">GIG READY</div>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFavorite(vehicle.id) }}
-                          className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all"
+                          className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
                           aria-label={savedVehicleIds.includes(vehicle.id) ? "Unsave vehicle" : "Save vehicle"}
                         >
-                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-5 sm:w-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-5 sm:w-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
+                          <Heart className={savedVehicleIds.includes(vehicle.id) ? "w-4 h-4 sm:w-4 md:w-5 md:h-5 text-red-500 fill-red-500" : "w-4 h-4 sm:w-4 md:w-5 md:h-5 text-neutral-400"} fill={savedVehicleIds.includes(vehicle.id) ? "#ef4444" : "none"} />
                         </button>
                       </div>
                       <div
-                        className={`absolute top-2 sm:top-4 right-2 sm:right-4 px-2 sm:px-3 py-1 label-text rounded-full text-xs ${
+                        className={`absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 px-2 sm:px-2.5 md:px-3 py-1 label-text rounded-full text-xs ${
                           vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
                         }`}
                       >
                         {vehicle.available ? "AVAILABLE" : "RENTED"}
                       </div>
-                      <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 flex gap-1 sm:gap-2">
+                      <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 right-2 sm:right-3 md:right-4 flex gap-1 sm:gap-2">
                         <button
                           data-action="details"
                           onClick={(e) => {
                             e.stopPropagation()
                             // COMMENTED OUT: openModal(vehicle)
                           }}
-                          className="px-2 sm:px-4 py-1 sm:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs"
+                          className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs sm:text-sm min-h-[44px] flex items-center"
                         >
                           DETAILS
                         </button>
@@ -408,9 +446,9 @@ export default function InventoryPage() {
                               // NEW: Redirect to Wheelbase checkout
                               handleBookNow(vehicle);
                             }}
-                            className="px-2 sm:px-4 py-1 sm:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                            className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-blue-600/90 text-white rounded-full nav-text flex items-center gap-1 text-xs sm:text-sm hover:bg-blue-700 transition-colors cursor-pointer min-h-[44px]"
                           >
-                            <Calendar className="w-3 h-3" />
+                            <Calendar className="w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4" />
                             BOOK
                           </button>
                         )}
@@ -726,18 +764,18 @@ export default function InventoryPage() {
       <AnimatePresence>
         {!isMenuOpen && (
           <motion.div
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40"
+            className="fixed bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-40"
             initial={{ y: 0, opacity: 1 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 200, opacity: 0, scale: 0.8, transition: { type: "spring", bounce: 0.5, duration: 0.6 } }}
           >
             <motion.button
               onClick={() => setIsMenuOpen(true)}
-              className="flex items-center gap-3 px-6 py-3 bg-orange-600 text-white rounded-full shadow-lg hover:bg-orange-700 transition-all"
+              className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-orange-600 text-white rounded-full shadow-lg hover:bg-orange-700 transition-all min-h-[44px]"
               whileTap={{ scale: 0.95, y: -10 }}
               whileHover={{ scale: 1.05 }}
             >
-              <span className="nav-text font-medium">ALL VEHICLES</span>
+              <span className="nav-text font-medium text-xs sm:text-sm">ALL VEHICLES</span>
               <Menu className="w-4 h-4" />
             </motion.button>
           </motion.div>
@@ -755,27 +793,27 @@ export default function InventoryPage() {
             onClick={() => setIsMenuOpen(false)}
           >
             <motion.div
-              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto"
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-4 sm:p-6 max-h-[80vh] overflow-y-auto"
               initial={{ y: 200 }}
               animate={{ y: 0 }}
               exit={{ y: 200 }}
               transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="display-heading text-2xl text-black">Filter Vehicles</h2>
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="display-heading text-xl sm:text-2xl text-black">Filter Vehicles</h2>
                 <button
                   onClick={() => setIsMenuOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-all text-black"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-all text-black min-w-[44px] min-h-[44px] flex items-center justify-center"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Search */}
                 <div>
-                  <label className="label-text block mb-2 text-black">Search</label>
+                  <label className="label-text block mb-2 text-black text-xs sm:text-sm">Search</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                     <input
@@ -783,18 +821,18 @@ export default function InventoryPage() {
                       placeholder="Search by make or model..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="body-text w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500 text-black bg-white"
+                      className="body-text w-full pl-10 pr-4 py-2 sm:py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500 text-black bg-white text-sm sm:text-base min-h-[44px]"
                     />
                   </div>
                 </div>
 
                 {/* Vehicle Type */}
                 <div>
-                  <label className="label-text block mb-2 text-black">Vehicle Type</label>
+                  <label className="label-text block mb-2 text-black text-xs sm:text-sm">Vehicle Type</label>
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="body-text w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500 text-black bg-white"
+                    className="body-text w-full px-3 sm:px-4 py-2 sm:py-3 border border-neutral-300 rounded-lg focus:outline-none focus:border-neutral-500 text-black bg-white text-sm sm:text-base min-h-[44px]"
                   >
                     <option value="all">All Types</option>
                     <option value="available">Available</option>
@@ -806,7 +844,7 @@ export default function InventoryPage() {
 
                 {/* Price Range */}
                 <div>
-                  <label className="label-text block mb-2 text-black">
+                  <label className="label-text block mb-2 text-black text-xs sm:text-sm">
                     Daily Rate: ${priceRange[0]} - ${priceRange[1]}
                   </label>
                   <div className="space-y-2">
@@ -816,7 +854,7 @@ export default function InventoryPage() {
                       max="200"
                       value={priceRange[0]}
                       onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-                      className="w-full"
+                      className="w-full min-h-[44px]"
                     />
                     <input
                       type="range"
@@ -824,9 +862,9 @@ export default function InventoryPage() {
                       max="200"
                       value={priceRange[1]}
                       onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-                      className="w-full"
+                      className="w-full min-h-[44px]"
                     />
-                    <div className="flex justify-between text-sm text-gray-600">
+                    <div className="flex justify-between text-xs sm:text-sm text-gray-600">
                       <span>$0</span>
                       <span>$200</span>
                     </div>
@@ -836,7 +874,7 @@ export default function InventoryPage() {
                 {/* Apply Button */}
                 <button
                   onClick={() => setIsMenuOpen(false)}
-                  className="w-full py-3 bg-neutral-900 text-white rounded-lg nav-text hover:bg-neutral-800 transition-all"
+                  className="w-full py-2 sm:py-3 bg-neutral-900 text-white rounded-lg nav-text hover:bg-neutral-800 transition-all text-sm sm:text-base min-h-[44px]"
                 >
                   Apply Filters ({filteredVehicles.length} vehicles)
                 </button>
