@@ -108,19 +108,26 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
             {menuOpen && (
               <div
                 id="main-menu-dropdown"
-                className={`absolute right-0 mt-2 w-40 rounded-lg shadow-lg border z-50 ${dropdownBg}`}
+                className={`absolute right-0 top-full mt-2 w-full rounded-lg shadow-lg border z-50 ${variant === "dark" ? "bg-white/10 backdrop-blur-sm border-white/20" : "bg-white/80 backdrop-blur-sm border-neutral-300"}`}
                 onMouseLeave={() => setMenuOpen(false)}
               >
                 <Link
                   href="/about"
-                  className={`block px-4 py-2 rounded-t-lg ${dropdownHover}`}
+                  className={`block px-4 py-3 rounded-t-lg ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
                   onClick={() => setMenuOpen(false)}
                 >
                   About
                 </Link>
                 <Link
+                  href="/invest"
+                  className={`block px-4 py-3 ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Invest
+                </Link>
+                <Link
                   href="/contact"
-                  className={`block px-4 py-2 rounded-b-lg ${dropdownHover}`}
+                  className={`block px-4 py-3 rounded-b-lg ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
                   onClick={() => setMenuOpen(false)}
                 >
                   Contact
@@ -164,7 +171,7 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div className="xl:hidden fixed inset-0 bg-black/50 z-50 animate-in fade-in duration-200" onClick={() => setMobileMenuOpen(false)}>
-          <div className={`absolute top-0 right-0 w-72 sm:w-80 h-full ${variant === "dark" ? "bg-black" : "bg-white"} shadow-xl p-6 animate-in slide-in-from-right duration-300`} onClick={(e) => e.stopPropagation()}>
+          <div className={`absolute top-0 right-0 w-72 sm:w-80 h-full ${variant === "dark" ? "bg-black/90 backdrop-blur-md" : "bg-white/90 backdrop-blur-md"} shadow-xl p-6 animate-in slide-in-from-right duration-300`} onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-8">
               <h2 className={`text-xl font-bold ${variant === "dark" ? "text-white" : "text-black"}`}>Menu</h2>
               <button
@@ -175,38 +182,45 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
               </button>
             </div>
             
-            <div className="space-y-1">
+            <div className="space-y-2">
               <Link
                 href="/"
-                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-75`}
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-75`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 href="/inventory"
-                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-100`}
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-100`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Fleet
               </Link>
               <Link
                 href="/services"
-                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-125`}
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-125`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Services
               </Link>
               <Link
                 href="/about"
-                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-150`}
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-150`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 About
               </Link>
               <Link
+                href="/invest"
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-175`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Invest
+              </Link>
+              <Link
                 href="/contact"
-                className={`block py-3 px-4 rounded-lg ${variant === "dark" ? "hover:bg-white/10 text-white" : "hover:bg-gray-100 text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-175`}
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-200`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact
