@@ -64,7 +64,16 @@ function PaymentForm({
     setIsProcessing(true)
 
     try {
-      // Confirm payment using the prefetched client secret
+      // ✅ This line must come FIRST - validate and tokenize card details
+      const { error: submitError } = await elements.submit()
+      if (submitError) {
+        console.error('Submit error:', submitError)
+        alert(submitError.message || 'Error submitting payment details')
+        setIsProcessing(false)
+        return
+      }
+
+      // ✅ THEN confirm payment using the prefetched client secret
       const { error } = await stripe.confirmPayment({
         elements,
         clientSecret,
