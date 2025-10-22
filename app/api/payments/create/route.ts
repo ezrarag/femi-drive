@@ -1,66 +1,83 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
 
-const stripe = process.env.STRIPE_SECRET_KEY 
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-12-18.acacia',
-    })
-  : null
-
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { amount, connectedAccountId, description, metadata } = await request.json()
-
-    // Validate amount
-    if (!amount || amount <= 0) {
-      return NextResponse.json(
-        { error: 'Amount must be greater than 0' },
-        { status: 400 }
-      )
+    // Check environment variable
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      console.error("❌ Missing STRIPE_SECRET_KEY in environment variables.");
+      return NextResponse.json({ error: "Missing Stripe secret key." }, { status: 500 });
     }
 
-    if (!stripe) {
-      return NextResponse.json(
-        { error: 'Stripe is not configured. Please add STRIPE_SECRET_KEY to environment variables.' },
-        { status: 500 }
-      )
+    const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    const body = await req.json();
+
+    console.log("📦 Incoming request body:", body);
+
+    const { amount, connectedAccountId, description, metadata } = body;
+
+    if (!amount || isNaN(amount)) {
+      console.error("❌ Invalid or missing amount:", amount);
+      return NextResponse.json({ error: "Invalid or missing amount." }, { status: 400 });
     }
 
     // Convert USD to cents
-    const amountInCents = Math.round(amount * 100)
+    const amountInCents = Math.round(amount * 100);
     
     // Calculate 0.5% platform fee (rounded)
-    const applicationFeeAmount = Math.round(amountInCents * 0.005)
+    const applicationFeeAmount = Math.round(amountInCents * 0.005);
 
     // Determine payment type and metadata
-    const paymentType = metadata?.type || 'investment'
+    const paymentType = metadata?.type || 'investment';
     const paymentMetadata = {
       type: paymentType,
       description: description || `${paymentType === 'booking' ? 'Booking' : 'Investment'} of $${amount}`,
       ...metadata, // Include all metadata fields
+    };
+
+    // Build PaymentIntent parameters
+    const params: Stripe.PaymentIntentCreateParams = {
+      amount: amountInCents,
+      currency: "usd",
+      description: description || "Femi Leasing Investment",
+      automatic_payment_methods: { enabled: true },
+      metadata: paymentMetadata,
+    };
+
+    // Add Connect data if provided
+    if (connectedAccountId) {
+      params.transfer_data = { destination: connectedAccountId };
+      params.application_fee_amount = applicationFeeAmount;
     }
 
-    // Create PaymentIntent with Stripe Connect
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
-      currency: 'usd',
-      transfer_data: {
-        destination: connectedAccountId || 'acct_1SK6dd1lscTKUkb9', // Femi Leasing connected account
-      },
-      application_fee_amount: applicationFeeAmount,
-      payment_method_types: ['card'],
-      metadata: paymentMetadata,
-    })
+    console.log("🧮 PaymentIntent params:", params);
 
-    return NextResponse.json({
+    // Attempt to create PaymentIntent
+    const paymentIntent = await stripe.paymentIntents.create(params);
+    console.log("✅ PaymentIntent created:", paymentIntent.id);
+
+    return NextResponse.json({ 
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-    })
-  } catch (error) {
-    console.error('Stripe error:', error)
+    });
+  } catch (err: any) {
+    console.error("🚨 Stripe PaymentIntent creation failed:", {
+      message: err.message,
+      type: err.type,
+      code: err.code,
+      stack: err.stack,
+    });
+
+    // Return detailed error info for debugging (don't keep this in production)
     return NextResponse.json(
-      { error: 'Failed to create payment intent' },
+      {
+        error: "PaymentIntent creation failed",
+        message: err.message,
+        type: err.type,
+        code: err.code,
+      },
       { status: 500 }
-    )
+    );
   }
 }
