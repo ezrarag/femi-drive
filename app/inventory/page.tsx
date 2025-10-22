@@ -117,28 +117,15 @@ export default function InventoryPage() {
 
   // COMMENTED OUT: Debug logging for modal state
 
-  // Function to get Wheelbase checkout URL based on vehicle make and model
-  const getWheelbaseUrl = (vehicle: any): string => {
-    const make = vehicle.make?.toLowerCase()
-    const model = vehicle.model?.toLowerCase()
-    
-    // Map specific vehicles to their Wheelbase URLs
-    if (make === 'dodge' && model === 'charger') {
-      return 'https://checkout.wheelbasepro.com/reserve/457237?locale=en-us'
-    } else if (make === 'nissan' && model === 'altima') {
-      return 'https://checkout.wheelbasepro.com/reserve/463737?locale=en-us'
-    } else if (make === 'volkswagen' && model === 'passat') {
-      return 'https://checkout.wheelbasepro.com/reserve/454552?locale=en-us'
-    }
-    
-    // Default fallback URL (you can change this to a general booking page)
-    return 'https://checkout.wheelbasepro.com'
+  // Function to get booking URL for the new booking flow
+  const getBookingUrl = (vehicle: any) => {
+    return `/vehicles/${vehicle.id}/book`
   }
 
   // Function to handle booking redirect
   const handleBookNow = (vehicle: any) => {
-    const wheelbaseUrl = getWheelbaseUrl(vehicle)
-    window.open(wheelbaseUrl, '_blank')
+    const bookingUrl = getBookingUrl(vehicle)
+    router.push(bookingUrl)
   }
 
   // Static data - no need for useEffect

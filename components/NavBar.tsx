@@ -108,26 +108,26 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
             {menuOpen && (
               <div
                 id="main-menu-dropdown"
-                className={`absolute right-0 top-full mt-2 w-full rounded-lg shadow-lg border z-50 ${variant === "dark" ? "bg-white/10 backdrop-blur-sm border-white/20" : "bg-white/80 backdrop-blur-sm border-neutral-300"}`}
+                className={`absolute right-0 top-full mt-2 w-32 rounded-lg shadow-lg border z-50 ${variant === "dark" ? "bg-transparent border-white/20" : "bg-transparent border-neutral-300"}`}
                 onMouseLeave={() => setMenuOpen(false)}
               >
                 <Link
                   href="/about"
-                  className={`block px-4 py-3 rounded-t-lg ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
+                  className={`block px-3 py-2 rounded-t-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
                   onClick={() => setMenuOpen(false)}
                 >
                   About
                 </Link>
                 <Link
                   href="/invest"
-                  className={`block px-4 py-3 ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
+                  className={`block px-3 py-2 text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
                   onClick={() => setMenuOpen(false)}
                 >
                   Invest
                 </Link>
                 <Link
                   href="/contact"
-                  className={`block px-4 py-3 rounded-b-lg ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
+                  className={`block px-3 py-2 rounded-b-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
                   onClick={() => setMenuOpen(false)}
                 >
                   Contact
