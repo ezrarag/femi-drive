@@ -41,6 +41,7 @@ function PaymentForm({
   startDate, 
   endDate, 
   paymentType,
+  clientSecret,
   onSuccess 
 }: { 
   amount: number
@@ -48,6 +49,7 @@ function PaymentForm({
   startDate: string
   endDate: string
   paymentType: 'booking' | 'direct_payment'
+  clientSecret: string
   onSuccess: () => void 
 }) {
   const stripe = useStripe()
@@ -62,44 +64,7 @@ function PaymentForm({
     setIsProcessing(true)
 
     try {
-      // Create payment intent based on payment type
-      const paymentData = paymentType === 'booking' 
-        ? {
-            amount,
-            connectedAccountId: "acct_1SK6dd1lscTKUkb9",
-            description: `Booking for ${vehicle.make} ${vehicle.model}`,
-            metadata: { 
-              type: "booking", 
-              vehicleId: vehicle.id, 
-              vehicleName: `${vehicle.make} ${vehicle.model}`,
-              startDate,
-              endDate
-            }
-          }
-        : {
-            amount,
-            connectedAccountId: "acct_1SK6dd1lscTKUkb9",
-            description: `Direct payment for ${vehicle.make} ${vehicle.model}`,
-            metadata: { 
-              type: "direct_payment", 
-              vehicleId: vehicle.id, 
-              vehicleName: `${vehicle.make} ${vehicle.model}`
-            }
-          }
-
-      const response = await fetch('/api/payments/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentData),
-      })
-
-      const { clientSecret } = await response.json()
-
-      if (!clientSecret) {
-        throw new Error('No client secret received')
-      }
-
-      // Confirm payment
+      // Confirm payment using the prefetched client secret
       const { error } = await stripe.confirmPayment({
         elements,
         clientSecret,
@@ -152,6 +117,8 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
   const [bookingSuccess, setBookingSuccess] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [isLoadingPayment, setIsLoadingPayment] = useState(false)
 
   // Calculate total cost based on payment type
   const totalDays = startDate && endDate ? 
@@ -241,13 +208,62 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
     fetchVehicle()
   }, [params.id])
 
-  const handleReserve = () => {
+  const handleReserve = async () => {
     if (paymentType === 'booking') {
       if (!startDate || !endDate || totalCost <= 0) return
     } else {
       if (!paymentAmount || totalCost <= 0) return
     }
-    setShowPaymentForm(true)
+
+    if (!vehicle) return
+
+    setIsLoadingPayment(true)
+    try {
+      // Create payment intent based on payment type
+      const paymentData = paymentType === 'booking' 
+        ? {
+            amount: totalCost,
+            connectedAccountId: "acct_1SK6dd1lscTKUkb9",
+            description: `Booking for ${vehicle.make} ${vehicle.model}`,
+            metadata: { 
+              type: "booking", 
+              vehicleId: vehicle.id, 
+              vehicleName: `${vehicle.make} ${vehicle.model}`,
+              startDate,
+              endDate
+            }
+          }
+        : {
+            amount: totalCost,
+            connectedAccountId: "acct_1SK6dd1lscTKUkb9",
+            description: `Direct payment for ${vehicle.make} ${vehicle.model}`,
+            metadata: { 
+              type: "direct_payment", 
+              vehicleId: vehicle.id, 
+              vehicleName: `${vehicle.make} ${vehicle.model}`
+            }
+          }
+
+      const response = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentData),
+      })
+
+      const { clientSecret: secret } = await response.json()
+
+      if (!secret) {
+        throw new Error('No client secret received')
+      }
+
+      setClientSecret(secret)
+      setShowPaymentForm(true)
+    } catch (error) {
+      console.error('Failed to create payment intent:', error)
+      alert('Failed to initialize payment. Please try again.')
+    } finally {
+      setIsLoadingPayment(false)
+    }
   }
 
   const handleBookingSuccess = () => {
@@ -262,6 +278,7 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
     setPaymentType('booking')
     setShowPaymentForm(false)
     setBookingSuccess(false)
+    setClientSecret(null)
   }
 
   if (loading) {
@@ -409,16 +426,19 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
                   </div>
                 </div>
                 
-                <Elements stripe={stripePromise}>
-                  <PaymentForm 
-                    amount={totalCost} 
-                    vehicle={vehicle}
-                    startDate={startDate}
-                    endDate={endDate}
-                    paymentType={paymentType}
-                    onSuccess={handleBookingSuccess} 
-                  />
-                </Elements>
+                {clientSecret && (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <PaymentForm 
+                      amount={totalCost} 
+                      vehicle={vehicle}
+                      startDate={startDate}
+                      endDate={endDate}
+                      paymentType={paymentType}
+                      clientSecret={clientSecret}
+                      onSuccess={handleBookingSuccess} 
+                    />
+                  </Elements>
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -558,30 +578,32 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
                     onClick={handleReserve}
                     disabled={
                       paymentType === 'booking' 
-                        ? (!startDate || !endDate || totalCost <= 0)
-                        : (!paymentAmount || totalCost <= 0)
+                        ? (!startDate || !endDate || totalCost <= 0 || isLoadingPayment)
+                        : (!paymentAmount || totalCost <= 0 || isLoadingPayment)
                     }
                     className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all flex items-center justify-center gap-2 ${
-                      (paymentType === 'booking' && startDate && endDate && totalCost > 0) || 
-                      (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)
+                      ((paymentType === 'booking' && startDate && endDate && totalCost > 0) || 
+                      (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)) && !isLoadingPayment
                         ? 'bg-white text-black hover:bg-white/90'
                         : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/20'
                     }`}
                     whileHover={
-                      (paymentType === 'booking' && startDate && endDate && totalCost > 0) || 
-                      (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)
+                      ((paymentType === 'booking' && startDate && endDate && totalCost > 0) || 
+                      (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)) && !isLoadingPayment
                         ? { scale: 1.02 } : {}
                     }
                     whileTap={
-                      (paymentType === 'booking' && startDate && endDate && totalCost > 0) || 
-                      (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)
+                      ((paymentType === 'booking' && startDate && endDate && totalCost > 0) || 
+                      (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)) && !isLoadingPayment
                         ? { scale: 0.98 } : {}
                     }
                   >
                     <DollarSign className="w-5 h-5" />
-                    {paymentType === 'booking' 
-                      ? (!startDate || !endDate ? 'Select Dates' : `Reserve Now - $${totalCost.toLocaleString()}`)
-                      : (!paymentAmount ? 'Enter Amount' : `Pay Now - $${totalCost.toLocaleString()}`)
+                    {isLoadingPayment 
+                      ? 'Initializing Payment...'
+                      : paymentType === 'booking' 
+                        ? (!startDate || !endDate ? 'Select Dates' : `Reserve Now - $${totalCost.toLocaleString()}`)
+                        : (!paymentAmount ? 'Enter Amount' : `Pay Now - $${totalCost.toLocaleString()}`)
                     }
                   </motion.button>
                 </div>

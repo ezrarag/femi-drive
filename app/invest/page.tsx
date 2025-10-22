@@ -14,7 +14,7 @@ import {
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
-function PaymentForm({ amount, onSuccess }: { amount: number, onSuccess: () => void }) {
+function PaymentForm({ amount, clientSecret, onSuccess }: { amount: number, clientSecret: string, onSuccess: () => void }) {
   const stripe = useStripe()
   const elements = useElements()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -27,23 +27,7 @@ function PaymentForm({ amount, onSuccess }: { amount: number, onSuccess: () => v
     setIsProcessing(true)
 
     try {
-      // Create payment intent
-      const response = await fetch('/api/payments/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          amount,
-          description: `Investment in Femi Leasing`
-        }),
-      })
-
-      const { clientSecret } = await response.json()
-
-      if (!clientSecret) {
-        throw new Error('No client secret received')
-      }
-
-      // Confirm payment
+      // Confirm payment using the prefetched client secret
       const { error } = await stripe.confirmPayment({
         elements,
         clientSecret,
@@ -90,11 +74,38 @@ export default function InvestPage() {
   const [amount, setAmount] = useState('')
   const [showPaymentForm, setShowPaymentForm] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [isLoadingPayment, setIsLoadingPayment] = useState(false)
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const numAmount = parseFloat(amount)
     if (numAmount > 0) {
-      setShowPaymentForm(true)
+      setIsLoadingPayment(true)
+      try {
+        // Prefetch payment intent
+        const response = await fetch('/api/payments/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            amount: numAmount,
+            description: `Investment in Femi Leasing`
+          }),
+        })
+
+        const { clientSecret: secret } = await response.json()
+
+        if (!secret) {
+          throw new Error('No client secret received')
+        }
+
+        setClientSecret(secret)
+        setShowPaymentForm(true)
+      } catch (error) {
+        console.error('Failed to create payment intent:', error)
+        alert('Failed to initialize payment. Please try again.')
+      } finally {
+        setIsLoadingPayment(false)
+      }
     }
   }
 
@@ -107,6 +118,7 @@ export default function InvestPage() {
     setAmount('')
     setShowPaymentForm(false)
     setPaymentSuccess(false)
+    setClientSecret(null)
   }
 
   return (
@@ -189,9 +201,11 @@ export default function InvestPage() {
                   </div>
                 </div>
                 
-                <Elements stripe={stripePromise}>
-                  <PaymentForm amount={parseFloat(amount)} onSuccess={handlePaymentSuccess} />
-                </Elements>
+                {clientSecret && (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <PaymentForm amount={parseFloat(amount)} clientSecret={clientSecret} onSuccess={handlePaymentSuccess} />
+                  </Elements>
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -251,16 +265,16 @@ export default function InvestPage() {
 
                   <motion.button
                     onClick={handleContinue}
-                    disabled={!amount || parseFloat(amount) <= 0}
+                    disabled={!amount || parseFloat(amount) <= 0 || isLoadingPayment}
                     className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all ${
-                      amount && parseFloat(amount) > 0
+                      amount && parseFloat(amount) > 0 && !isLoadingPayment
                         ? 'bg-white text-black hover:bg-white/90'
                         : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/20'
                     }`}
-                    whileHover={amount && parseFloat(amount) > 0 ? { scale: 1.02 } : {}}
-                    whileTap={amount && parseFloat(amount) > 0 ? { scale: 0.98 } : {}}
+                    whileHover={amount && parseFloat(amount) > 0 && !isLoadingPayment ? { scale: 1.02 } : {}}
+                    whileTap={amount && parseFloat(amount) > 0 && !isLoadingPayment ? { scale: 0.98 } : {}}
                   >
-                    Continue
+                    {isLoadingPayment ? 'Initializing Payment...' : 'Continue'}
                   </motion.button>
                 </div>
               </motion.div>
