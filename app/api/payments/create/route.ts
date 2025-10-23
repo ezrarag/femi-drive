@@ -36,20 +36,20 @@ export async function POST(req: Request) {
       ...metadata, // Include all metadata fields
     };
 
-    // Build PaymentIntent parameters
+    // Build PaymentIntent parameters - ALWAYS transfer to Femi Leasing connected account
     const params: Stripe.PaymentIntentCreateParams = {
       amount: amountInCents,
       currency: "usd",
       description: description || "Femi Leasing Investment",
       automatic_payment_methods: { enabled: true },
       metadata: paymentMetadata,
+      // Always transfer to Femi Leasing connected account
+      transfer_data: { 
+        destination: connectedAccountId || "acct_1SK6dd1lscTKUkb9" 
+      },
+      // Always apply 0.5% platform fee
+      application_fee_amount: applicationFeeAmount,
     };
-
-    // Add Connect data if provided
-    if (connectedAccountId) {
-      params.transfer_data = { destination: connectedAccountId };
-      params.application_fee_amount = applicationFeeAmount;
-    }
 
     console.log("🧮 PaymentIntent params:", params);
 
