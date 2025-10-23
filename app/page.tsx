@@ -20,24 +20,26 @@ export default function HomePage() {
     cta: "View Fleet",
     info: "03 - 03 Newark - NYC Area",
     },
-    {
-      title: "FLEXIBLE",
-      subtitle: "FINANCING",
-      label: "No Credit",
-      description:
-        "No credit? No problem. We've created innovative financing solutions that work with your situation. From rent-to-own to traditional leasing options.",
-      cta: "Apply Now",
-      info: "02 - 03 Financing Options",
-    },
-    {
-      title: "DRIVE",
-      subtitle: "TO EARN",
-      label: "Gig Economy",
-      description:
-        "Rooted in the gig economy world, we've developed a comprehensive vehicle access platform. Moving beyond traditional leasing to embrace its power as a financial tool.",
-      cta: "Start Earning",
-      info: "01 - 03 Uber - Lyft Ready",
-    },
+    // COMMENTED OUT: Flexible financing section
+    // {
+    //   title: "FLEXIBLE",
+    //   subtitle: "FINANCING",
+    //   label: "No Credit",
+    //   description:
+    //     "No credit? No problem. We've created innovative financing solutions that work with your situation. From rent-to-own to traditional leasing options.",
+    //   cta: "Apply Now",
+    //   info: "02 - 03 Financing Options",
+    // },
+    // COMMENTED OUT: Drive to earn section
+    // {
+    //   title: "DRIVE",
+    //   subtitle: "TO EARN",
+    //   label: "Gig Economy",
+    //   description:
+    //     "Rooted in the gig economy world, we've developed a comprehensive vehicle access platform. Moving beyond traditional leasing to embrace its power as a financial tool.",
+    //   cta: "Start Earning",
+    //   info: "01 - 03 Uber - Lyft Ready",
+    // },
   ]
 
   const nextSlide = () => {
@@ -79,7 +81,7 @@ export default function HomePage() {
           </div>
 
           {/* Center CTA */}
-          <div className="flex justify-center order-1 xl:order-2 mb-4 sm:mb-6 lg:mb-0">
+          <div className="flex justify-center order-1 xl:order-2 mb-4 sm:mb-6 lg:mb-0 w-full">
             <Link
               href="/inventory"
               className="nav-text px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all text-center text-xs sm:text-sm md:text-base min-h-[44px] flex items-center justify-center"
