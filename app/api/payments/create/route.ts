@@ -32,8 +32,10 @@ export async function POST(req: Request) {
     const paymentType = metadata?.type || 'investment';
     const paymentMetadata = {
       type: paymentType,
+      client: 'femileasing', // Mark as Femi Leasing payment
+      project: 'femi-leasing', // Project identifier
       description: description || `${paymentType === 'booking' ? 'Booking' : 'Investment'} of $${amount}`,
-      ...metadata, // Include all metadata fields
+      ...metadata, // Include all metadata fields (allow override)
     };
 
     // Build PaymentIntent parameters - ALWAYS transfer to Femi Leasing connected account

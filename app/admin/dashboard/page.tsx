@@ -2,40 +2,35 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-// TODO: Implement authentication when backend is ready
+import { AuthGuard } from "@/lib/auth-guard"
+import { useAuth } from "@/hooks/useAuth"
 
-export default function AdminDashboard() {
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-      // TODO: Implement user authentication when backend is ready
-      const user = null // Placeholder
-      // TEMPORARY: Allow any email for development - REMOVE BEFORE PRODUCTION
-      // if (!user || !user.email || !user.email.endsWith("@femileasing.com")) {
-      if (!user || !user.email) {
-        window.location.href = "/admin/login"
-      } else {
-        setLoading(false)
-      }
-    }
-    checkAdmin()
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg font-semibold text-gray-700">Checking admin access...</div>
-      </div>
-    )
+function AdminDashboardContent() {
+  const { user, logout } = useAuth()
+  
+  const handleLogout = async () => {
+    await logout()
+    window.location.href = "/admin/login"
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-4xl bg-white rounded-xl shadow-lg p-4 sm:p-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Admin Dashboard</h1>
-        <div className="mb-4 p-2 sm:p-3 bg-yellow-100 border border-yellow-300 rounded text-xs text-yellow-800">
-          ⚠️ Development Mode: Email restrictions temporarily disabled
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-center">Admin Dashboard</h1>
+          <div className="flex items-center gap-4">
+            {user && (
+              <div className="text-sm text-gray-600">
+                {user.email}
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className="text-sm text-red-600 hover:text-red-800 px-3 py-1 border border-red-300 rounded hover:bg-red-50"
+            >
+              Logout
+            </button>
+          </div>
         </div>
         
         {/* Main Actions Grid */}
@@ -111,5 +106,13 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AdminDashboard() {
+  return (
+    <AuthGuard allowedEmails={['finance@readyaimgo.biz', 'ezra@readyaimgo.biz', 'femileasing@gmail.com']}>
+      <AdminDashboardContent />
+    </AuthGuard>
   )
 } 

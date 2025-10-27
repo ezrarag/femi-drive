@@ -7,6 +7,7 @@ interface Balance {
   available: number
   pending: number
   currency: string
+  error?: string
 }
 
 interface Transaction {
@@ -31,11 +32,29 @@ interface Transfer {
   status: string
 }
 
+interface FemiPayment {
+  id: string
+  amount: number
+  currency: string
+  status: string
+  description: string
+  metadata: any
+  created: number
+  transferDestination: string
+  applicationFeeAmount: number
+}
+
+interface FemiTransaction extends Transaction {
+  availableOn: string | null
+}
+
 export default function FinancePage() {
   const [loading, setLoading] = useState(true)
   const [balance, setBalance] = useState<Balance | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [transfers, setTransfers] = useState<Transfer[]>([])
+  const [femiPayments, setFemiPayments] = useState<FemiPayment[]>([])
+  const [femiTransactions, setFemiTransactions] = useState<FemiTransaction[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -46,17 +65,26 @@ export default function FinancePage() {
     try {
       setLoading(true)
       const response = await fetch('/api/finance/balance')
-      if (!response.ok) {
-        throw new Error('Failed to fetch balance data')
-      }
       const data = await response.json()
+      
+      // Always set the data, even if there's an error
       setBalance(data.balance)
       setTransactions(data.recentTransactions || [])
       setTransfers(data.recentTransfers || [])
-      setError(null)
+      setFemiPayments(data.femiPayments || [])
+      setFemiTransactions(data.femiTransactions || [])
+      
+      // Set error only if there's a critical error
+      if (!response.ok && !data.balance) {
+        setError(data.error || 'Failed to fetch balance data')
+      } else {
+        setError(null)
+      }
     } catch (err: any) {
       console.error('Failed to fetch balance:', err)
-      setError(err.message || 'Failed to fetch finance data')
+      // Don't block the UI with empty state on network errors
+      setBalance({ available: 0, pending: 0, currency: 'usd', error: 'Network error' })
+      setError('Network error - check connection')
     } finally {
       setLoading(false)
     }
@@ -99,9 +127,16 @@ export default function FinancePage() {
           <p className="text-gray-600 mt-2">View balances, transactions, and transfer history</p>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
-            Error: {error}
+        {(error || (balance?.error)) && (
+          <div className={`border px-4 py-3 rounded mb-6 ${
+            error 
+              ? 'bg-red-50 border-red-300 text-red-800' 
+              : 'bg-yellow-50 border-yellow-300 text-yellow-800'
+          }`}>
+            {error ? `API Error: ${error}` : balance?.error}
+            <p className="text-xs mt-2 opacity-75">
+              Some data may be incomplete. Check server console for details.
+            </p>
           </div>
         )}
 
@@ -128,6 +163,114 @@ export default function FinancePage() {
                 {formatCurrency(balance.pending)}
               </div>
               <p className="text-sm text-gray-500 mt-2">Awaiting processing</p>
+            </div>
+          </div>
+        )}
+
+        {/* Femi Leasing Payments - Platform Payments Destined for Transfer */}
+        {femiPayments.length > 0 && (
+          <div className="bg-white rounded-lg shadow mb-8">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">Femi Leasing Payments</h2>
+              <p className="text-sm text-gray-600 mt-1">Platform payments that will be transferred to Femi Leasing account</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Platform Fee</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Net to Femi</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {femiPayments.map((payment) => (
+                    <tr key={payment.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatDate(payment.created)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {formatCurrency(payment.amount)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+                        -{formatCurrency(payment.applicationFeeAmount)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
+                        {formatCurrency(payment.amount - payment.applicationFeeAmount)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded bg-purple-100 text-purple-800">
+                          {payment.metadata?.type || 'payment'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          payment.status === 'succeeded' 
+                            ? 'bg-green-100 text-green-800' 
+                            : payment.status === 'processing'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {payment.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Femi Leasing Balance Transactions */}
+        {femiTransactions.length > 0 && (
+          <div className="bg-white rounded-lg shadow mb-8">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">Femi Leasing Balance Activity</h2>
+              <p className="text-sm text-gray-600 mt-1">Stripe balance transactions for Femi Leasing payments</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fees</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Net</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {femiTransactions.map((transaction) => (
+                    <tr key={transaction.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatDate(transaction.created)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800">
+                          {transaction.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {formatCurrency(transaction.amount)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+                        -{formatCurrency(transaction.fee)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">
+                        {formatCurrency(transaction.net)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {transaction.availableOn ? formatDate(Date.parse(transaction.availableOn) / 1000) : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

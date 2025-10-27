@@ -1,57 +1,77 @@
 "use client"
 
 import { useEffect, useState } from "react"
-// TODO: Implement authentication when backend is ready
+import { useRouter } from "next/navigation"
+import { signInWithPopup } from "firebase/auth"
+import { auth, googleProvider } from "@/lib/firebase"
+import { useAuth } from "@/hooks/useAuth"
 import Image from "next/image"
 
 export default function AdminLoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
 
   const handleLogin = async () => {
     setLoading(true)
     setError("")
     
     try {
-      // TODO: Implement OAuth when backend is ready
-      console.log('OAuth login not implemented yet')
+      const result = await signInWithPopup(auth, googleProvider)
+      const userEmail = result.user.email
       
-      // TODO: Handle login errors when backend is ready
-    } catch (err) {
-      setError("An unexpected error occurred during login")
+      // Check if user is authorized
+      const authorizedEmails = [
+        'finance@readyaimgo.biz',
+        'ezra@readyaimgo.biz',
+        'femileasing@gmail.com',
+        // Add more authorized emails as needed
+      ]
+      
+      const isAuthorized = authorizedEmails.some(email => 
+        userEmail?.toLowerCase().includes(email.toLowerCase())
+      )
+      
+      if (!isAuthorized) {
+        setError("Access denied. Please contact support to request admin access.")
+        await signInWithPopup(auth, googleProvider) // This will sign out if unauthorized
+        return
+      }
+      
+      // Redirect to dashboard on success
+      router.push("/admin/dashboard")
+    } catch (err: any) {
+      console.error("Login error:", err)
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError("Sign-in cancelled")
+      } else {
+        setError(err.message || "An unexpected error occurred during login")
+      }
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      // TODO: Implement user authentication when backend is ready
-      const user = null // Placeholder
-      if (user) {
-        // TEMPORARY: Allow any email for development - REMOVE BEFORE PRODUCTION
-        // if (user.email && user.email.endsWith("@femileasing.com")) {
-        if (user.email) {
-          console.log("Admin user authenticated, redirecting to dashboard...")
-          window.location.href = "/admin/dashboard"
-        } else {
-          setError("Access denied: You must use a femileasing.com email.")
-          // TODO: Implement sign out when backend is ready
-        }
+    if (!authLoading && user) {
+      // Check if user is authorized
+      const userEmail = user.email
+      const authorizedEmails = [
+        'finance@readyaimgo.biz',
+        'ezra@readyaimgo.biz',
+        'femileasing@gmail.com',
+      ]
+      
+      const isAuthorized = authorizedEmails.some(email => 
+        userEmail?.toLowerCase().includes(email.toLowerCase())
+      )
+      
+      if (isAuthorized) {
+        router.push("/admin/dashboard")
       }
     }
-
-    // Check initial session
-    checkAdmin()
-
-    // Listen for auth state changes
-    // TODO: Implement auth state change when backend is ready
-    const subscription = null // Placeholder
-
-    return () => {
-      // TODO: Implement subscription cleanup when backend is ready
-    }
-  }, [])
+  }, [user, authLoading, router])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -68,8 +88,8 @@ export default function AdminLoginPage() {
           <p className="text-neutral-500 text-center text-sm mt-2">
             Sign in with your Google account to access the admin dashboard and manage the system.
           </p>
-          <div className="mt-2 p-2 bg-yellow-100 border border-yellow-300 rounded text-xs text-yellow-800">
-            ⚠️ Development Mode: Email restrictions temporarily disabled
+          <div className="mt-2 p-2 bg-blue-100 border border-blue-300 rounded text-xs text-blue-800">
+            🔐 Secure authentication via Firebase
           </div>
         </div>
         <button
