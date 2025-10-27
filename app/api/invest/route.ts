@@ -25,18 +25,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create a payment intent
+    // Convert amount to cents
+    const amountInCents = amount * 100;
+    
+    // Calculate 0.5% platform fee
+    const applicationFeeAmount = Math.round(amountInCents * 0.005);
+
+    // Create a payment intent with automatic transfer to Femi Leasing
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100, // Convert to cents
+      amount: amountInCents,
       currency,
       metadata: {
         type: 'investment',
         investor_email: email,
         investor_name: name,
+        project: 'femi-leasing',
       },
       automatic_payment_methods: {
         enabled: true,
       },
+      // Always transfer to Femi Leasing connected account
+      transfer_data: { 
+        destination: "acct_1SK6dd1lscTKUkb9" 
+      },
+      // Apply 0.5% platform fee
+      application_fee_amount: applicationFeeAmount,
     })
 
     return NextResponse.json({

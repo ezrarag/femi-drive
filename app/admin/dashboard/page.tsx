@@ -70,13 +70,10 @@ export default function AdminDashboard() {
             <div className="text-xs opacity-80 mt-1">AI Configuration</div>
           </Link>
           
-          <button 
-            onClick={() => window.open('https://readyaimgo.biz', '_blank')}
-            className="block w-full bg-teal-600 text-white py-4 sm:py-6 rounded-lg text-center hover:bg-teal-700 transition text-sm sm:text-base"
-          >
-            💰 Sales & Payouts
-            <div className="text-xs opacity-80 mt-1">External Platform</div>
-          </button>
+          <Link href="/admin/finance" className="block w-full bg-teal-600 text-white py-4 sm:py-6 rounded-lg text-center hover:bg-teal-700 transition text-sm sm:text-base">
+            💰 Finance & Payouts
+            <div className="text-xs opacity-80 mt-1">Balances & Transfers</div>
+          </Link>
         </div>
         
         {/* Quick Stats */}
