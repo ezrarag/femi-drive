@@ -56,6 +56,8 @@ export default function FinancePage() {
   const [femiPayments, setFemiPayments] = useState<FemiPayment[]>([])
   const [femiTransactions, setFemiTransactions] = useState<FemiTransaction[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [payoutLoading, setPayoutLoading] = useState(false)
+  const [payoutSuccess, setPayoutSuccess] = useState(false)
 
   useEffect(() => {
     fetchBalance()
@@ -105,6 +107,33 @@ export default function FinancePage() {
       hour: '2-digit',
       minute: '2-digit'
     })
+  }
+
+  const handlePayout = async () => {
+    setPayoutLoading(true)
+    setPayoutSuccess(false)
+    setError(null)
+    
+    try {
+      const response = await fetch('/api/finance/payout', { method: 'POST' })
+      const data = await response.json()
+      
+      if (data.success) {
+        setPayoutSuccess(true)
+        // Refresh the balance after successful payout
+        setTimeout(() => {
+          fetchBalance()
+          setPayoutSuccess(false)
+        }, 3000)
+      } else {
+        setError(data.message || data.error || 'Payout failed')
+      }
+    } catch (err: any) {
+      console.error('Payout error:', err)
+      setError('Failed to process payout. Please try again.')
+    } finally {
+      setPayoutLoading(false)
+    }
   }
 
   if (loading) {
@@ -377,20 +406,44 @@ export default function FinancePage() {
           </div>
         )}
 
-        {/* Manual Transfer Section */}
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Manual Transfer</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Transfer funds to Femi Leasing account (acct_1SK6dd1lscTKUkb9)
-          </p>
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-4 mb-4">
-            <p className="text-sm text-yellow-800">
-              ⚠️ Manual transfers should only be used for immediate needs. Future payments will automatically route to the connected account.
-            </p>
-          </div>
-          <p className="text-sm text-gray-700">
-            Use the API endpoint: <code className="bg-gray-100 px-2 py-1 rounded">POST /api/finance/transfer</code>
-          </p>
+        {/* Transfer to Bank Section */}
+        <div className="mt-8">
+          {balance && balance.available > 0 ? (
+            <div className="bg-white rounded-lg shadow p-6 text-center">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Transfer Funds</h2>
+              <p className="text-gray-600 mb-4">
+                You have {formatCurrency(balance.available)} ready to send to your bank account.
+              </p>
+              {payoutSuccess ? (
+                <div className="bg-green-50 border border-green-200 rounded p-4 mb-4">
+                  <p className="text-green-800 font-semibold">
+                    ✅ Funds successfully sent to your bank account.
+                  </p>
+                  <p className="text-sm text-green-700 mt-1">
+                    Your payout will arrive in your bank within 1-2 business days.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  onClick={handlePayout}
+                  disabled={payoutLoading}
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
+                >
+                  {payoutLoading ? 'Processing...' : '💸 Transfer to Bank'}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-lg border border-gray-200 p-6 text-center text-gray-600">
+              <p className="text-lg mb-2">No funds available for payout yet.</p>
+              <p className="text-sm text-gray-500">
+                Pending balance: {balance ? formatCurrency(balance.pending) : formatCurrency(0)}
+              </p>
+              <p className="text-xs text-gray-400 mt-2">
+                Funds become available after payment processing is complete.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
