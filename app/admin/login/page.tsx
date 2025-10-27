@@ -17,6 +17,12 @@ export default function AdminLoginPage() {
     setLoading(true)
     setError("")
     
+    if (!auth || !googleProvider) {
+      setError("Firebase authentication is not configured. Please check environment variables.")
+      setLoading(false)
+      return
+    }
+    
     try {
       const result = await signInWithPopup(auth, googleProvider)
       const userEmail = result.user.email

@@ -11,16 +11,40 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase (only if not already initialized)
-let app: FirebaseApp;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
+// Initialize Firebase only if config is complete and we're in the browser
+function getFirebaseApp() {
+  // Check if we're in browser and have valid config
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const hasConfig = firebaseConfig.apiKey && 
+                    firebaseConfig.authDomain && 
+                    firebaseConfig.projectId;
+
+  if (!hasConfig) {
+    console.warn('⚠️ Firebase not configured. Missing environment variables.');
+    return null;
+  }
+
+  // Initialize Firebase (only if not already initialized)
+  try {
+    if (!getApps().length) {
+      return initializeApp(firebaseConfig);
+    } else {
+      return getApps()[0];
+    }
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+    return null;
+  }
 }
 
-// Initialize Firebase Auth
-export const auth = getAuth(app);
+// Get app instance
+const app = getFirebaseApp();
+
+// Initialize Firebase Auth (safely)
+export const auth = app ? getAuth(app) : null;
 
 // Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
@@ -28,6 +52,6 @@ googleProvider.setCustomParameters({
   prompt: 'select_account',
 });
 
-// Auth helper functions
+// Auth helper functions - re-export only if available
 export { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 export type { User } from 'firebase/auth';

@@ -14,6 +14,9 @@ export function AuthGuard({ children, allowedEmails }: AuthGuardProps) {
   const router = useRouter();
 
   useEffect(() => {
+    // Only run client-side
+    if (typeof window === 'undefined') return;
+    
     if (!loading && !user) {
       router.push('/admin/login');
     } else if (user && allowedEmails) {
