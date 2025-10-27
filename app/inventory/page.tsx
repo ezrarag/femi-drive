@@ -245,9 +245,6 @@ export default function InventoryPage() {
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 flex gap-1 sm:gap-2">
-                        {vehicle.gigReady && (
-                          <div className="px-2 sm:px-2.5 md:px-3 py-1 bg-green-500 text-white label-text rounded-full text-xs">GIG READY</div>
-                        )}
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFavorite(vehicle.id) }}
                           className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -264,16 +261,6 @@ export default function InventoryPage() {
                         {vehicle.available ? "AVAILABLE" : "RENTED"}
                       </div>
                       <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 right-2 sm:right-3 md:right-4 flex gap-1 sm:gap-2">
-                        <button
-                          data-action="details"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            // COMMENTED OUT: openModal(vehicle)
-                          }}
-                          className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs sm:text-sm min-h-[44px] flex items-center"
-                        >
-                          DETAILS
-                        </button>
                         {vehicle.available && (
                           <button
                             onClick={(e) => {
@@ -320,9 +307,6 @@ export default function InventoryPage() {
                         className="object-cover object-center w-full h-full aspect-video"
                       />
                       <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 flex gap-1 sm:gap-2">
-                        {vehicle.gigReady && (
-                          <div className="px-2 sm:px-2.5 md:px-3 py-1 bg-green-500 text-white label-text rounded-full text-xs">GIG READY</div>
-                        )}
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleFavorite(vehicle.id) }}
                           className="p-1 rounded-full bg-white/80 hover:bg-red-100 border border-neutral-300 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -339,16 +323,6 @@ export default function InventoryPage() {
                         {vehicle.available ? "AVAILABLE" : "RENTED"}
                       </div>
                       <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 right-2 sm:right-3 md:right-4 flex gap-1 sm:gap-2">
-                        <button
-                          data-action="details"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            // COMMENTED OUT: openModal(vehicle)
-                          }}
-                          className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 bg-white/90 text-black rounded-full nav-text hover:bg-white transition-all text-xs sm:text-sm min-h-[44px] flex items-center"
-                        >
-                          DETAILS
-                        </button>
                         {vehicle.available && (
                           <button
                             onClick={(e) => {
