@@ -112,28 +112,30 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
                 id="main-menu-dropdown"
                 className={`absolute right-0 top-full mt-2 w-32 rounded-lg shadow-lg border z-50 ${variant === "dark" ? "bg-transparent border-white/20" : "bg-transparent border-neutral-300"}`}
                 onMouseLeave={() => setMenuOpen(false)}
+            >
+              {/* COMMENTED OUT: About link
+              <Link
+                href="/about"
+                className={`block px-3 py-2 rounded-t-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
+                onClick={() => setMenuOpen(false)}
               >
-                <Link
-                  href="/about"
-                  className={`block px-3 py-2 rounded-t-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  About
-                </Link>
-                <Link
-                  href="/invest"
-                  className={`block px-3 py-2 text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Invest
-                </Link>
-                <Link
-                  href="/contact"
-                  className={`block px-3 py-2 rounded-b-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Contact
-                </Link>
+                About
+              </Link>
+              */}
+              <Link
+                href="/invest"
+                className={`block px-3 py-2 rounded-t-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Invest
+              </Link>
+              <Link
+                href="/contact"
+                className={`block px-3 py-2 rounded-b-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Contact
+              </Link>
               </div>
             )}
           </div>
@@ -208,6 +210,7 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
                 Services
               </Link>
               */}
+              {/* COMMENTED OUT: About link in mobile menu
               <Link
                 href="/about"
                 className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-150`}
@@ -215,6 +218,7 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
               >
                 About
               </Link>
+              */}
               <Link
                 href="/invest"
                 className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-175`}
