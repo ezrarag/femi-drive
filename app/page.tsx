@@ -57,7 +57,7 @@ export default function HomePage() {
       <div className="absolute inset-0 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover">
           <source
-            src="https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2F2229697-uhd_3840_2160_30fps.mp4?alt=media&token=baa0aecd-215f-4e67-a290-f5853e1d4dd0"
+            src="https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2FHome%2F5419498-uhd_3840_2160_25fps.mp4?alt=media&token=a667e232-1daf-4aa9-b1a0-7ea2604f5051"
             type="video/mp4"
           />
           Your browser does not support the video tag.
