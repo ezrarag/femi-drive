@@ -94,9 +94,7 @@ export default function ContactPage() {
                 <Clock className="w-5 h-5 mt-1 opacity-60" />
                 <div>
                   <div className="label-text mb-2">Hours</div>
-                  <div className="body-text">Mon-Fri: 8:00 AM - 8:00 PM</div>
-                  <div className="body-text">Sat: 9:00 AM - 6:00 PM</div>
-                  <div className="body-text">Sun: 10:00 AM - 4:00 PM</div>
+                  <div className="body-text">Daily: 6:00 AM - 11:00 PM</div>
                 </div>
               </div>
             </div>
@@ -233,51 +231,26 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto pt-16">
           <h2 className="display-heading text-4xl mb-12">FREQUENTLY ASKED</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div>
-                <h3 className="label-text mb-3">How quickly can I get a vehicle?</h3>
-                <p className="body-text opacity-80">
-                  Most approved applicants can pick up a vehicle within 24-48 hours of approval.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="label-text mb-3">What if I have no credit?</h3>
-                <p className="body-text opacity-80">
-                  No problem! We have specialized programs for drivers with no credit or poor credit history.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="label-text mb-3">Are all vehicles gig-ready?</h3>
-                <p className="body-text opacity-80">
-                  Most of our fleet is pre-approved for Uber, Lyft, and major delivery platforms.
-                </p>
-              </div>
+          <div className="max-w-4xl space-y-8">
+            <div>
+              <h3 className="label-text mb-3 text-xl">What is the security deposit?</h3>
+              <p className="body-text opacity-80 text-lg">
+                At Femi Leasing, the security deposit is $250.
+              </p>
             </div>
 
-            <div className="space-y-6">
-              <div>
-                <h3 className="label-text mb-3">What's included in the rental?</h3>
-                <p className="body-text opacity-80">
-                  Insurance, maintenance, and 24/7 roadside assistance are included in all rentals.
-                </p>
-              </div>
+            <div>
+              <h3 className="label-text mb-3 text-xl">Do you offer long-term rentals?</h3>
+              <p className="body-text opacity-80 text-lg">
+                Yes, Femi Leasing offers flexible long-term rental options to meet your needs.
+              </p>
+            </div>
 
-              <div>
-                <h3 className="label-text mb-3">Can I rent for just a few days?</h3>
-                <p className="body-text opacity-80">
-                  Yes! We offer flexible terms from daily rentals to long-term leases.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="label-text mb-3">How do I become a fleet partner?</h3>
-                <p className="body-text opacity-80">
-                  Contact us to learn about listing your vehicle and earning passive income.
-                </p>
-              </div>
+            <div>
+              <h3 className="label-text mb-3 text-xl">What are the requirements?</h3>
+              <p className="body-text opacity-80 text-lg">
+                Renters must be 25 years or older and possess a valid driver's license.
+              </p>
             </div>
           </div>
         </div>
