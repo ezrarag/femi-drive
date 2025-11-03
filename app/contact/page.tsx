@@ -231,24 +231,24 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto pt-16">
           <h2 className="display-heading text-4xl mb-12">FREQUENTLY ASKED</h2>
 
-          <div className="max-w-4xl space-y-8">
-            <div>
-              <h3 className="label-text mb-3 text-xl">What is the security deposit?</h3>
-              <p className="body-text opacity-80 text-lg">
+          <div className="max-w-4xl space-y-4">
+            <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all">
+              <h3 className="label-text mb-1 text-lg">What is the security deposit?</h3>
+              <p className="body-text opacity-60 text-base">
                 At Femi Leasing, the security deposit is $250.
               </p>
             </div>
 
-            <div>
-              <h3 className="label-text mb-3 text-xl">Do you offer long-term rentals?</h3>
-              <p className="body-text opacity-80 text-lg">
+            <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all">
+              <h3 className="label-text mb-1 text-lg">Do you offer long-term rentals?</h3>
+              <p className="body-text opacity-60 text-base">
                 Yes, Femi Leasing offers flexible long-term rental options to meet your needs.
               </p>
             </div>
 
-            <div>
-              <h3 className="label-text mb-3 text-xl">What are the requirements?</h3>
-              <p className="body-text opacity-80 text-lg">
+            <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all">
+              <h3 className="label-text mb-1 text-lg">What are the requirements?</h3>
+              <p className="body-text opacity-60 text-base">
                 Renters must be 25 years or older and possess a valid driver's license.
               </p>
             </div>

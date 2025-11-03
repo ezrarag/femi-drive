@@ -129,10 +129,17 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
               </Link>
               <Link
                 href="/contact"
-                className={`block px-3 py-2 rounded-b-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
+                className={`block px-3 py-2 text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
                 onClick={() => setMenuOpen(false)}
               >
                 Contact
+              </Link>
+              <Link
+                href="/admin/login"
+                className={`block px-3 py-2 rounded-b-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all border-t ${variant === "dark" ? "border-white/20" : "border-neutral-200"}`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Staff Login
               </Link>
               </div>
             )}
@@ -228,6 +235,13 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact
+              </Link>
+              <Link
+                href="/admin/login"
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-225 border-t ${variant === "dark" ? "border-white/20" : "border-neutral-200"} mt-2`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Staff Login
               </Link>
             </div>
           </div>
