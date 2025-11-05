@@ -76,11 +76,36 @@ export default function HomePage() {
               Privacy
             </Link>
           </div>
-          <button
+          <motion.button
             onClick={() => setReviewPopupOpen(true)}
-            className="w-2 h-2 sm:w-3 sm:h-3 bg-white/40 rounded-full hover:bg-white/60 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/50"
+            className="w-2 h-2 sm:w-3 sm:h-3 bg-white/40 rounded-full hover:bg-white/60 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/50 relative"
             aria-label="View reviews"
-          />
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.4, 0.8, 0.4],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 23,
+              delay: 0,
+            }}
+          >
+            {/* Pulsing ring effect */}
+            <motion.span
+              className="absolute inset-0 rounded-full bg-white/40"
+              animate={{
+                scale: [1, 2.5, 2.5],
+                opacity: [0.6, 0, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                repeatDelay: 1,
+                delay: 0,
+              }}
+            />
+          </motion.button>
         </div>
       </footer>
 
