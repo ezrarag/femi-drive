@@ -4,11 +4,13 @@ import { formatPhoneNumber } from "@/lib/phone-utils"
 
 interface PhoneDisplayProps {
   className?: string
+  phoneNumber?: string
+  variant?: string
 }
 
-export function PhoneDisplay({ className = "" }: PhoneDisplayProps) {
-  // Get phone number from environment variable (client-side)
-  const phoneNumber = process.env.NEXT_PUBLIC_BUSINESS_PHONE
+export function PhoneDisplay({ className = "", phoneNumber: phoneNumberProp }: PhoneDisplayProps) {
+  // Use provided phone number or get from environment variable (client-side)
+  const phoneNumber = phoneNumberProp || process.env.NEXT_PUBLIC_BUSINESS_PHONE
 
   // Don't render if no phone number is configured
   if (!phoneNumber) {

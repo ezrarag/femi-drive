@@ -56,7 +56,7 @@ export default function ContactPage() {
                 <Phone className="w-5 h-5 mt-1 opacity-60" />
                 <div>
                   <div className="label-text mb-2">Phone (AI Assistant Available 24/7)</div>
-                  <PhoneDisplay phoneNumber="+12018987182" variant="cta" className="mb-2" />
+                  <PhoneDisplay phoneNumber="+12018987281" variant="cta" className="mb-2" />
                   <div className="body-text opacity-60">Our AI assistant Femi can help with:</div>
                   <ul className="body-text opacity-60 text-sm mt-1 space-y-1">
                     <li>• Vehicle availability and pricing</li>
@@ -71,7 +71,7 @@ export default function ContactPage() {
                 <Mail className="w-5 h-5 mt-1 opacity-60" />
                 <div>
                   <div className="label-text mb-2">Email</div>
-                  <div className="body-text">ayoola@femileasing.com</div>
+                  <div className="body-text">femileasingauto@gmail.com</div>
                   <div className="body-text opacity-60">24/7 response</div>
                 </div>
               </div>
@@ -226,10 +226,10 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* FAQ Section */}
+          {/* FAQ Section */}
       <div className="px-6 pb-16 border-t border-white/10">
         <div className="max-w-7xl mx-auto pt-16">
-          <h2 className="display-heading text-4xl mb-12">FREQUENTLY ASKED</h2>
+          <h2 className="display-heading text-xl mb-6">frequently asked</h2>
 
           <div className="max-w-4xl space-y-4">
             <div className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all">

@@ -47,7 +47,7 @@ export default function InventoryPage() {
       size: "large",
       category: "Sedan",
       gigReady: true,
-      image_url: "https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2FVehicles%2F2016-Dodge-Charger-front-angle3_10837_089_640x480.avif?alt=media&token=fff6f0d0-47a1-4793-b1d1-19bf556bbed0",
+      image_url: "https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2FVehicles%2F2020-Dodge-Charger-front_14278_032_2400x1800_PW7_nologo.avif?alt=media&token=bd201f7a-a1b4-4119-9f4f-40f401395ac1",
       description: "Powerful and stylish sedan perfect for rideshare",
       mileage: 45000,
       transmission: "Automatic",
