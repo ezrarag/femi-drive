@@ -42,12 +42,6 @@ export default function ReviewsPage() {
           >
             Fleet
           </Link>
-          <Link
-            href="/services"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Services
-          </Link>
         </div>
         {/* Hamburger for Mobile */}
         <div className="sm:hidden flex items-center">
@@ -100,13 +94,6 @@ export default function ReviewsPage() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Fleet
-            </Link>
-            <Link
-              href="/services"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Services
             </Link>
             <Link
               href="/about"

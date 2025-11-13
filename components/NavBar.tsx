@@ -62,14 +62,6 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
           >
             Fleet
           </Link>
-          {/* COMMENTED OUT: Services link
-          <Link
-            href="/services"
-            className={`nav-text px-3 2xl:px-4 py-2 rounded-full border ${border} ${hover} transition-all text-xs 2xl:text-sm`}
-          >
-            Services
-          </Link>
-          */}
         </div>
       </div>
 
@@ -206,18 +198,9 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
               >
                 Fleet
               </Link>
-              {/* COMMENTED OUT: Services link in mobile menu
-              <Link
-                href="/services"
-                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-125`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Services
-              </Link>
-              */}
               <Link
                 href="/about"
-                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-150`}
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-125`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 About

@@ -112,14 +112,6 @@ export default function ContactPage() {
                 </Link>
 
                 <Link
-                  href="/financing"
-                  className="block w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all"
-                >
-                  <div className="label-text mb-1">Apply for Financing</div>
-                  <div className="body-text opacity-60">Get pre-approved today</div>
-                </Link>
-
-                <Link
                   href="/drive-to-earn"
                   className="block w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/20 transition-all"
                 >
