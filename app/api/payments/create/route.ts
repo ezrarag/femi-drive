@@ -25,18 +25,47 @@ export async function POST(req: Request) {
     // Convert USD to cents
     const amountInCents = Math.round(amount * 100);
     
+    // Stripe minimum amount is $0.50 (50 cents)
+    if (amountInCents < 50) {
+      console.error("❌ Amount too small:", amountInCents);
+      return NextResponse.json({ 
+        error: "Amount must be at least $0.50",
+        code: "amount_too_small"
+      }, { status: 400 });
+    }
+    
+    // Validate connected account ID format
+    const accountId = connectedAccountId || "acct_1SK6dd1lscTKUkb9";
+    if (!accountId.startsWith("acct_")) {
+      console.error("❌ Invalid connected account ID format:", accountId);
+      return NextResponse.json({ 
+        error: "Invalid connected account ID format",
+        code: "invalid_account_id"
+      }, { status: 400 });
+    }
+    
     // Calculate 0.5% platform fee (rounded)
     const applicationFeeAmount = Math.round(amountInCents * 0.005);
 
     // Determine payment type and metadata
     const paymentType = metadata?.type || 'investment';
-    const paymentMetadata = {
-      type: paymentType,
+    
+    // Format metadata - Stripe requires all values to be strings and keys/values have length limits
+    const paymentMetadata: Record<string, string> = {
+      type: String(paymentType),
       client: 'femileasing', // Mark as Femi Leasing payment
       project: 'femi-leasing', // Project identifier
-      description: description || `${paymentType === 'booking' ? 'Booking' : 'Investment'} of $${amount}`,
-      ...metadata, // Include all metadata fields (allow override)
     };
+    
+    // Add all metadata fields, ensuring all values are strings and within limits
+    if (metadata) {
+      for (const [key, value] of Object.entries(metadata)) {
+        // Stripe metadata keys must be <= 40 chars, values <= 500 chars
+        const keyStr = String(key).substring(0, 40);
+        const valueStr = String(value).substring(0, 500);
+        paymentMetadata[keyStr] = valueStr;
+      }
+    }
 
     // Build PaymentIntent parameters - ALWAYS transfer to Femi Leasing connected account
     const params: Stripe.PaymentIntentCreateParams = {
@@ -47,7 +76,7 @@ export async function POST(req: Request) {
       metadata: paymentMetadata,
       // Always transfer to Femi Leasing connected account
       transfer_data: { 
-        destination: connectedAccountId || "acct_1SK6dd1lscTKUkb9" 
+        destination: accountId
       },
       // Always apply 0.5% platform fee
       application_fee_amount: applicationFeeAmount,
@@ -68,16 +97,29 @@ export async function POST(req: Request) {
       message: err.message,
       type: err.type,
       code: err.code,
+      statusCode: err.statusCode,
+      raw: err.raw,
       stack: err.stack,
     });
 
-    // Return detailed error info for debugging (don't keep this in production)
+    // Return detailed error info for debugging
+    const errorMessage = err.message || "PaymentIntent creation failed";
+    const errorCode = err.code || err.type || "unknown_error";
+    
     return NextResponse.json(
       {
         error: "PaymentIntent creation failed",
-        message: err.message,
-        type: err.type,
-        code: err.code,
+        message: errorMessage,
+        code: errorCode,
+        // Include more details in development
+        ...(process.env.NODE_ENV === 'development' && {
+          details: {
+            type: err.type,
+            statusCode: err.statusCode,
+            declineCode: err.decline_code,
+            param: err.param,
+          }
+        }),
       },
       { status: 500 }
     );

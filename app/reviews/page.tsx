@@ -1,134 +1,166 @@
 "use client";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, Star, Calendar, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { PhoneDisplay } from "@/components/phone-display";
 import ReviewCard from "@/components/ReviewCard";
-// TODO: Implement reviews when backend is ready
-import React from "react";
+import NavBar from "@/components/NavBar";
+import { ReviewSubmissionModal } from "@/components/ReviewSubmissionModal";
 
-async function getReviews() {
-  // TODO: Implement reviews when backend is ready
-  return [];
+interface Review {
+  id: string;
+  name: string;
+  rating: number;
+  bookingStartDate: string;
+  bookingEndDate: string;
+  comment: string;
+  createdAt: string;
+  approved?: boolean;
 }
 
 export default function ReviewsPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [error, setError] = useState<any>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   // Fetch reviews on mount
-  React.useEffect(() => {
-    getReviews()
-      .then(setReviews)
-      .catch(setError);
+  useEffect(() => {
+    fetchReviews();
   }, []);
+
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/reviews');
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Filter to show only approved reviews (or all if none are approved yet)
+        const approvedReviews = data.reviews.filter((r: Review) => r.approved !== false);
+        setReviews(approvedReviews);
+      } else {
+        setError(data.error || 'Failed to load reviews');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load reviews');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this review?')) return;
+    
+    try {
+      const response = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        setReviews(reviews.filter(r => r.id !== id));
+      }
+    } catch (err) {
+      alert('Failed to delete review');
+    }
+  };
+
+  const calculateDuration = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between p-6">
-        {/* Desktop Nav */}
-        <div className="hidden sm:flex gap-4">
-          <Link
-            href="/"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Home
-          </Link>
-          <Link
-            href="/inventory"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Fleet
-          </Link>
-        </div>
-        {/* Hamburger for Mobile */}
-        <div className="sm:hidden flex items-center">
+      <NavBar variant="dark" />
+      
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-12 sm:py-16 md:py-24">
+        <div className="flex items-center justify-between mb-8 sm:mb-12">
+          <h1 className="display-heading text-3xl sm:text-4xl md:text-5xl">CUSTOMER REVIEWS</h1>
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setShowReviewModal(true)}
+            className="nav-text px-4 sm:px-6 py-2 sm:py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all text-sm sm:text-base"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            Leave a Review
           </button>
         </div>
-        {/* Center Logo */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="text-center">
-            <div className="text-sm font-bold tracking-widest">FE</div>
-            <div className="text-sm font-bold tracking-widest -mt-1">MI</div>
+
+        {loading ? (
+          <div className="text-center py-16">
+            <p className="body-text text-white/60">Loading reviews...</p>
           </div>
-        </div>
-        {/* Desktop Right Nav */}
-        <div className="hidden sm:flex gap-4">
-          {process.env.NEXT_PUBLIC_BUSINESS_PHONE && (
-            <PhoneDisplay className="text-white" />
-          )}
-          <Link
-            href="/about"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className="nav-text px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-all"
-          >
-            Contact
-          </Link>
-        </div>
-        {/* Mobile Dropdown Menu */}
-        {mobileMenuOpen && (
-          <div className="sm:hidden absolute top-full left-0 w-full bg-black/95 border-t border-white/10 shadow-lg flex flex-col items-center py-6 gap-4 animate-fadein z-50">
-            <Link
-              href="/"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
+        ) : error ? (
+          <div className="text-center py-16">
+            <p className="body-text text-red-400">{error}</p>
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="body-text text-white/60 mb-6">No reviews yet. Be the first to leave a review!</p>
+            <button
+              onClick={() => setShowReviewModal(true)}
+              className="nav-text px-6 py-3 bg-white text-black rounded-full hover:bg-white/90 transition-all"
             >
-              Home
-            </Link>
-            <Link
-              href="/inventory"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Fleet
-            </Link>
-            <Link
-              href="/about"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              href="/contact"
-              className="nav-text px-6 py-3 rounded-full hover:bg-white/10 transition-all w-11/12 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            {process.env.NEXT_PUBLIC_BUSINESS_PHONE && (
-              <PhoneDisplay className="text-white mt-2" />
-            )}
+              Leave a Review
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {reviews.map((review) => (
+              <div
+                key={review.id}
+                className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-6 space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="label-text text-lg font-semibold">{review.name}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Calendar className="w-4 h-4 text-white/60" />
+                      <span className="body-text text-sm text-white/60">
+                        {calculateDuration(review.bookingStartDate, review.bookingEndDate)} days
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < review.rating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-white/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="body-text text-white/80">{review.comment}</p>
+                <div className="flex items-center justify-between pt-4 border-t border-white/20">
+                  <span className="body-text text-xs text-white/60">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </span>
+                  {/* Admin delete button - TODO: Add admin check */}
+                  <button
+                    onClick={() => handleDeleteReview(review.id)}
+                    className="p-2 hover:bg-white/10 rounded transition-colors"
+                    aria-label="Delete review"
+                  >
+                    <Trash2 className="w-4 h-4 text-white/60" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
-      </nav>
-
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Customer Reviews</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {error ? (
-            <div className="col-span-2 text-red-500">Error loading reviews.</div>
-          ) : reviews.length === 0 ? (
-            <div className="col-span-2 text-gray-500">No reviews yet.</div>
-          ) : (
-            reviews.map((r: any) => <ReviewCard key={r.id} {...r} />)
-          )}
-        </div>
       </div>
+
+      {/* Review Submission Modal */}
+      <ReviewSubmissionModal
+        open={showReviewModal}
+        onOpenChange={setShowReviewModal}
+        onSuccess={fetchReviews}
+      />
     </div>
   );
 } 

@@ -32,11 +32,15 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
     ? "hover:bg-white/10"
     : "hover:bg-white"
   const border = noBorder ? "" : (variant === "dark" ? "border-white/20" : "border-neutral-300")
-  const dropdownBg = variant === "dark" ? "bg-black text-white border-white/20" : "bg-white text-gray-800 border-neutral-200"
+  const dropdownBg = transparent 
+    ? "bg-black/80 backdrop-blur-sm text-white border-white/20"
+    : variant === "dark" 
+      ? "bg-black text-white border-white/20" 
+      : "bg-white text-gray-800 border-neutral-200"
   const dropdownHover = variant === "dark" ? "hover:bg-white/10" : "hover:bg-gray-100"
 
   return (
-    <nav className={`relative z-50 flex items-center justify-between p-3 sm:p-4 md:p-6 ${base} ${border ? `border-b ${border}` : ""}`}> 
+    <nav className={`${transparent ? 'absolute' : 'relative'} top-0 left-0 right-0 z-50 flex items-center justify-between p-3 sm:p-4 md:p-6 ${base} ${border ? `border-b ${border}` : ""}`}> 
       {/* Left Section - Mobile Menu Button or Desktop Navigation */}
       <div className="flex items-center">
         {/* Mobile Menu Button */}
@@ -102,7 +106,7 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
             {menuOpen && (
               <div
                 id="main-menu-dropdown"
-                className={`absolute right-0 top-full mt-2 w-32 rounded-lg shadow-lg border z-50 ${variant === "dark" ? "bg-transparent border-white/20" : "bg-transparent border-neutral-300"}`}
+                className={`absolute right-0 top-full mt-2 w-32 rounded-lg shadow-lg border z-50 ${dropdownBg}`}
                 onMouseLeave={() => setMenuOpen(false)}
             >
               <Link
@@ -111,13 +115,6 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
                 onClick={() => setMenuOpen(false)}
               >
                 About
-              </Link>
-              <Link
-                href="/invest"
-                className={`block px-3 py-2 text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all`}
-                onClick={() => setMenuOpen(false)}
-              >
-                Invest
               </Link>
               <Link
                 href="/contact"
@@ -206,15 +203,8 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
                 About
               </Link>
               <Link
-                href="/invest"
-                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-175`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Invest
-              </Link>
-              <Link
                 href="/contact"
-                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-200`}
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-150`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact

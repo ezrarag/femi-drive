@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Calendar, CreditCard, Car, DollarSign, ArrowLeft } from "lucide-react"
 import NavBar from "@/components/NavBar"
@@ -13,7 +13,9 @@ import {
   useElements
 } from '@stripe/react-stripe-js'
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null
 
 interface Vehicle {
   id: string
@@ -116,7 +118,10 @@ function PaymentForm({
   )
 }
 
-export default function VehicleBookingPage({ params }: { params: { id: string } }) {
+export default function VehicleBookingPage({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap params Promise using React.use()
+  const { id } = use(params)
+  
   const [vehicle, setVehicle] = useState<Vehicle | null>(null)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -128,6 +133,10 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
   const [error, setError] = useState('')
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [isLoadingPayment, setIsLoadingPayment] = useState(false)
+  // Customer information
+  const [customerName, setCustomerName] = useState('')
+  const [customerEmail, setCustomerEmail] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
 
   // Calculate total cost based on payment type
   const totalDays = startDate && endDate ? 
@@ -201,7 +210,7 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
           }
         ]
 
-        const foundVehicle = vehicles.find(v => v.id === params.id)
+        const foundVehicle = vehicles.find(v => v.id === id)
         if (foundVehicle) {
           setVehicle(foundVehicle)
         } else {
@@ -215,16 +224,80 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
     }
 
     fetchVehicle()
-  }, [params.id])
+  }, [id])
 
   const handleReserve = async () => {
-    if (paymentType === 'booking') {
-      if (!startDate || !endDate || totalCost <= 0) return
-    } else {
-      if (!paymentAmount || totalCost <= 0) return
+    // Clear any previous errors
+    setError('')
+
+    // Validate customer information
+    if (!customerName.trim()) {
+      setError('Please enter your name')
+      return
+    }
+    if (!customerEmail.trim()) {
+      setError('Please enter your email address')
+      return
+    }
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(customerEmail)) {
+      setError('Please enter a valid email address')
+      return
+    }
+    if (!customerPhone.trim()) {
+      setError('Please enter your phone number')
+      return
     }
 
-    if (!vehicle) return
+    if (paymentType === 'booking') {
+      if (!startDate || !endDate) {
+        setError('Please select both pickup and return dates')
+        return
+      }
+      
+      // Validate dates
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      if (start < today) {
+        setError('Pickup date cannot be in the past')
+        return
+      }
+      
+      if (end <= start) {
+        setError('Return date must be after pickup date')
+        return
+      }
+      
+      if (totalCost <= 0) {
+        setError('Invalid booking duration. Please check your dates.')
+        return
+      }
+    } else {
+      if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
+        setError('Please enter a valid payment amount')
+        return
+      }
+      
+      if (totalCost <= 0) {
+        setError('Invalid payment amount')
+        return
+      }
+    }
+
+    if (!vehicle) {
+      setError('Vehicle information is missing')
+      return
+    }
+    
+    // Check if Stripe is configured
+    if (!stripePromise) {
+      setError('Payment system is not configured. Please contact support.')
+      return
+    }
 
     setIsLoadingPayment(true)
     try {
@@ -239,7 +312,10 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
               vehicleId: vehicle.id, 
               vehicleName: `${vehicle.make} ${vehicle.model}`,
               startDate,
-              endDate
+              endDate,
+              customerName: customerName.trim(),
+              customerEmail: customerEmail.trim(),
+              customerPhone: customerPhone.trim()
             }
           }
         : {
@@ -249,7 +325,10 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
             metadata: { 
               type: "direct_payment", 
               vehicleId: vehicle.id, 
-              vehicleName: `${vehicle.make} ${vehicle.model}`
+              vehicleName: `${vehicle.make} ${vehicle.model}`,
+              customerName: customerName.trim(),
+              customerEmail: customerEmail.trim(),
+              customerPhone: customerPhone.trim()
             }
           }
 
@@ -259,17 +338,28 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
         body: JSON.stringify(paymentData),
       })
 
-      const { clientSecret: secret } = await response.json()
+      const data = await response.json()
+
+      if (!response.ok) {
+        // Show more detailed error message
+        const errorMsg = data.message || data.error || 'Failed to create payment intent'
+        const errorCode = data.code ? ` (${data.code})` : ''
+        throw new Error(`${errorMsg}${errorCode}`)
+      }
+
+      const { clientSecret: secret } = data
 
       if (!secret) {
-        throw new Error('No client secret received')
+        throw new Error('No client secret received from server')
       }
 
       setClientSecret(secret)
       setShowPaymentForm(true)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create payment intent:', error)
-      alert('Failed to initialize payment. Please try again.')
+      const errorMessage = error?.message || 'Failed to initialize payment. Please try again.'
+      alert(errorMessage)
+      setError(errorMessage)
     } finally {
       setIsLoadingPayment(false)
     }
@@ -288,6 +378,9 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
     setShowPaymentForm(false)
     setBookingSuccess(false)
     setClientSecret(null)
+    setCustomerName('')
+    setCustomerEmail('')
+    setCustomerPhone('')
   }
 
   if (loading) {
@@ -435,7 +528,7 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
                   </div>
                 </div>
                 
-                {clientSecret && (
+                {clientSecret && stripePromise ? (
                   <Elements stripe={stripePromise} options={{ clientSecret }}>
                     <PaymentForm 
                       amount={totalCost} 
@@ -447,6 +540,10 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
                       onSuccess={handleBookingSuccess} 
                     />
                   </Elements>
+                ) : (
+                  <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 text-red-200">
+                    <p className="text-sm">Stripe is not configured. Please check your environment variables.</p>
+                  </div>
                 )}
               </motion.div>
             ) : (
@@ -467,6 +564,19 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
                     <p className="text-white/80 text-sm">{vehicle.year} • ${vehicle.price_per_day}/day</p>
                   </div>
                 </div>
+
+                {/* Error Display */}
+                {error && (
+                  <div className="mb-6 bg-red-500/20 border border-red-500/50 rounded-lg p-4 text-red-200">
+                    <p className="text-sm font-medium">Error: {error}</p>
+                    <button
+                      onClick={() => setError('')}
+                      className="mt-2 text-xs underline hover:no-underline"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
 
                 {/* Payment Type Toggle */}
                 <div className="flex bg-white/5 border border-white/20 rounded-lg p-1 mb-6">
@@ -493,6 +603,50 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
                 </div>
 
                 <div className="space-y-6">
+                  {/* Customer Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white mb-4">Contact Information</h3>
+                    <div>
+                      <label className="block text-sm font-medium text-white/80 mb-2">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        required
+                        placeholder="John Doe"
+                        className="w-full px-4 py-3 text-white bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent placeholder-white/30"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/80 mb-2">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                        required
+                        placeholder="john@example.com"
+                        className="w-full px-4 py-3 text-white bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent placeholder-white/30"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/80 mb-2">
+                        Phone Number *
+                      </label>
+                      <input
+                        type="tel"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        required
+                        placeholder="(201) 555-1234"
+                        className="w-full px-4 py-3 text-white bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent placeholder-white/30"
+                      />
+                    </div>
+                  </div>
+
                   {/* Date Selection - Only for Booking */}
                   {paymentType === 'booking' && (
                     <div className="space-y-4">
@@ -586,22 +740,26 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
                   <motion.button
                     onClick={handleReserve}
                     disabled={
-                      paymentType === 'booking' 
+                      !customerName.trim() || !customerEmail.trim() || !customerPhone.trim() ||
+                      (paymentType === 'booking' 
                         ? (!startDate || !endDate || totalCost <= 0 || isLoadingPayment)
-                        : (!paymentAmount || totalCost <= 0 || isLoadingPayment)
+                        : (!paymentAmount || totalCost <= 0 || isLoadingPayment))
                     }
                     className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all flex items-center justify-center gap-2 ${
+                      customerName.trim() && customerEmail.trim() && customerPhone.trim() &&
                       ((paymentType === 'booking' && startDate && endDate && totalCost > 0) || 
                       (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)) && !isLoadingPayment
                         ? 'bg-white text-black hover:bg-white/90'
                         : 'bg-white/10 text-white/40 cursor-not-allowed border border-white/20'
                     }`}
                     whileHover={
+                      customerName.trim() && customerEmail.trim() && customerPhone.trim() &&
                       ((paymentType === 'booking' && startDate && endDate && totalCost > 0) || 
                       (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)) && !isLoadingPayment
                         ? { scale: 1.02 } : {}
                     }
                     whileTap={
+                      customerName.trim() && customerEmail.trim() && customerPhone.trim() &&
                       ((paymentType === 'booking' && startDate && endDate && totalCost > 0) || 
                       (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)) && !isLoadingPayment
                         ? { scale: 0.98 } : {}
@@ -610,9 +768,11 @@ export default function VehicleBookingPage({ params }: { params: { id: string } 
                     <DollarSign className="w-5 h-5" />
                     {isLoadingPayment 
                       ? 'Initializing Payment...'
-                      : paymentType === 'booking' 
-                        ? (!startDate || !endDate ? 'Select Dates' : `Reserve Now - $${totalCost.toLocaleString()}`)
-                        : (!paymentAmount ? 'Enter Amount' : `Pay Now - $${totalCost.toLocaleString()}`)
+                      : !customerName.trim() || !customerEmail.trim() || !customerPhone.trim()
+                        ? 'Complete Contact Info'
+                        : paymentType === 'booking' 
+                          ? (!startDate || !endDate ? 'Select Dates' : `Reserve Now - $${totalCost.toLocaleString()}`)
+                          : (!paymentAmount ? 'Enter Amount' : `Pay Now - $${totalCost.toLocaleString()}`)
                     }
                   </motion.button>
                 </div>

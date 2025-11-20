@@ -1,18 +1,20 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, use } from "react"
 import { motion } from "framer-motion"
 import { CheckCircle, ArrowLeft, Car } from "lucide-react"
 import NavBar from "@/components/NavBar"
 import Link from "next/link"
 
-export default function BookingSuccessPage({ params }: { params: { id: string } }) {
+export default function BookingSuccessPage({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap params Promise using React.use()
+  const { id } = use(params)
   const [bookingDetails, setBookingDetails] = useState<any>(null)
 
   useEffect(() => {
     // Get booking details from URL params or localStorage if available
     const urlParams = new URLSearchParams(window.location.search)
-    const vehicleId = params.id
+    const vehicleId = id
     const startDate = urlParams.get('start_date')
     const endDate = urlParams.get('end_date')
     const totalCost = urlParams.get('total_cost')
@@ -27,7 +29,7 @@ export default function BookingSuccessPage({ params }: { params: { id: string } 
         totalCost: parseFloat(totalCost)
       })
     }
-  }, [params.id])
+  }, [id])
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">

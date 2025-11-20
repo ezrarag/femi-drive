@@ -16,11 +16,8 @@ export default function DriveToEarnPage() {
   ]
 
   const requirements = [
-    "Valid driver's license (21+ years old)",
-    "Clean driving record (3+ years)",
-    "Pass background check",
-    "Proof of rideshare/delivery app approval",
-    "Basic income verification",
+    "25+ years old",
+    "Valid driver's license",
   ]
 
   const earnings = [
@@ -58,7 +55,7 @@ export default function DriveToEarnPage() {
       <section className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">Drive to Earn Program</h1>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">Drive to Earn — Rentals</h1>
             <p className="text-xl md:text-2xl mb-8">
               Rent a vehicle and start earning with rideshare and delivery services
             </p>
