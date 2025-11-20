@@ -27,6 +27,14 @@ declare global {
   }
 }
 
+const WHEELBASE_OWNER_ID = process.env.NEXT_PUBLIC_WHEELBASE_OWNER_ID || "4321962"
+
+const wheelbaseListingMap: Record<string, string> = {
+  "1": "457237",
+  "2": "463737",
+  "3": "454552",
+}
+
 export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
@@ -117,15 +125,20 @@ export default function InventoryPage() {
 
   // COMMENTED OUT: Debug logging for modal state
 
-  // Function to get booking URL for the new booking flow
+  // Function to get Wheelbase booking URL
   const getBookingUrl = (vehicle: any) => {
-    return `/vehicles/${vehicle.id}/book`
+    const listingId = wheelbaseListingMap[vehicle.id] || vehicle.id
+    return `https://checkout.wheelbasepro.com/reserve?owner_id=${WHEELBASE_OWNER_ID}&listing_id=${listingId}`
   }
 
   // Function to handle booking redirect
   const handleBookNow = (vehicle: any) => {
     const bookingUrl = getBookingUrl(vehicle)
-    router.push(bookingUrl)
+    if (typeof window !== "undefined") {
+      window.location.href = bookingUrl
+    } else {
+      router.push(bookingUrl)
+    }
   }
 
   // Static data - no need for useEffect
