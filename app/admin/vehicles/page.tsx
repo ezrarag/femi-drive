@@ -74,14 +74,12 @@ function AdminVehiclesContent() {
     fetchVehicles()
   }, [user])
 
-  // Debounced save function
-  let saveTimeout: ReturnType<typeof setTimeout> | null = null
-  
+  // Debounced save function  
   const debouncedSave = (form: any) => {
-    if (saveTimeout) {
-      clearTimeout(saveTimeout);
+    if ((debouncedSave as any).timeout) {
+      clearTimeout((debouncedSave as any).timeout);
     }
-    saveTimeout = setTimeout(async () => {
+    (debouncedSave as any).timeout = setTimeout(async () => {
       if (!user) {
         return;
       }
