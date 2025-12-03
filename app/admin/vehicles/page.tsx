@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import React, { useEffect, useState, useCallback, useRef } from "react"
 import Link from "next/link"
 import { AuthGuard } from "@/lib/auth-guard"
 import { useAuth } from "@/hooks/useAuth"
@@ -157,7 +157,7 @@ function AdminVehiclesContent(): JSX.Element {
     setSaveStatus("")
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !user) {
       return
@@ -191,7 +191,7 @@ function AdminVehiclesContent(): JSX.Element {
     } finally {
       setUploadingImage(false)
     }
-  }
+  }, [user, editingVehicle]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
