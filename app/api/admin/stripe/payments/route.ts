@@ -225,7 +225,7 @@ export async function GET(request: NextRequest) {
         createdAt: new Date(paymentDate * 1000).toISOString(),
         stripeUrl,
       };
-    }));
+    });
 
     // Sort by date (newest first)
     payments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
