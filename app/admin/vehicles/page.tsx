@@ -1,20 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import Link from "next/link"
 import { AuthGuard } from "@/lib/auth-guard"
 import { useAuth } from "@/hooks/useAuth"
 import { AUTHORIZED_ADMIN_EMAILS } from "@/lib/admin-authorized-emails"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 import AdminHeader from "@/components/admin/AdminHeader"
-
-function debounce(fn: (...args: any[]) => void, delay: number) {
-  let timer: NodeJS.Timeout
-  return (...args: any[]) => {
-    clearTimeout(timer)
-    timer = setTimeout(() => fn(...args), delay)
-  }
-}
 
 function AdminVehiclesContent() {
   const { user } = useAuth()
@@ -83,14 +75,18 @@ function AdminVehiclesContent() {
   }, [user])
 
   // Debounced save function
-  const debouncedSave = debounce(async (form: any) => {
-    if (!user) return
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  
+  const saveVehicle = useCallback(async (form: any) => {
+    if (!user) {
+      return;
+    }
     
-    setSaving(true)
-    setSaveStatus("Saving...")
+    setSaving(true);
+    setSaveStatus("Saving...");
     
     try {
-      const idToken = await user.getIdToken()
+      const idToken = await user.getIdToken();
       const response = await fetch(`/api/admin/vehicles?id=${form.id}`, {
         method: 'PUT',
         headers: {
@@ -98,32 +94,41 @@ function AdminVehiclesContent() {
           'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify(form),
-      })
+      });
       
       if (!response.ok) {
-        throw new Error('Failed to update vehicle')
+        throw new Error('Failed to update vehicle');
       }
       
-      setSaveStatus("Saved!")
-      setTimeout(() => setSaveStatus(""), 1200)
+      setSaveStatus("Saved!");
+      setTimeout(() => setSaveStatus(""), 1200);
       
       // Refresh the vehicle list
       const vehiclesResponse = await fetch('/api/admin/vehicles', {
         headers: {
           'Authorization': `Bearer ${idToken}`,
         },
-      })
+      });
       if (vehiclesResponse.ok) {
-        const data = await vehiclesResponse.json()
-        setVehicles(data.vehicles || [])
+        const data = await vehiclesResponse.json();
+        setVehicles(data.vehicles || []);
       }
     } catch (err: any) {
-      setSaveStatus(`Error: ${err.message}`)
-      setTimeout(() => setSaveStatus(""), 3000)
+      setSaveStatus(`Error: ${err.message}`);
+      setTimeout(() => setSaveStatus(""), 3000);
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }, 800)
+  }, [user]);
+  
+  const debouncedSave = useCallback((form: any) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      saveVehicle(form);
+    }, 800);
+  }, [saveVehicle]);
 
   const handleEditClick = (vehicle: any) => {
     setEditingVehicle(vehicle)
@@ -154,7 +159,9 @@ function AdminVehiclesContent() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file || !user) return
+    if (!file || !user) {
+      return
+    }
 
     setUploadingImage(true)
     try {
