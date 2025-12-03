@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { AuthGuard } from "@/lib/auth-guard"
 import { useAuth } from "@/hooks/useAuth"
@@ -8,7 +8,7 @@ import { AUTHORIZED_ADMIN_EMAILS } from "@/lib/admin-authorized-emails"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 import AdminHeader from "@/components/admin/AdminHeader"
 
-function AdminVehiclesContent(): JSX.Element {
+function AdminVehiclesContent() {
   const { user } = useAuth()
   const [vehicles, setVehicles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -75,60 +75,56 @@ function AdminVehiclesContent(): JSX.Element {
   }, [user])
 
   // Debounced save function
-  const saveTimeoutRef = useRef<any>(null)
+  let saveTimeout: ReturnType<typeof setTimeout> | null = null
   
-  const saveVehicle = useCallback(async (form: any) => {
-    if (!user) {
-      return;
+  const debouncedSave = (form: any) => {
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
     }
-    
-    setSaving(true);
-    setSaveStatus("Saving...");
-    
-    try {
-      const idToken = await user.getIdToken();
-      const response = await fetch(`/api/admin/vehicles?id=${form.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`,
-        },
-        body: JSON.stringify(form),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update vehicle');
+    saveTimeout = setTimeout(async () => {
+      if (!user) {
+        return;
       }
       
-      setSaveStatus("Saved!");
-      setTimeout(() => setSaveStatus(""), 1200);
+      setSaving(true);
+      setSaveStatus("Saving...");
       
-      // Refresh the vehicle list
-      const vehiclesResponse = await fetch('/api/admin/vehicles', {
-        headers: {
-          'Authorization': `Bearer ${idToken}`,
-        },
-      });
-      if (vehiclesResponse.ok) {
-        const data = await vehiclesResponse.json();
-        setVehicles(data.vehicles || []);
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch(`/api/admin/vehicles?id=${form.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`,
+          },
+          body: JSON.stringify(form),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update vehicle');
+        }
+        
+        setSaveStatus("Saved!");
+        setTimeout(() => setSaveStatus(""), 1200);
+        
+        // Refresh the vehicle list
+        const vehiclesResponse = await fetch('/api/admin/vehicles', {
+          headers: {
+            'Authorization': `Bearer ${idToken}`,
+          },
+        });
+        if (vehiclesResponse.ok) {
+          const data = await vehiclesResponse.json();
+          setVehicles(data.vehicles || []);
+        }
+      } catch (err: any) {
+        setSaveStatus(`Error: ${err.message}`);
+        setTimeout(() => setSaveStatus(""), 3000);
+      } finally {
+        setSaving(false);
       }
-    } catch (err: any) {
-      setSaveStatus(`Error: ${err.message}`);
-      setTimeout(() => setSaveStatus(""), 3000);
-    } finally {
-      setSaving(false);
-    }
-  }, [user]);
-  
-  const debouncedSave = useCallback((form: any) => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    saveTimeoutRef.current = setTimeout(() => {
-      saveVehicle(form);
     }, 800);
-  }, [saveVehicle]);
+  }
 
   const handleEditClick = (vehicle: any) => {
     setEditingVehicle(vehicle)
@@ -157,7 +153,7 @@ function AdminVehiclesContent(): JSX.Element {
     setSaveStatus("")
   }
 
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !user) {
       return
@@ -191,7 +187,7 @@ function AdminVehiclesContent(): JSX.Element {
     } finally {
       setUploadingImage(false)
     }
-  }, [user, editingVehicle]);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
