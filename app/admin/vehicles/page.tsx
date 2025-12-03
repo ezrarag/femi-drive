@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { AuthGuard } from "@/lib/auth-guard"
 import { useAuth } from "@/hooks/useAuth"
@@ -75,13 +75,13 @@ function AdminVehiclesContent() {
   }, [user])
 
   // Debounced save function
-  let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const debouncedSave = (form: any) => {
-    if (saveTimeout) {
-      clearTimeout(saveTimeout);
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
-    saveTimeout = setTimeout(async () => {
+    saveTimeoutRef.current = setTimeout(async () => {
       if (!user) {
         return;
       }
@@ -473,6 +473,7 @@ function AdminVehiclesContent() {
                       </div>
                     </td>
                   </tr>
+                  </>
                 ))}
               </tbody>
             </table>
