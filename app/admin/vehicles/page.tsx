@@ -74,12 +74,14 @@ function AdminVehiclesContent() {
     fetchVehicles()
   }, [user])
 
-  // Debounced save function  
+  // Debounced save function
+  let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+  
   const debouncedSave = (form: any) => {
-    if ((debouncedSave as any).timeout) {
-      clearTimeout((debouncedSave as any).timeout);
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
     }
-    (debouncedSave as any).timeout = setTimeout(async () => {
+    saveTimeout = setTimeout(async () => {
       if (!user) {
         return;
       }
@@ -185,7 +187,7 @@ function AdminVehiclesContent() {
     } finally {
       setUploadingImage(false)
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
