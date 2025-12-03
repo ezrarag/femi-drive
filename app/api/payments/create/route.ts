@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     }
     
     // Validate connected account ID format
-    const accountId = connectedAccountId || "acct_1SK6dd1lscTKUkb9";
+    const accountId = connectedAccountId || "acct_1SK6dd1IscTKUkb9";
     if (!accountId.startsWith("acct_")) {
       console.error("❌ Invalid connected account ID format:", accountId);
       return NextResponse.json({ 
@@ -67,6 +67,9 @@ export async function POST(req: Request) {
       }
     }
 
+    // Extract customer email from metadata if available
+    const customerEmail = metadata?.customerEmail || metadata?.customer_email || metadata?.investor_email
+
     // Build PaymentIntent parameters - ALWAYS transfer to Femi Leasing connected account
     const params: Stripe.PaymentIntentCreateParams = {
       amount: amountInCents,
@@ -74,6 +77,8 @@ export async function POST(req: Request) {
       description: description || "Femi Leasing Investment",
       automatic_payment_methods: { enabled: true },
       metadata: paymentMetadata,
+      // Set receipt_email if customer email is available
+      ...(customerEmail && { receipt_email: customerEmail }),
       // Always transfer to Femi Leasing connected account
       transfer_data: { 
         destination: accountId
@@ -82,11 +87,23 @@ export async function POST(req: Request) {
       application_fee_amount: applicationFeeAmount,
     };
 
-    console.log("🧮 PaymentIntent params:", params);
+    console.log("🧮 PaymentIntent params:", JSON.stringify(params, null, 2));
 
     // Attempt to create PaymentIntent
     const paymentIntent = await stripe.paymentIntents.create(params);
-    console.log("✅ PaymentIntent created:", paymentIntent.id);
+    console.log("✅ PaymentIntent created:", {
+      id: paymentIntent.id,
+      status: paymentIntent.status,
+      amount: paymentIntent.amount,
+      currency: paymentIntent.currency,
+      client_secret: paymentIntent.client_secret ? 'present' : 'missing',
+      transfer_data: paymentIntent.transfer_data,
+      application_fee_amount: paymentIntent.application_fee_amount,
+    });
+
+    if (!paymentIntent.client_secret) {
+      throw new Error("PaymentIntent created but no client_secret returned");
+    }
 
     return NextResponse.json({ 
       clientSecret: paymentIntent.client_secret,

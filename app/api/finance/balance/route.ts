@@ -48,7 +48,7 @@ export async function GET(req: Request) {
     // Get recent transfers to connected accounts
     transfers = await stripe.transfers.list({ 
       limit: 10,
-      destination: "acct_1SK6dd1lscTKUkb9" // Femi Leasing account
+      destination: "acct_1SK6dd1IscTKUkb9" // Femi Leasing account
     });
     console.log(`✅ Retrieved ${transfers.data.length} transfers`);
   } catch (err: any) {
@@ -66,18 +66,50 @@ export async function GET(req: Request) {
     console.error("🚨 Failed to retrieve payment intents:", err.message);
   }
 
-  // Filter payments for Femi Leasing (either by destination or metadata)
-  const femiPayments = allPayments.data.filter(payment => 
-    payment.transfer_data?.destination === "acct_1SK6dd1lscTKUkb9" ||
-    payment.metadata?.project === "femi-leasing" ||
-    payment.metadata?.client === "femileasing"
-  );
+  // Filter payments for Femi Leasing (exclude subscription payments)
+  const femiPayments = allPayments.data.filter(payment => {
+    // Must be a payment TO FemiLeasing (has transfer_data destination)
+    const isToFemiLeasing = payment.transfer_data?.destination === "acct_1SK6dd1IscTKUkb9" ||
+      payment.metadata?.project === "femi-leasing" ||
+      payment.metadata?.client === "femileasing";
+    
+    // Exclude subscription payments (these are FROM FemiLeasing TO ReadyAimGo)
+    const isSubscriptionPayment = 
+      payment.metadata?.type === 'subscription' ||
+      payment.metadata?.subscription === 'true' ||
+      payment.metadata?.subscription_payment === 'true' ||
+      (payment.metadata?.from === 'femileasing' && payment.metadata?.to === 'readyaimgo') ||
+      (payment.metadata?.from === 'ayoola' && payment.metadata?.to === 'readyaimgo') ||
+      payment.description?.toLowerCase().includes('readyaimgo') ||
+      payment.description?.toLowerCase().includes('subscription') ||
+      payment.description?.toLowerCase().includes('c-suite');
+    
+    // Include booking and direct payment types
+    const isBookingOrPayment = 
+      payment.metadata?.type === 'booking' ||
+      payment.metadata?.type === 'direct_payment' ||
+      payment.metadata?.type === 'investment' ||
+      !payment.metadata?.type; // Include payments without type metadata
+    
+    return isToFemiLeasing && !isSubscriptionPayment && (isBookingOrPayment || !payment.metadata?.type);
+  });
 
-  // Get balance transactions for these specific payment intents
+  // Get balance transactions for these specific payment intents (exclude subscription-related)
   const femiPaymentIds = femiPayments.map(p => p.id);
-  const femiTransactions = transactions.data.filter(t => 
-    t.source && femiPaymentIds.includes(t.source as string)
-  );
+  const femiTransactions = transactions.data.filter(t => {
+    // Only include transactions related to our filtered payments
+    if (t.source && femiPaymentIds.includes(t.source as string)) {
+      return true;
+    }
+    // Also exclude subscription-related transactions by description
+    if (t.description) {
+      const desc = t.description.toLowerCase();
+      return !desc.includes('subscription') && 
+             !desc.includes('readyaimgo') && 
+             !desc.includes('c-suite');
+    }
+    return false;
+  });
 
   // Calculate summary stats
   const available = balance?.available.find(b => b.currency === 'usd');

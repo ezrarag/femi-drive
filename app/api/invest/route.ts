@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       },
       // Always transfer to Femi Leasing connected account
       transfer_data: { 
-        destination: "acct_1SK6dd1lscTKUkb9" 
+        destination: "acct_1SK6dd1IscTKUkb9" 
       },
       // Apply 0.5% platform fee
       application_fee_amount: applicationFeeAmount,

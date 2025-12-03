@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 // @ts-ignore - nodemailer types not available
 import nodemailer from 'nodemailer'
+import { sendSmsToAdmins } from '@/lib/admin-sms'
 
 const stripe = process.env.STRIPE_SECRET_KEY 
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -155,11 +156,10 @@ async function sendBookingNotifications(bookingData: {
   paymentIntentId: string
 }) {
   try {
-    // Send SMS to admin and cousin via Email-to-SMS gateway
+    // Send SMS to admins with notifications enabled
     const smsMessage = `🚗 NEW BOOKING CONFIRMED!
-    
+
 Vehicle: ${bookingData.vehicleName}
-ID: ${bookingData.vehicleId}
 Dates: ${bookingData.startDate} to ${bookingData.endDate}
 Amount: $${bookingData.amount.toFixed(2)}
 Customer: ${bookingData.customerEmail || 'N/A'}
@@ -167,8 +167,11 @@ Customer: ${bookingData.customerEmail || 'N/A'}
 Payment ID: ${bookingData.paymentIntentId}
 Status: Confirmed ✅
 
-ReadyAimGo - Femi Leasing`
+Femi Leasing`
 
+    await sendSmsToAdmins(smsMessage)
+
+    // Legacy: Send SMS to admin and cousin via Email-to-SMS gateway (fallback)
     if (smsGateways.length > 0) {
       await transporter.sendMail({
         from: process.env.SMTP_USER,
@@ -176,7 +179,7 @@ ReadyAimGo - Femi Leasing`
         subject: "Femi Leasing Booking Confirmation",
         text: smsMessage,
       })
-      console.log('SMS notifications sent to:', smsGateways)
+      console.log('Legacy SMS notifications sent to:', smsGateways)
     }
 
     // Send email to admin
@@ -226,19 +229,21 @@ async function sendDirectPaymentNotifications(paymentData: {
   paymentIntentId: string
 }) {
   try {
-    // Send SMS to admin and cousin via Email-to-SMS gateway
-    const smsMessage = `💳 DIRECT PAYMENT CONFIRMED!
-    
+    // Send SMS to admins with notifications enabled
+    const smsMessage = `💳 PAYMENT RECEIVED!
+
 Vehicle: ${paymentData.vehicleName}
-ID: ${paymentData.vehicleId}
 Amount: $${paymentData.amount.toFixed(2)}
 Customer: ${paymentData.customerEmail || 'N/A'}
 
 Payment ID: ${paymentData.paymentIntentId}
 Status: Confirmed ✅
 
-ReadyAimGo - Femi Leasing`
+Femi Leasing`
 
+    await sendSmsToAdmins(smsMessage)
+
+    // Legacy: Send SMS to admin and cousin via Email-to-SMS gateway (fallback)
     if (smsGateways.length > 0) {
       await transporter.sendMail({
         from: process.env.SMTP_USER,
@@ -246,7 +251,7 @@ ReadyAimGo - Femi Leasing`
         subject: "Femi Leasing Direct Payment Confirmation",
         text: smsMessage,
       })
-      console.log('SMS notifications sent to:', smsGateways)
+      console.log('Legacy SMS notifications sent to:', smsGateways)
     }
 
     // Send email to admin

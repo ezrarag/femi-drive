@@ -11,7 +11,7 @@ export async function POST() {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
-    const CONNECTED_ACCOUNT_ID = "acct_1SK6dd1lscTKUkb9"; // Femi Leasing account
+    const CONNECTED_ACCOUNT_ID = "acct_1SK6dd1IscTKUkb9"; // Femi Leasing account
 
     // Get the connected account's balance
     const balance = await stripe.balance.retrieve({ 

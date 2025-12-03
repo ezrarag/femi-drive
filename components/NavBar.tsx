@@ -27,16 +27,16 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
     ? "bg-transparent text-white"
     : variant === "dark"
       ? "bg-black text-white border-white/20"
-      : "bg-white/80 text-neutral-900 border-neutral-300"
+      : "bg-white/80 text-neutral-900 border-white/20"
   const hover = variant === "dark"
     ? "hover:bg-white/10"
     : "hover:bg-white"
-  const border = noBorder ? "" : (variant === "dark" ? "border-white/20" : "border-neutral-300")
+  const border = noBorder ? "" : (variant === "dark" ? "border-white/20" : "border-white/20")
   const dropdownBg = transparent 
     ? "bg-black/80 backdrop-blur-sm text-white border-white/20"
     : variant === "dark" 
       ? "bg-black text-white border-white/20" 
-      : "bg-white text-gray-800 border-neutral-200"
+      : "bg-white text-gray-800 border-white/20"
   const dropdownHover = variant === "dark" ? "hover:bg-white/10" : "hover:bg-gray-100"
 
   return (
@@ -125,7 +125,7 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
               </Link>
               <Link
                 href="/admin/login"
-                className={`block px-3 py-2 rounded-b-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all border-t ${variant === "dark" ? "border-white/20" : "border-neutral-200"}`}
+                className={`block px-3 py-2 rounded-b-lg text-sm ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-neutral-900"} transition-all border-t ${variant === "dark" ? "border-white/20" : "border-white/20"}`}
                 onClick={() => setMenuOpen(false)}
               >
                 Staff Login
@@ -211,7 +211,7 @@ export default function NavBar({ variant = "light", transparent = false, noBorde
               </Link>
               <Link
                 href="/admin/login"
-                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-225 border-t ${variant === "dark" ? "border-white/20" : "border-neutral-200"} mt-2`}
+                className={`block py-3 px-4 rounded-full ${variant === "dark" ? "hover:bg-white/20 text-white" : "hover:bg-white text-black"} transition-all text-lg min-h-[44px] flex items-center animate-in slide-in-from-right duration-300 delay-225 border-t ${variant === "dark" ? "border-white/20" : "border-white/20"} mt-2`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Staff Login

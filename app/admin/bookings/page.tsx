@@ -1,7 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-// TODO: Implement authentication when backend is ready
+import { AuthGuard } from "@/lib/auth-guard"
+import { useAuth } from "@/hooks/useAuth"
+import { AUTHORIZED_ADMIN_EMAILS } from "@/lib/admin-authorized-emails"
+import AdminSidebar from "@/components/admin/AdminSidebar"
+import AdminHeader from "@/components/admin/AdminHeader"
 import Link from "next/link"
 import { 
   Calendar, 
@@ -14,7 +18,11 @@ import {
   Eye,
   Edit,
   Filter,
-  Search
+  Search,
+  Download,
+  Upload,
+  Plus,
+  X
 } from "lucide-react"
 
 interface Booking {
@@ -37,86 +45,160 @@ interface Booking {
   }
 }
 
-export default function AdminBookingsPage() {
+function AdminBookingsContent() {
+  const { user } = useAuth()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [authLoading, setAuthLoading] = useState(true)
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [showAddBookingModal, setShowAddBookingModal] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [vehicles, setVehicles] = useState<any[]>([])
+  const [newBooking, setNewBooking] = useState({
+    vehicle_id: '',
+    start_date: '',
+    end_date: '',
+    total_price: '',
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    status: 'pending' as Booking['status'],
+    notes: '',
+  })
 
   useEffect(() => {
-    const checkAuth = async () => {
-      // TODO: Implement user authentication when backend is ready
-      const user = null // Placeholder
-      if (!user) {
-        window.location.href = "/admin/login"
-        return
-      }
-
-      // TODO: Implement admin role check when backend is ready
-      const isAdmin = false // Placeholder
-      if (!isAdmin) {
-        window.location.href = "/admin/login"
-        return
-      }
-
-      setAuthLoading(false)
-    }
-    checkAuth()
-  }, [])
-
-  useEffect(() => {
-    if (!authLoading) {
+    if (user) {
       loadBookings()
+      loadVehicles()
     }
-  }, [authLoading])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
+
+  const loadVehicles = async () => {
+    if (!user) return
+    try {
+      const idToken = await user.getIdToken()
+      const response = await fetch('/api/admin/vehicles', {
+        headers: { 'Authorization': `Bearer ${idToken}` },
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setVehicles(data.vehicles || [])
+      }
+    } catch (err) {
+      console.error('Error loading vehicles:', err)
+    }
+  }
+
+  const handleCreateBooking = async () => {
+    if (!user) return
+    
+    try {
+      const idToken = await user.getIdToken()
+      const response = await fetch('/api/admin/bookings/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify(newBooking),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create booking')
+      }
+
+      // Reset form and reload bookings
+      setNewBooking({
+        vehicle_id: '',
+        start_date: '',
+        end_date: '',
+        total_price: '',
+        customer_name: '',
+        customer_email: '',
+        customer_phone: '',
+        status: 'pending',
+        notes: '',
+      })
+      setShowAddBookingModal(false)
+      loadBookings()
+      alert('Booking created successfully!')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to create booking')
+    }
+  }
+
+  const handleImportBookings = async (file: File) => {
+    if (!user) return
+    
+    try {
+      const text = await file.text()
+      const lines = text.split('\n').filter(line => line.trim())
+      const headers = lines[0].split(',').map(h => h.trim())
+      
+      // Expected headers: vehicle_id, start_date, end_date, total_price, customer_name, customer_email, customer_phone, status
+      const bookings = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim())
+        const booking: any = {}
+        headers.forEach((header, index) => {
+          booking[header] = values[index] || ''
+        })
+        return booking
+      })
+
+      const idToken = await user.getIdToken()
+      let successCount = 0
+      let errorCount = 0
+
+      for (const booking of bookings) {
+        try {
+          const response = await fetch('/api/admin/bookings/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify(booking),
+          })
+          if (response.ok) {
+            successCount++
+          } else {
+            errorCount++
+          }
+        } catch (err) {
+          errorCount++
+        }
+      }
+
+      setShowImportModal(false)
+      loadBookings()
+      alert(`Import complete: ${successCount} successful, ${errorCount} failed`)
+    } catch (err) {
+      alert('Failed to import bookings. Please check CSV format.')
+    }
+  }
 
   const loadBookings = async () => {
+    if (!user) return
+    
     try {
       setLoading(true)
-      // Simulate API call - replace with actual Supabase queries
-      const mockBookings: Booking[] = [
-        {
-          id: "1",
-          user_id: "user1",
-          vehicle_id: "vehicle1",
-          start_date: "2024-01-15",
-          end_date: "2024-01-17",
-          total_price: 150,
-          status: "pending",
-          created_at: "2024-01-10T10:00:00Z",
-          user: { name: "John Doe", email: "john@example.com" },
-          vehicle: { make: "Tesla", model: "Model 3", year: 2023 }
+      const idToken = await user.getIdToken()
+      const response = await fetch('/api/admin/bookings', {
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
         },
-        {
-          id: "2",
-          user_id: "user2",
-          vehicle_id: "vehicle2",
-          start_date: "2024-01-20",
-          end_date: "2024-01-22",
-          total_price: 200,
-          status: "approved",
-          created_at: "2024-01-12T14:30:00Z",
-          user: { name: "Jane Smith", email: "jane@example.com" },
-          vehicle: { make: "Toyota", model: "Camry", year: 2022 }
-        },
-        {
-          id: "3",
-          user_id: "user3",
-          vehicle_id: "vehicle3",
-          start_date: "2024-01-18",
-          end_date: "2024-01-19",
-          total_price: 100,
-          status: "completed",
-          created_at: "2024-01-08T09:15:00Z",
-          user: { name: "Mike Johnson", email: "mike@example.com" },
-          vehicle: { make: "Honda", model: "CR-V", year: 2021 }
-        }
-      ]
+      })
       
-      setBookings(mockBookings)
+      if (!response.ok) {
+        throw new Error('Failed to fetch bookings')
+      }
+      
+      const data = await response.json()
+      setBookings(data.bookings || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load bookings")
     } finally {
@@ -125,14 +207,25 @@ export default function AdminBookingsPage() {
   }
 
   const updateBookingStatus = async (bookingId: string, newStatus: Booking['status']) => {
+    if (!user) return
+    
     try {
-      // Simulate API call - replace with actual Supabase update
-      const updatedBookings = bookings.map(booking => 
-        booking.id === bookingId 
-          ? { ...booking, status: newStatus }
-          : booking
-      )
-      setBookings(updatedBookings)
+      const idToken = await user.getIdToken()
+      const response = await fetch('/api/admin/bookings/update-status', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ bookingId, status: newStatus }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update booking status')
+      }
+
+      // Reload bookings to get updated data
+      loadBookings()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update booking")
     }
@@ -191,38 +284,33 @@ export default function AdminBookingsPage() {
 
   const stats = getStats()
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg font-semibold text-gray-700">Checking admin access...</div>
-      </div>
-    )
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg font-semibold text-gray-700">Loading bookings...</div>
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar />
+        <div className="flex-1 flex flex-col">
+          <AdminHeader />
+          <main className="flex-1 p-6 flex items-center justify-center">
+            <div className="text-lg font-semibold text-gray-700">Loading bookings...</div>
+          </main>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Booking Management</h1>
-            <p className="text-gray-600 mt-2">Manage and approve vehicle bookings</p>
+    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      <AdminSidebar />
+      <div className="flex-1 flex flex-col lg:ml-0">
+        <AdminHeader />
+        <main className="flex-1 p-4 sm:p-6 pt-16 lg:pt-6">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">Bookings</h1>
+            <p className="text-gray-600">Manage and approve vehicle bookings</p>
           </div>
-          <div className="flex gap-2">
-            <Link href="/admin/dashboard" className="px-3 sm:px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm">Dashboard</Link>
-          </div>
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          {/* Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <div className="bg-white p-4 rounded-lg shadow">
             <div className="flex items-center">
               <Calendar className="w-8 h-8 text-blue-600" />
@@ -270,9 +358,9 @@ export default function AdminBookingsPage() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+        {/* Filters and Export */}
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -285,7 +373,7 @@ export default function AdminBookingsPage() {
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap w-full sm:w-auto">
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
@@ -298,15 +386,55 @@ export default function AdminBookingsPage() {
                 <option value="cancelled">Cancelled</option>
                 <option value="completed">Completed</option>
               </select>
+              <button
+                onClick={async () => {
+                  if (!user) return
+                  try {
+                    const idToken = await user.getIdToken()
+                    const response = await fetch('/api/admin/bookings/export', {
+                      headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                      },
+                    })
+                    if (response.ok) {
+                      const blob = await response.blob()
+                      const url = window.URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `bookings-export-${new Date().toISOString().split('T')[0]}.csv`
+                      document.body.appendChild(a)
+                      a.click()
+                      window.URL.revokeObjectURL(url)
+                      document.body.removeChild(a)
+                    }
+                  } catch (err) {
+                    console.error('Export failed:', err)
+                    alert('Failed to export bookings')
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                <Download className="w-4 h-4" />
+                Export CSV
+              </button>
+              <button
+                onClick={() => {
+                  alert('QuickBooks import coming soon! This will allow you to import transactions from QuickBooks.')
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                <Upload className="w-4 h-4" />
+                Import QuickBooks
+              </button>
             </div>
           </div>
         </div>
 
         {/* Bookings Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-hidden -mx-4 sm:mx-0">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 hidden sm:table-header-group">
                 <tr>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
@@ -318,7 +446,85 @@ export default function AdminBookingsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredBookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-gray-50">
+                  <>
+                    {/* Mobile Card View */}
+                    <tr key={`mobile-${booking.id}`} className="sm:hidden hover:bg-gray-50">
+                      <td className="px-4 py-4">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
+                              <User className="w-5 h-5 text-gray-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-gray-900 truncate">{booking.user?.name}</div>
+                              <div className="text-xs text-gray-500 truncate">{booking.user?.email}</div>
+                            </div>
+                            {getStatusBadge(booking.status)}
+                          </div>
+                          <div className="border-t pt-3 space-y-2">
+                            <div>
+                              <span className="text-xs text-gray-500">Vehicle:</span>
+                              <div className="text-sm font-medium text-gray-900">
+                                {booking.vehicle?.year} {booking.vehicle?.make} {booking.vehicle?.model}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-xs text-gray-500">Dates:</span>
+                              <div className="text-sm text-gray-900">
+                                {new Date(booking.start_date).toLocaleDateString()} - {new Date(booking.end_date).toLocaleDateString()}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {Math.ceil((new Date(booking.end_date).getTime() - new Date(booking.start_date).getTime()) / (1000 * 60 * 60 * 24))} days
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between pt-2">
+                              <div>
+                                <span className="text-xs text-gray-500">Total:</span>
+                                <div className="text-lg font-bold text-gray-900">${booking.total_price}</div>
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setSelectedBooking(booking)}
+                                  className="p-2 text-indigo-600 hover:bg-indigo-50 rounded"
+                                  title="View Details"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                {booking.status === 'pending' && (
+                                  <>
+                                    <button
+                                      onClick={() => updateBookingStatus(booking.id, 'approved')}
+                                      className="p-2 text-green-600 hover:bg-green-50 rounded"
+                                      title="Approve"
+                                    >
+                                      <CheckCircle className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => updateBookingStatus(booking.id, 'rejected')}
+                                      className="p-2 text-red-600 hover:bg-red-50 rounded"
+                                      title="Reject"
+                                    >
+                                      <XCircle className="w-4 h-4" />
+                                    </button>
+                                  </>
+                                )}
+                                {booking.status === 'approved' && (
+                                  <button
+                                    onClick={() => updateBookingStatus(booking.id, 'completed')}
+                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                                    title="Mark Complete"
+                                  >
+                                    <CheckCircle className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    {/* Desktop Table View */}
+                    <tr key={`desktop-${booking.id}`} className="hidden sm:table-row hover:bg-gray-50">
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -392,6 +598,7 @@ export default function AdminBookingsPage() {
                       </div>
                     </td>
                   </tr>
+                  </>
                 ))}
               </tbody>
             </table>
@@ -409,10 +616,9 @@ export default function AdminBookingsPage() {
             {error}
           </div>
         )}
-      </div>
 
-      {/* Booking Details Modal */}
-      {selectedBooking && (
+        {/* Booking Details Modal */}
+        {selectedBooking && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
@@ -471,7 +677,190 @@ export default function AdminBookingsPage() {
             </div>
           </div>
         </div>
+        )}
+
+      {/* Add Booking Modal */}
+      {showAddBookingModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowAddBookingModal(false)}>
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Add New Booking</h2>
+              <button onClick={() => setShowAddBookingModal(false)} className="text-gray-500 hover:text-black">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-1">Vehicle</label>
+                <select
+                  value={newBooking.vehicle_id}
+                  onChange={(e) => setNewBooking({ ...newBooking, vehicle_id: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                  required
+                >
+                  <option value="">Select a vehicle</option>
+                  {vehicles.map(vehicle => (
+                    <option key={vehicle.id} value={vehicle.id}>
+                      {vehicle.year} {vehicle.make} {vehicle.model}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    value={newBooking.start_date}
+                    onChange={(e) => setNewBooking({ ...newBooking, start_date: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-1">End Date</label>
+                  <input
+                    type="date"
+                    value={newBooking.end_date}
+                    onChange={(e) => setNewBooking({ ...newBooking, end_date: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-1">Total Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={newBooking.total_price}
+                  onChange={(e) => setNewBooking({ ...newBooking, total_price: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-1">Customer Name</label>
+                <input
+                  type="text"
+                  value={newBooking.customer_name}
+                  onChange={(e) => setNewBooking({ ...newBooking, customer_name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-1">Customer Email</label>
+                  <input
+                    type="email"
+                    value={newBooking.customer_email}
+                    onChange={(e) => setNewBooking({ ...newBooking, customer_email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-1">Customer Phone</label>
+                  <input
+                    type="tel"
+                    value={newBooking.customer_phone}
+                    onChange={(e) => setNewBooking({ ...newBooking, customer_phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-1">Status</label>
+                <select
+                  value={newBooking.status}
+                  onChange={(e) => setNewBooking({ ...newBooking, status: e.target.value as Booking['status'] })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-1">Notes (Optional)</label>
+                <textarea
+                  value={newBooking.notes}
+                  onChange={(e) => setNewBooking({ ...newBooking, notes: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                  rows={3}
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <button
+                  onClick={handleCreateBooking}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg"
+                >
+                  Create Booking
+                </button>
+                <button
+                  onClick={() => setShowAddBookingModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
+
+      {/* Import CSV Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowImportModal(false)}>
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Import Bookings from CSV</h2>
+              <button onClick={() => setShowImportModal(false)} className="text-gray-500 hover:text-black">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Upload a CSV file with the following columns:
+              </p>
+              <div className="bg-gray-50 p-3 rounded-lg text-xs font-mono text-gray-700">
+                vehicle_id, start_date, end_date, total_price, customer_name, customer_email, customer_phone, status
+              </div>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleImportBookings(file)
+                  }
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+              <button
+                onClick={() => setShowImportModal(false)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+        </main>
+      </div>
     </div>
+  )
+}
+
+export default function AdminBookingsPage() {
+  return (
+    <AuthGuard allowedEmails={[...AUTHORIZED_ADMIN_EMAILS]}>
+      <AdminBookingsContent />
+    </AuthGuard>
   )
 }

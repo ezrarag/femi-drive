@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Search, X, Menu, Calendar, Heart } from "lucide-react"
@@ -27,14 +27,6 @@ declare global {
   }
 }
 
-const WHEELBASE_OWNER_ID = process.env.NEXT_PUBLIC_WHEELBASE_OWNER_ID || "4321962"
-
-const wheelbaseListingMap: Record<string, string> = {
-  "1": "457237",
-  "2": "463737",
-  "3": "454552",
-}
-
 export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200])
@@ -43,68 +35,40 @@ export default function InventoryPage() {
   // const [selectedVehicle, setSelectedVehicle] = useState<any>(null)
   // Remove unused state variables
 
-  // Static vehicles data
-  const [vehicles] = useState<any[]>([
-    {
-      id: "1",
-      make: "Dodge",
-      model: "Charger",
-      year: 2016,
-      price_per_day: 89,
-      available: true,
-      size: "large",
-      category: "Sedan",
-      gigReady: true,
-      image_url: "https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2FVehicles%2F2020-Dodge-Charger-front_14278_032_2400x1800_PW7_nologo.avif?alt=media&token=bd201f7a-a1b4-4119-9f4f-40f401395ac1",
-      description: "Powerful and stylish sedan perfect for rideshare",
-      mileage: 45000,
-      transmission: "Automatic",
-      location: "Newark, NJ",
-      features: ["Bluetooth", "Backup Camera", "Cruise Control", "USB Ports"],
-      insurance: "Full Coverage",
-      maintenance: "Regular Service"
-    },
-    {
-      id: "2", 
-      make: "Nissan",
-      model: "Altima",
-      year: 2023,
-      price_per_day: 75,
-      available: true,
-      size: "medium",
-      category: "Sedan",
-      gigReady: true,
-      image_url: "https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2FVehicles%2F2023-Nissan-Altima-front-angle3_52469_089_640x480.avif?alt=media&token=0d560adb-cc2f-4510-ba74-53b862c901ff",
-      description: "Reliable and fuel-efficient sedan",
-      mileage: 12000,
-      transmission: "Automatic",
-      location: "Newark, NJ",
-      features: ["Bluetooth", "Backup Camera", "Cruise Control"],
-      insurance: "Full Coverage",
-      maintenance: "Regular Service"
-    },
-    {
-      id: "3",
-      make: "Volkswagen",
-      model: "Passat",
-      year: 2015,
-      price_per_day: 65,
-      available: true,
-      size: "medium",
-      category: "Sedan",
-      gigReady: true,
-      image_url: "https://firebasestorage.googleapis.com/v0/b/readyaimgo-clients-temp.firebasestorage.app/o/femileasing%2FVehicles%2F2015-Volkswagen-Passat-front-angle6_9850_116_640x480.avif?alt=media&token=54613885-1269-4398-b67a-7f164d8ebeda",
-      description: "Comfortable and spacious sedan",
-      mileage: 65000,
-      transmission: "Automatic",
-      location: "Newark, NJ",
-      features: ["Bluetooth", "Backup Camera", "Cruise Control", "Heated Seats"],
-      insurance: "Full Coverage",
-      maintenance: "Regular Service"
+  // Fetch vehicles from Firestore
+  const [vehicles, setVehicles] = useState<any[]>([])
+  const [loadingVehicles, setLoadingVehicles] = useState(true)
+  const [fetchError, setFetchError] = useState("")
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        setLoadingVehicles(true)
+        setFetchError("")
+        
+        const response = await fetch('/api/vehicles', { cache: 'no-store' })
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || errorData.message || `Failed to fetch vehicles (${response.status})`)
+        }
+        
+        const data = await response.json()
+        console.log('Vehicles from API:', data.vehicles)
+        console.log('Vehicle count:', data.vehicles?.length || 0)
+        setVehicles(data.vehicles || [])
+      } catch (err: any) {
+        console.error('Error fetching vehicles:', err)
+        setFetchError(err.message || 'Failed to load vehicles')
+        // Fallback to empty array on error
+        setVehicles([])
+      } finally {
+        setLoadingVehicles(false)
+      }
     }
-  ])
-  const [loadingVehicles] = useState(false)
-  const [fetchError] = useState("")
+
+    fetchVehicles()
+  }, [])
 
 
   const router = useRouter()
@@ -125,37 +89,52 @@ export default function InventoryPage() {
 
   // COMMENTED OUT: Debug logging for modal state
 
-  // Function to get Wheelbase booking URL
+  // Function to get booking URL for the new booking flow
+  // This ensures all vehicles use the same booking process
   const getBookingUrl = (vehicle: any) => {
-    const listingId = wheelbaseListingMap[vehicle.id] || vehicle.id
-    return `https://checkout.wheelbasepro.com/reserve?owner_id=${WHEELBASE_OWNER_ID}&listing_id=${listingId}`
+    if (!vehicle || !vehicle.id) {
+      console.error('Vehicle missing ID:', vehicle)
+      return '/inventory' // Fallback to inventory page
+    }
+    return `/vehicles/${vehicle.id}/book`
   }
 
   // Function to handle booking redirect
+  // Works for all vehicles - routes to the booking page we created
   const handleBookNow = (vehicle: any) => {
-    const bookingUrl = getBookingUrl(vehicle)
-    if (typeof window !== "undefined") {
-      window.location.href = bookingUrl
-    } else {
-      router.push(bookingUrl)
+    if (!vehicle || !vehicle.id) {
+      console.error('Cannot book vehicle - missing ID:', vehicle)
+      return
     }
+    const bookingUrl = getBookingUrl(vehicle)
+    console.log('Navigating to booking page:', bookingUrl)
+    router.push(bookingUrl)
   }
 
-  // Static data - no need for useEffect
+  // Vehicles are now fetched from Firestore dynamically
 
   const filteredVehicles = vehicles.filter((vehicle) => {
+    // Handle missing fields gracefully
+    const make = vehicle.make || ""
+    const model = vehicle.model || ""
+    const pricePerDay = vehicle.price_per_day || 0
+    // Treat undefined/null available as true (available)
+    const isAvailable = vehicle.available === true || vehicle.available === undefined || vehicle.available === null
+    
     const matchesSearch =
-      (vehicle.make?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (vehicle.model?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-    const matchesPrice = vehicle.price_per_day >= priceRange[0] && vehicle.price_per_day <= priceRange[1]
+      make.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      model.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesPrice = pricePerDay >= priceRange[0] && pricePerDay <= priceRange[1]
     let matchesType = true
     if (selectedType === "available") {
-      matchesType = vehicle.available === true
+      matchesType = isAvailable
     } else if (selectedType !== "all") {
       matchesType = vehicle.type === selectedType
     }
     return matchesSearch && matchesPrice && matchesType
   })
+  
+  console.log('Filtered vehicles:', filteredVehicles.length, 'out of', vehicles.length)
 
   // COMMENTED OUT: Handle card click - open booking unless clicking on details button
   // const handleCardClick = (e: React.MouseEvent, vehicle: any) => {
@@ -216,13 +195,7 @@ export default function InventoryPage() {
       {/* Navigation */}
       <NavBar variant="light" />
 
-      {/* Header Section */}
-      <div className="px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 md:gap-0">
-          <h1 className="display-heading text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl">FLEET</h1>
-          <h2 className="display-heading text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl">OVERVIEW</h2>
-        </div>
-      </div>
+      {/* Header Section - Removed title for cleaner look */}
 
       {/* Vehicle Grid */}
       <div className="px-3 sm:px-4 md:px-6 pb-24 sm:pb-28 md:pb-32">
@@ -240,20 +213,27 @@ export default function InventoryPage() {
           ) : (
             filteredVehicles.map((vehicle, index) => {
               const cardNumber = String(index + 1).padStart(2, "0")
+              
+              // Handle missing fields gracefully
+              const make = vehicle.make || "Vehicle"
+              const model = vehicle.model || ""
+              const year = vehicle.year || ""
+              const category = vehicle.category || ""
+              const isAvailable = vehicle.available === true || vehicle.available === undefined || vehicle.available === null
 
               if (vehicle.size === "large") {
                 return (
                   <div key={vehicle.id} className="group" data-vehicle-id={vehicle.id}>
                     <div className="label-text text-neutral-600 mb-2 sm:mb-3 md:mb-4 text-xs sm:text-sm">
-                      {cardNumber} {vehicle.make.toUpperCase()} {vehicle.model.toUpperCase()} - {vehicle.category}
+                      {cardNumber} {make.toUpperCase()} {model.toUpperCase()} {category ? `- ${category}` : ""}
                     </div>
                     <div
-                      className={`relative w-full h-48 sm:h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
+                      className={`relative w-full h-48 sm:h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg ${isAvailable ? "cursor-pointer" : "cursor-default"}`}
                       // COMMENTED OUT: onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
                         src={vehicle.image_url || "/placeholder.svg"}
-                        alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                        alt={`${year} ${make} ${model}`}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -268,13 +248,13 @@ export default function InventoryPage() {
                       </div>
                       <div
                         className={`absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 px-2 sm:px-2.5 md:px-3 py-1 label-text rounded-full text-xs ${
-                          vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                          isAvailable ? "bg-green-500 text-white" : "bg-red-500 text-white"
                         }`}
                       >
-                        {vehicle.available ? "AVAILABLE" : "RENTED"}
+                        {isAvailable ? "AVAILABLE" : "RENTED"}
                       </div>
                       <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 right-2 sm:right-3 md:right-4 flex gap-1 sm:gap-2">
-                        {vehicle.available && (
+                        {isAvailable && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -300,22 +280,29 @@ export default function InventoryPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
             {filteredVehicles
-              .filter((v) => v.size === "medium" || v.size === "small")
+              .filter((v) => v.size === "medium" || v.size === "small" || !v.size)
               .map((vehicle, index) => {
                 const cardNumber = String(filteredVehicles.findIndex((v) => v.id === vehicle.id) + 1).padStart(2, "0")
+                
+                // Handle missing fields gracefully
+                const make = vehicle.make || "Vehicle"
+                const model = vehicle.model || ""
+                const year = vehicle.year || ""
+                const category = vehicle.category || ""
+                const isAvailable = vehicle.available === true || vehicle.available === undefined || vehicle.available === null
 
                 return (
                   <div key={vehicle.id} className="group" data-vehicle-id={vehicle.id}>
                     <div className="label-text text-neutral-600 mb-2 sm:mb-3 md:mb-4 text-xs sm:text-sm">
-                      {cardNumber} {vehicle.make.toUpperCase()} - {vehicle.model.toUpperCase()} {vehicle.category}
+                      {cardNumber} {make.toUpperCase()} {model ? `- ${model.toUpperCase()}` : ""} {category ? category : ""}
                     </div>
                     <div
-                      className={`relative w-full h-40 sm:h-48 md:h-56 lg:h-64 aspect-video overflow-hidden rounded-lg bg-gray-100 ${vehicle.available ? "cursor-pointer" : "cursor-default"}`}
+                      className={`relative w-full h-40 sm:h-48 md:h-56 lg:h-64 aspect-video overflow-hidden rounded-lg bg-gray-100 ${isAvailable ? "cursor-pointer" : "cursor-default"}`}
                       // COMMENTED OUT: onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
                         src={vehicle.image_url || "/placeholder.svg"}
-                        alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                        alt={`${year} ${make} ${model}`}
                         fill
                         className="object-cover object-center w-full h-full aspect-video"
                       />
@@ -330,13 +317,13 @@ export default function InventoryPage() {
                       </div>
                       <div
                         className={`absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 px-2 sm:px-2.5 md:px-3 py-1 label-text rounded-full text-xs ${
-                          vehicle.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                          isAvailable ? "bg-green-500 text-white" : "bg-red-500 text-white"
                         }`}
                       >
-                        {vehicle.available ? "AVAILABLE" : "RENTED"}
+                        {isAvailable ? "AVAILABLE" : "RENTED"}
                       </div>
                       <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 right-2 sm:right-3 md:right-4 flex gap-1 sm:gap-2">
-                        {vehicle.available && (
+                        {isAvailable && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -662,14 +649,15 @@ export default function InventoryPage() {
       <AnimatePresence>
         {!isMenuOpen && (
           <motion.div
-            className="fixed bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-40"
+            className="fixed bottom-4 sm:bottom-6 md:bottom-8 left-1/2 z-40"
+            style={{ transform: 'translateX(-50%)' }}
             initial={{ y: 0, opacity: 1 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 200, opacity: 0, scale: 0.8, transition: { type: "spring", bounce: 0.5, duration: 0.6 } }}
           >
             <motion.button
               onClick={() => setIsMenuOpen(true)}
-              className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-orange-600 text-white rounded-full shadow-lg hover:bg-orange-700 transition-all min-h-[44px]"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-orange-600 text-white rounded-full shadow-lg hover:bg-orange-700 transition-all min-h-[44px]"
               whileTap={{ scale: 0.95, y: -10 }}
               whileHover={{ scale: 1.05 }}
             >

@@ -1,10 +1,13 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { B612_Mono } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "sonner"
 
-const inter = Inter({ subsets: ["latin"] })
+const b612Mono = B612_Mono({ 
+  subsets: ["latin"],
+  weight: ["400", "700"]
+})
 
 export const metadata: Metadata = {
   title: "Femi Leasing - Premium Vehicle Rental & Fleet Management",
@@ -26,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={b612Mono.className}>
         {children}
         <Toaster />
       </body>

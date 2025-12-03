@@ -4,14 +4,61 @@ This document explains how to set up Firebase Authentication for the ReadyAimGo 
 
 ## 🎯 Overview
 
-The application now uses **Firebase Authentication** with Google OAuth for secure admin access. This replaces the placeholder authentication system.
+The application now uses **Firebase Authentication** with Google OAuth for secure user and admin access. This replaces the placeholder authentication system.
 
 ### Features
-- ✅ Google OAuth sign-in
+- ✅ Google OAuth sign-in for all users (`/login`)
+- ✅ Google OAuth sign-in for admin users (`/admin/login`)
 - ✅ Email-based authorization (only whitelisted emails can access admin)
 - ✅ Automatic session management
 - ✅ Secure logout functionality
 - ✅ Protected routes with `AuthGuard` component
+
+---
+
+## 🚀 Quick Start for Femi-Drive
+
+Since you're using **one Firebase project for all ReadyAimGo clients**, here's what you need to do:
+
+### ✅ What's Already Done
+- Google sign-in is implemented on `/login` page
+- Firebase configuration is set up in `lib/firebase.ts`
+- Authentication hook (`useAuth`) is ready to use
+
+### 🔧 What You Need to Do in Firebase Console
+
+1. **Verify Google Authentication is Enabled**
+   - Go to Firebase Console → Authentication → Sign-in method
+   - Ensure Google provider is enabled (it likely already is for other ReadyAimGo clients)
+
+2. **Add Your Domain to Authorized Domains** (if deploying)
+   - Go to Authentication → Settings → Authorized domains
+   - Add your femi-drive production domain (e.g., `femi-drive.readyaimgo.com`)
+   - `localhost` should already be there for development
+
+3. **Get/Copy Firebase Config** (if not already in `.env.local`)
+   - Go to Project Settings → Your apps
+   - Copy the Firebase config values
+   - Add them to `.env.local` (see "Get Your Firebase Configuration" section below)
+
+4. **Test the Login Flow**
+   - Start your dev server: `npm run dev`
+   - Navigate to `http://localhost:3000/login`
+   - Click "Sign in with Google"
+   - You should be redirected to `/dashboard` after successful authentication
+
+### 📝 Environment Variables Needed
+
+Make sure your `.env.local` file has these variables (using your shared Firebase project config):
+
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
+```
 
 ---
 
@@ -35,29 +82,42 @@ pnpm install firebase firebase-admin
 
 ## 🔧 Firebase Console Setup
 
-### Step 1: Create a Firebase Project
+### Step 1: Use Your Existing Firebase Project
+
+Since you're using **one Firebase project for all ReadyAimGo clients** (including femi-drive), you should:
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Click "Add project" or select an existing project
-3. Follow the setup wizard to create your project
+2. Select your existing ReadyAimGo project (or create a new one if needed)
+3. **Important**: This project will be shared across all ReadyAimGo client applications
 
-### Step 2: Enable Authentication
+### Step 2: Enable Google Authentication
 
 1. In your Firebase project, go to **Authentication** → **Sign-in method**
-2. Click **"Add new provider"**
-3. Select **"Google"**
-4. Toggle the "Enable" switch
-5. Set your project support email (e.g., `finance@readyaimgo.biz`)
-6. Click **"Save"**
+2. If Google is not already enabled:
+   - Click **"Add new provider"** (or click on Google if it's listed)
+   - Select **"Google"**
+   - Toggle the "Enable" switch to ON
+   - Set your project support email (e.g., `finance@readyaimgo.biz`)
+   - Click **"Save"**
+3. If Google is already enabled (for other ReadyAimGo clients), you're all set!
 
-### Step 3: Add Authorized Domains
+### Step 3: Configure OAuth Consent Screen (if needed)
 
-1. In **Authentication** → **Settings** → **Authorized domains**
-2. Add these domains:
-   - `localhost` (for development)
-   - `your-domain.com` (for production)
-   - `your-domain.com` (for production)
-3. Click "Add domain"
+If this is a new Google OAuth setup:
+
+1. You may need to configure the OAuth consent screen in [Google Cloud Console](https://console.cloud.google.com/)
+2. Go to **APIs & Services** → **OAuth consent screen**
+3. Configure the app name, support email, and authorized domains
+4. Add your production domain(s) to authorized domains
+
+### Step 4: Add Authorized Domains
+
+1. In Firebase Console, go to **Authentication** → **Settings** → **Authorized domains**
+2. Ensure these domains are added:
+   - `localhost` (for development - usually added by default)
+   - Your production domain(s) (e.g., `femi-drive.readyaimgo.com` or `your-domain.com`)
+3. Click "Add domain" for any missing domains
+4. **Note**: Since you're using one project for all clients, you may already have domains configured
 
 ---
 
@@ -67,9 +127,14 @@ pnpm install firebase firebase-admin
 
 1. In Firebase Console, go to **Project Settings** (gear icon)
 2. Scroll down to "Your apps"
-3. Click the **`</>`** (Web) icon to register a web app
-4. Register the app name: "ReadyAimGo Client"
-5. Copy the `firebaseConfig` object values
+3. **If you already have a web app registered** (for other ReadyAimGo clients):
+   - Click on the existing web app
+   - Copy the `firebaseConfig` object values
+4. **If you need to register a new web app**:
+   - Click the **`</>`** (Web) icon to register a web app
+   - Register the app name: "Femi Drive" (or "ReadyAimGo - Femi Drive")
+   - Copy the `firebaseConfig` object values
+5. **Note**: You can use the same Firebase config for all ReadyAimGo client apps, or register separate apps for better analytics tracking
 
 ### Step 2: Add to `.env.local`
 
@@ -145,17 +210,25 @@ const authorizedEmails = [
 npm run dev
 ```
 
-### Step 2: Navigate to Admin Login
+### Step 2: Test Regular User Login
+
+1. Go to `http://localhost:3000/login`
+2. Click "Sign in with Google"
+3. Complete the OAuth flow
+4. You should be redirected to `/dashboard` after successful authentication
+5. Any Google account can sign in (no email restrictions for regular users)
+
+### Step 3: Test Admin Login
 
 1. Go to `http://localhost:3000/admin/login`
 2. Click "Sign in with Google"
 3. Complete the OAuth flow
-4. If your email is authorized, you'll be redirected to the dashboard
+4. If your email is authorized, you'll be redirected to `/admin/dashboard`
 5. If your email is not authorized, you'll see an error message
 
-### Step 3: Test Logout
+### Step 4: Test Logout
 
-1. Click the "Logout" button in the top right
+1. Click the "Logout" button (if available in the dashboard)
 2. You should be redirected back to the login page
 
 ---
@@ -171,7 +244,8 @@ npm run dev
 
 ### Files Modified:
 - `package.json` - Added `firebase` and `firebase-admin` dependencies
-- `app/admin/login/page.tsx` - Implemented Firebase Auth
+- `app/login/page.tsx` - Implemented Firebase Auth for regular users
+- `app/admin/login/page.tsx` - Implemented Firebase Auth for admin users
 - `app/admin/dashboard/page.tsx` - Added AuthGuard and logout
 - `env.template` - Added Firebase configuration placeholders
 
