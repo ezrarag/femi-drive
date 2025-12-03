@@ -8,7 +8,7 @@ import { AUTHORIZED_ADMIN_EMAILS } from "@/lib/admin-authorized-emails"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 import AdminHeader from "@/components/admin/AdminHeader"
 
-function AdminVehiclesContent() {
+function AdminVehiclesContent(): JSX.Element {
   const { user } = useAuth()
   const [vehicles, setVehicles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -75,7 +75,7 @@ function AdminVehiclesContent() {
   }, [user])
 
   // Debounced save function
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const saveTimeoutRef = useRef<any>(null)
   
   const saveVehicle = useCallback(async (form: any) => {
     if (!user) {
