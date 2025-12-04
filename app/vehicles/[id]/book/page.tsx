@@ -155,7 +155,15 @@ export default function VehicleBookingPage({ params }: { params: Promise<{ id: s
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [paymentAmount, setPaymentAmount] = useState('')
-  const [paymentType, setPaymentType] = useState<'booking' | 'direct_payment'>('booking')
+  
+  // Check URL params for paymentType
+  const [paymentType, setPaymentType] = useState<'booking' | 'direct_payment'>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      return urlParams.get('paymentType') === 'direct_payment' ? 'direct_payment' : 'booking'
+    }
+    return 'booking'
+  })
   const [showPaymentForm, setShowPaymentForm] = useState(false)
   const [bookingSuccess, setBookingSuccess] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -1133,8 +1141,37 @@ export default function VehicleBookingPage({ params }: { params: Promise<{ id: s
                       </div>
                     </>
                   ) : (
-                    /* Direct Payment Form (unchanged) */
+                    /* Direct Payment Form */
                     <>
+                      {/* Vehicle Information Display */}
+                      {vehicle && (
+                        <div className="mb-6 bg-white/5 border border-white/20 rounded-lg p-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            {vehicle.image_url && (
+                              <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                <img
+                                  src={vehicle.image_url}
+                                  alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold text-white">
+                                {vehicle.year} {vehicle.make} {vehicle.model}
+                              </h3>
+                              <p className="text-sm text-white/70">{vehicle.location || 'Newark, NJ'}</p>
+                              <p className="text-sm text-white/60 mt-1">
+                                Daily Rate: ${vehicle.price_per_day}/day
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-sm text-white/80 mt-3">
+                            Make a payment toward this vehicle rental
+                          </p>
+                        </div>
+                      )}
+                      
                       {/* Customer Information */}
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold text-white mb-4">Contact Information</h3>
@@ -1283,10 +1320,12 @@ export default function VehicleBookingPage({ params }: { params: Promise<{ id: s
           </div>
           
           {/* Right Column - Reservation Summary */}
-          {paymentType === 'booking' && vehicle && (
+          {vehicle && (
             <div className="w-full lg:sticky lg:top-20">
               <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Reservation Request</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">
+                  {paymentType === 'booking' ? 'Reservation Request' : 'Payment Request'}
+                </h3>
                 
                 {/* Vehicle Image */}
                 <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
@@ -1302,8 +1341,8 @@ export default function VehicleBookingPage({ params }: { params: Promise<{ id: s
                   {vehicle.year} {vehicle.make} {vehicle.model}
                 </h4>
                 
-                {/* Dates */}
-                {startDate && endDate && (
+                {/* Dates - Only show for booking */}
+                {paymentType === 'booking' && startDate && endDate && (
                   <div className="mb-4 text-white/80">
                     <div className="flex items-center gap-2">
                       <span>Pick up</span>
@@ -1316,39 +1355,66 @@ export default function VehicleBookingPage({ params }: { params: Promise<{ id: s
                   </div>
                 )}
                 
+                {/* Payment Info for Direct Payment */}
+                {paymentType === 'direct_payment' && (
+                  <div className="mb-4 text-white/80">
+                    <p className="text-sm">Making a payment toward this vehicle rental</p>
+                    <p className="text-xs text-white/60 mt-1">Daily Rate: ${vehicle.price_per_day}/day</p>
+                  </div>
+                )}
+                
                 {/* Pricing Breakdown */}
-                {startDate && endDate && totalDays > 0 && (
+                {((paymentType === 'booking' && startDate && endDate && totalDays > 0) || (paymentType === 'direct_payment' && paymentAmount && totalCost > 0)) && (
                   <div className="space-y-2 text-sm border-t border-white/20 pt-4">
-                    <div className="flex justify-between text-white/80">
-                      <span>${vehicle.price_per_day.toFixed(2)} x {totalDays} night{totalDays !== 1 ? 's' : ''}</span>
-                      <span>${subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-white/80">
-                      <span>New Jersey State</span>
-                      <span>${tax.toFixed(2)}</span>
-                    </div>
-                    {discountApplied && discountAmount > 0 && (
-                      <div className="flex justify-between text-green-400">
-                        <span>Discount</span>
-                        <span>-${discountAmount.toFixed(2)}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between font-semibold text-white pt-2 border-t border-white/20">
-                      <span>Total</span>
-                      <span>${totalCost.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-white/80">
-                      <span>Due to Reserve</span>
-                      <span>${totalCost.toFixed(2)}</span>
-                    </div>
-                    {vehicle?.security_deposit_enabled && securityDepositAmount > 0 && (
-                      <div className="flex justify-between text-white/80 pt-2">
-                        <span className="flex items-center gap-1">
-                          Refundable Security Deposit
-                          <span className="text-xs">ℹ️</span>
-                        </span>
-                        <span>${securityDepositAmount.toFixed(2)}</span>
-                      </div>
+                    {paymentType === 'booking' ? (
+                      <>
+                        <div className="flex justify-between text-white/80">
+                          <span>${vehicle.price_per_day.toFixed(2)} x {totalDays} night{totalDays !== 1 ? 's' : ''}</span>
+                          <span>${subtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-white/80">
+                          <span>New Jersey State</span>
+                          <span>${tax.toFixed(2)}</span>
+                        </div>
+                        {discountApplied && discountAmount > 0 && (
+                          <div className="flex justify-between text-green-400">
+                            <span>Discount</span>
+                            <span>-${discountAmount.toFixed(2)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between font-semibold text-white pt-2 border-t border-white/20">
+                          <span>Total</span>
+                          <span>${totalCost.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-white/80">
+                          <span>Due to Reserve</span>
+                          <span>${totalCost.toFixed(2)}</span>
+                        </div>
+                        {vehicle?.security_deposit_enabled && securityDepositAmount > 0 && (
+                          <div className="flex justify-between text-white/80 pt-2">
+                            <span className="flex items-center gap-1">
+                              Refundable Security Deposit
+                              <span className="text-xs">ℹ️</span>
+                            </span>
+                            <span>${securityDepositAmount.toFixed(2)}</span>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex justify-between text-white/80">
+                          <span>Payment Amount</span>
+                          <span>${parseFloat(paymentAmount || '0').toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-white/80">
+                          <span>Tax</span>
+                          <span>${tax.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold text-white pt-2 border-t border-white/20">
+                          <span>Total</span>
+                          <span>${totalCost.toFixed(2)}</span>
+                        </div>
+                      </>
                     )}
                   </div>
                 )}
