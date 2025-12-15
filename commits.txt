@@ -1,0 +1,78 @@
+feat: add direct payment option to vehicle inventory and booking flow
+fix: wrap useSearchParams in Suspense boundary for accept-invite page
+fix: close JSX fragment in vehicles map function - fixes build error
+fix: remove semicolon after handleImageUpload function
+fix: use let variable instead of function property for debounce timeout
+fix: use function property for debounce timeout instead of let variable
+fix: remove useCallback and useRef, simplify debounce implementation
+fix: add React import and semicolon after useCallback in vehicles page
+fix: simplify useRef type annotation in vehicles page
+fix: replace debounce function with useCallback-based debounce to fix build error
+fix: correct syntax error in stripe payments route - remove extra closing parenthesis
+feat: major admin dashboard overhaul and new features
+wheelbase
+feat: refresh marketing content and booking flow
+Deleted /services page — removed app/services/page.tsx and related files Deleted /financing page — removed app/financing/page.tsx and related files Removed all menu/navigation references: Removed commented-out services links from NavBar.tsx (desktop and mobile menus) Removed financing link from the contact page's "Quick Actions" section Removed services links from the reviews page (desktop and mobile navigation) Removed services link from the drive-to-earn page navigation
+adding a pulsing affect to the circle for reviews
+feat: Enhance about page, contact page, and add review popup
+feat: redesign homepage, update FAQ styling, and add staff login
+background
+update
+changed the background video
+updated the images for consistent style
+Comment out About link from dropdown and mobile menu
+Comment out Services link from navigation header
+Remove GIG READY badge and DETAILS button from fleet/inventory page
+Fix Firebase initialization to handle missing env vars gracefully
+Refactor manual transfer section into clean payout UI with Stripe payouts
+Update pnpm-lock.yaml with Firebase dependencies
+dashboard admin finance fixes
+What's Been Automated ✅ Payments from the /invest page ✅ Payments from the vehicle booking page ✅ Platform fee (0.5%) applied ✅ Funds routed to the Femi Leasing account (acct_1SK6dd1lscTKUkb9) ✅ Metadata added to payments for audit
+updated todo and homepage
+Key Changes: 🎯 Always Transfer: Every PaymentIntent now includes transfer_data with destination acct_1SK6dd1lscTKUkb9 💰 Always Fee: Every PaymentIntent now includes the 0.5% platform fee (application_fee_amount) 🔄 Flexible Destination: Still allows override via connectedAccountId parameter if needed 📊 Better Logging: The diagnostic logs will show the transfer_data in the params 🧮 How It Works: Investment Payments: $1000 → $995 to Femi Leasing + $5 platform fee Booking Payments: $500 → $497.50 to Femi Leasing + $2.50 platform fee All Payments: Automatically routed to acct_1SK6dd1lscTKUkb9 with 0.5% fee 🚀 Result: Now every single payment created through /api/payments/create will: ✅ Transfer directly to the Femi Leasing connected account ✅ Include the 0.5% platform fee ✅ Work for both investment and booking flows ✅ Show proper transfer data in diagnostic logs The payment flow is now fully configured for Stripe Connect with guaranteed transfers to the Femi Leasing account! 🎉
+ Stripe PaymentElement Integration: Now follows proper async flow ✅ Card Validation: Ensures card details are valid before confirmation ✅ Better Error Handling: Distinguishes between validation and payment errors ✅ Success Flow: Should now redirect to success pages properly
+diagnostic route
+No more Stripe errors: The "In order to create a payment element..." error is resolved No more 404s: Privacy links now work properly Better UX: Users see loading states during payment initialization Proper flow: Payment intent is created before showing payment form
+Perfect! The issue was that I used createTransporter instead of createTransport. The correct nodemailer method is createTransport. This should fix the deployment error. The error occurred because: nodemailer.createTransporter doesn't exist The correct method is nodemailer.createTransport This caused a runtime error during the build process when Next.js tried to collect page data The fix changes: This should resolve the deployment issue and allow your build to complete successfully. The webhook will now properly initialize the nodemailer transporter for sending Email-to-SMS notifications.
+made changes to the booking so that a visitor can pay to book or they can pay a certain amount as discussed with management. added a sms with the stripe webhook for notifications. updated the invest page
+updated the dropdown menu and added an invest page
+feat: Remove Supabase dependencies and code
+fix: Make Supabase environment variables optional for Vercel build
+changes to the nav bar on the inventory page as well as
+updated the site images away from supabase, static non supabase fetching, and added a telephone facetime feature for booking
+sent users to wheelbase for checkout instead of inline
+fixed can't find variableVehicleds typo added missing import and added toggle function
+fix: Resolve hydration errors and user reference issues
+fix: Remove authentication requirement from inline booking form
+added to todo
+feat: Complete booking system redesign with inline form and SMS notifications
+Complete booking system redesign with 2-step flow New checkout modal with in-modal Google OAuth Enhanced booking modal with side-by-side date selection Auto-scroll to center selected vehicle cards Collapsible vehicle details in booking modal Fixed middleware performance issues Enhanced OAuth callback with popup handling Form auto-population from Google profile data
+1. Two-Step Booking Process: Step 1: Date Selection Modal - User selects pickup and return dates Step 2: Checkout Modal - User fills in personal info and payment details 2. User Flow: User clicks "Book" on a vehicle Date selection modal opens User selects dates and sees total price User clicks "Continue to Checkout" Checkout modal opens with: Left side: Booking summary (vehicle, dates, price) Right side: Personal information form After personal info, user proceeds to payment Payment is processed (simulated) Booking is created in database User is redirected to dashboard
+oauth flow issue not handling call back properly
+buil errors worked on
+admin dashboard and mobile improvements
+started updating the admin dashboard
+feat: implement enhanced AI voice system with professional-grade capabilities
+git add . git commit -m "feat: implement comprehensive booking system and authentication improvements
+feat: comprehensive project update and code improvements
+updated the menu to include login link and consolidate menu items, worked on dashboard, connected oauth
+added dashboard for customers, updated login flow for admin, fixed wheelbase issue with supabase column citation
+added an admin area and connected supabase to the fleet section for dynamic input removing static info
+updated the charger to true in availablility
+added a button so visitors can navigate to the reviews page
+updated the modals, created a supabase client, commented out full coverage insurance
+placed the wheelbase url for the passat
+updated the link for nissan altima
+updated the inventory page, landing page for navigation
+Trigger redeploy
+Trigger redeploy
+updated the inventory page to be inline booking of a iframe among other things
+fix: resolve PhoneDisplay import and restore original visual styles
+fix: resolve booking widget and services page issues
+feat: standardize /about page navigation
+feat: integrate Wheelbase's Embedded Individual Vehicle Checkout
+feat: fix MIME-type error and optimize images
+fix: allow external images from Supabase in Next.js
+refactor: sync main changes into femi-drive
+refactor: sync main changes into femi-drive
+Initialized repository for project Femi leasing website
