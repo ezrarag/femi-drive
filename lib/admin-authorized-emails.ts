@@ -9,6 +9,7 @@ export const AUTHORIZED_ADMIN_EMAILS = [
   'finance@readyaimgo.biz',
   'ezra@readyaimgo.biz',
   'femileasing@gmail.com',
+  'ezra@readyaimgo.com'
   // Add more authorized emails as needed
   // Note: New admins can also be added via the Team page invitation system
 ] as const
