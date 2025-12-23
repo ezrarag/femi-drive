@@ -18,7 +18,7 @@ function AddVehicleContent() {
     year: "",
     price_per_day: "",
     description: "",
-    image_url: "",
+    imageUrl: "",
     mileage: "",
     transmission: "Automatic",
     location: "Newark, NJ",
@@ -85,7 +85,7 @@ function AddVehicleContent() {
         year: "",
         price_per_day: "",
         description: "",
-        image_url: "",
+        imageUrl: "",
         mileage: "",
         transmission: "Automatic",
         location: "Newark, NJ",
@@ -284,9 +284,9 @@ function AddVehicleContent() {
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-900">Image</label>
               <div className="space-y-2">
-                {form.image_url && (
+                {form.imageUrl && (
                   <div className="relative w-full h-48 border rounded overflow-hidden">
-                    <img src={form.image_url} alt="Vehicle preview" className="w-full h-full object-cover" />
+                    <img src={form.imageUrl} alt="Vehicle preview" className="w-full h-full object-cover" />
                   </div>
                 )}
                 <div className="flex gap-2">
@@ -314,7 +314,7 @@ function AddVehicleContent() {
                           
                           if (response.ok) {
                             const data = await response.json()
-                            setForm(prev => ({ ...prev, image_url: data.url }))
+                            setForm(prev => ({ ...prev, imageUrl: data.url }))
                           }
                         } catch (err) {
                           console.error('Upload failed:', err)
@@ -328,8 +328,8 @@ function AddVehicleContent() {
                   </label>
                   <input
                     type="url"
-                    name="image_url"
-                    value={form.image_url}
+                    name="imageUrl"
+                    value={form.imageUrl}
                     onChange={handleChange}
                     className="flex-1 border rounded px-3 py-2 text-gray-900 text-sm"
                     placeholder="Or paste image URL"

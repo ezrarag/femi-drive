@@ -129,7 +129,7 @@ function AdminVehiclesContent() {
   const handleEditClick = (vehicle: any) => {
     setEditingVehicle(vehicle)
     setEditForm({ ...vehicle })
-    setImagePreview(vehicle.image_url || null)
+    setImagePreview(vehicle.imageUrl || null)
     setSaveStatus("")
   }
 
@@ -179,7 +179,7 @@ function AdminVehiclesContent() {
       }
 
       const data = await response.json()
-      setEditForm((prev: any) => ({ ...prev, image_url: data.url }))
+      setEditForm((prev: any) => ({ ...prev, imageUrl: data.url }))
       setImagePreview(data.url)
       setSaveStatus('Image uploaded! Saving...')
     } catch (err: any) {
@@ -652,8 +652,8 @@ function AdminVehiclesContent() {
                     </label>
                     <input
                       type="text"
-                      name="image_url"
-                      value={editForm.image_url || ""}
+                      name="imageUrl"
+                      value={editForm.imageUrl || ""}
                       onChange={handleEditChange}
                       placeholder="Or paste image URL"
                       className="flex-1 border rounded px-3 py-2 text-gray-900 text-sm"

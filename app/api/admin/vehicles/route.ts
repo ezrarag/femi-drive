@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
       year,
       price_per_day,
       available = true,
-      image_url,
+      imageUrl,
       description,
       mileage,
       transmission,
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
       year: parseInt(year),
       price_per_day: parseFloat(price_per_day),
       available: Boolean(available),
-      image_url: image_url || '',
+      imageUrl: imageUrl || '',
       description: description || '',
       mileage: mileage ? parseInt(mileage) : 0,
       transmission: transmission || 'Automatic',
@@ -321,7 +321,7 @@ export async function PUT(request: NextRequest) {
     if (body.year !== undefined) updateData.year = parseInt(body.year);
     if (body.price_per_day !== undefined) updateData.price_per_day = parseFloat(body.price_per_day);
     if (body.available !== undefined) updateData.available = Boolean(body.available);
-    if (body.image_url !== undefined) updateData.image_url = body.image_url || '';
+    if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl || '';
     if (body.description !== undefined) updateData.description = body.description || '';
     if (body.mileage !== undefined) updateData.mileage = body.mileage ? parseInt(body.mileage) : 0;
     if (body.transmission !== undefined) updateData.transmission = body.transmission || 'Automatic';

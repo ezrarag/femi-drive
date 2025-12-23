@@ -444,7 +444,7 @@ export default function CustomerDashboard() {
                 {savedVehicles.map((v) => (
                       <div key={v.id} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg p-3">
                         <img 
-                          src={v.image_url || "/placeholder.svg"} 
+                          src={v.imageUrl || "/placeholder.svg"} 
                           alt={v.make} 
                           className="w-16 h-12 object-cover rounded" 
                         />

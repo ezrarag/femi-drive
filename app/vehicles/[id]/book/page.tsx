@@ -27,7 +27,7 @@ interface Vehicle {
   size: string
   category: string
   gigReady: boolean
-  image_url: string
+  imageUrl: string
   description: string
   mileage: number
   transmission: string
@@ -309,7 +309,7 @@ export default function VehicleBookingPage({ params }: { params: Promise<{ id: s
             size: data.vehicle.size || 'medium',
             category: data.vehicle.category || 'Sedan',
             gigReady: data.vehicle.gigReady || false,
-            image_url: data.vehicle.image_url || '/placeholder.svg',
+            imageUrl: data.vehicle.imageUrl || '/placeholder.svg',
             description: data.vehicle.description || '',
             mileage: data.vehicle.mileage || 0,
             transmission: data.vehicle.transmission || 'Automatic',
@@ -1147,10 +1147,10 @@ export default function VehicleBookingPage({ params }: { params: Promise<{ id: s
                       {vehicle && (
                         <div className="mb-6 bg-white/5 border border-white/20 rounded-lg p-4">
                           <div className="flex items-center gap-3 mb-3">
-                            {vehicle.image_url && (
+                            {vehicle.imageUrl && (
                               <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                                 <img
-                                  src={vehicle.image_url}
+                                  src={vehicle.imageUrl}
                                   alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
                                   className="w-full h-full object-cover"
                                 />
@@ -1330,7 +1330,7 @@ export default function VehicleBookingPage({ params }: { params: Promise<{ id: s
                 {/* Vehicle Image */}
                 <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
                   <img
-                    src={vehicle.image_url || '/placeholder.svg'}
+                    src={vehicle.imageUrl || '/placeholder.svg'}
                     alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
                     className="w-full h-full object-cover"
                   />

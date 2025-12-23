@@ -244,7 +244,7 @@ export default function InventoryPage() {
                       // COMMENTED OUT: onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
-                        src={vehicle.image_url || "/placeholder.svg"}
+                        src={vehicle.imageUrl || "/placeholder.svg"}
                         alt={`${year} ${make} ${model}`}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -325,7 +325,7 @@ export default function InventoryPage() {
                       // COMMENTED OUT: onClick={(e) => handleCardClick(e, vehicle)}
                     >
                       <Image
-                        src={vehicle.image_url || "/placeholder.svg"}
+                        src={vehicle.imageUrl || "/placeholder.svg"}
                         alt={`${year} ${make} ${model}`}
                         fill
                         className="object-cover object-center w-full h-full aspect-video"
@@ -416,7 +416,7 @@ export default function InventoryPage() {
               >
                 <div className="relative w-full h-40 bg-gray-100 rounded-t-2xl overflow-hidden">
                   <Image
-                    src={selectedVehicle.image_url || "/placeholder.svg"}
+                    src={selectedVehicle.imageUrl || "/placeholder.svg"}
                     alt={`${selectedVehicle.year} ${selectedVehicle.make} ${selectedVehicle.model}`}
                     fill
                     className="object-cover object-center w-full h-full"
